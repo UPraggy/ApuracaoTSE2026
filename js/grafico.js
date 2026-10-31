@@ -1,6 +1,6 @@
 // Gráfico de linhas interativo: linha guia e dica que seguem o mouse ou o dedo, legenda que liga e desliga
 // cada série e botão "tocar" que desenha a linha do começo ao fim (a apuração andando).
-import { esc } from './util.js?v=752a33c587';
+import { esc } from './util.js?v=551bd26ea6';
 
 const NS = 'http://www.w3.org/2000/svg';
 

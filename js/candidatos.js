@@ -2,7 +2,7 @@
 // Unidade = município (o boletim é por seção, os indicadores sociais são por município). Exterior fora.
 // Média do eleitor do 13 = Σ(votos do 13 no município × indicador) ÷ Σ(votos do 13). Idem para o 22,
 // para todos os votantes (peso = comparecimento) e para a população (peso = habitantes do Censo 2022).
-import { REGIAO_NOME, carregar, nf, pct, esc, titulo } from './util.js?v=752a33c587';
+import { REGIAO_NOME, carregar, nf, pct, esc, titulo } from './util.js?v=551bd26ea6';
 
 // Indicadores, na ordem em que aparecem. un: forma de mostrar. bu: calculado do próprio boletim de urna.
 export const INDICADORES = [

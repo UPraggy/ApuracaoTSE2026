@@ -9,7 +9,7 @@ export const UF_NOME = {
 };
 export const REGIAO_NOME = { N: 'Norte', NE: 'Nordeste', CO: 'Centro-Oeste', SE: 'Sudeste', S: 'Sul' };
 
-const VERSAO_DADOS = '?v=4cd48b8018'; // o deploy troca por ?v=<hash dos dados>
+const VERSAO_DADOS = '?v=0417725899'; // o deploy troca por ?v=<hash dos dados>
 const cache = new Map();
 export function carregar(arquivo) {
   if (!cache.has(arquivo)) cache.set(arquivo, fetch('dados/' + arquivo + VERSAO_DADOS).then(r => { if (!r.ok) throw Error(arquivo + ': HTTP ' + r.status); return r.json(); }));
@@ -32,7 +32,7 @@ export const titulo = s => { const t = tituloBase(s); return ACENTOS[t] || t; };
 export const sigla = uf => `<abbr title="${esc(UF_NOME[uf] || uf)}">${uf === 'ZZ' ? 'Exterior (ZZ)' : esc(uf)}</abbr>`;
 
 // Soma de agregados no formato {secoes, aptos, comp, biom, a, b, br, nu, alertas}.
-export const vazio = () => ({ secoes: 0, aptos: 0, comp: 0, biom: 0, a: 0, b: 0, br: 0, nu: 0, alertas: 0 });
+export const vazio = () => ({ secoes: 0, aptos: 0, comp: 0, biom: 0, a: 0, b: 0, br: 0, nu: 0, alertas: 0, q17: 0, q1705: 0, q1730: 0, q19: 0 });
 export function somar(alvo, x) { for (const k of Object.keys(alvo)) alvo[k] += x[k] || 0; return alvo; }
 
 // ---------- Cores ----------

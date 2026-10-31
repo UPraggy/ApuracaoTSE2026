@@ -9,7 +9,7 @@
 <meta name="description" content="Mapa e análise dos boletins de urna do 2º turno de 2026 (Presidente): resultado por estado, município, zona, bairro e local de votação, biometria, horários e alertas automáticos. Dados abertos do TSE e malhas do IBGE.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M8 17l5 5 11-12' stroke='white' stroke-width='3.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<link rel="stylesheet" href="estilo.css?v=5cf5eedc57">
+<link rel="stylesheet" href="estilo.css?v=4c6ab20cf6">
 <link rel="stylesheet" href="inicio.css?v=e8fa787406">
 <link rel="stylesheet" href="explorar.css?v=29724f4c04">
 <link rel="stylesheet" href="candidatos.css?v=29d5ed3062">
@@ -59,8 +59,10 @@
   <nav class="abas" role="tablist" aria-label="Seções do painel">
     <button role="tab" id="tab-inicio" aria-controls="aba-inicio" data-aba="inicio" aria-selected="true"><svg class="ic" aria-hidden="true"><use href="#i-casa"/></svg>Início</button>
     <button role="tab" id="tab-mapa" aria-controls="aba-mapa" data-aba="mapa" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-mapa"/></svg>Mapa</button>
+    <button role="tab" id="tab-mundo" aria-controls="aba-mundo" data-aba="mundo" aria-selected="false" hidden><svg class="ic" aria-hidden="true"><use href="#i-globo"/></svg>Brasil × Mundo</button>
     <button role="tab" id="tab-geral" aria-controls="aba-geral" data-aba="geral" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-analise"/></svg>Análise</button>
     <button role="tab" id="tab-candidatos" aria-controls="aba-candidatos" data-aba="candidatos" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-urna"/></svg>Candidatos</button>
+    <button role="tab" id="tab-governos" aria-controls="aba-governos" data-aba="governos" aria-selected="false" hidden><svg class="ic" aria-hidden="true"><use href="#i-comparar"/></svg>Governos</button>
     <button role="tab" id="tab-comparar" aria-controls="aba-comparar" data-aba="comparar" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-comparar"/></svg>2022 × 2026</button>
     <button role="tab" id="tab-explorar" aria-controls="aba-explorar" data-aba="explorar" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-camadas"/></svg>Explorar</button>
     <button role="tab" id="tab-horarios" aria-controls="aba-horarios" data-aba="horarios" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-relogio"/></svg>Horários</button>
@@ -104,6 +106,8 @@
   <section id="aba-geral" role="tabpanel" hidden></section>
   <section id="aba-comparar" role="tabpanel" hidden></section>
   <section id="aba-candidatos" role="tabpanel" hidden></section>
+  <section id="aba-mundo" role="tabpanel" hidden></section>
+  <section id="aba-governos" role="tabpanel" hidden></section>
   <section id="aba-explorar" role="tabpanel" hidden></section>
   <section id="aba-biometria" role="tabpanel" hidden></section>
   <section id="aba-horarios" role="tabpanel" hidden></section>
@@ -163,6 +167,6 @@
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script type="module" src="js/app.js?v=7399ba3917"></script>
+<script type="module" src="js/app.js?v=0f46d8342f"></script>
 </body>
 </html>

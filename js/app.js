@@ -1,9 +1,9 @@
 // Painel da apuração: mapa de cor (UF → município → local de votação), busca e painel de detalhes.
-import { UF_NOME, REGIAO_NOME, carregar, nf, pct, pp, hhmm, esc, norm, titulo, sigla, vazio, somar, corVantagem, CLASSES_VANTAGEM, classesQuantis, corSequencial, corCss } from './util.js?v=752a33c587';
-import { iniciarAnalises } from './analises.js?v=f975a4433d';
+import { UF_NOME, REGIAO_NOME, carregar, nf, pct, pp, hhmm, esc, norm, titulo, sigla, vazio, somar, corVantagem, CLASSES_VANTAGEM, classesQuantis, corSequencial, corCss } from './util.js?v=551bd26ea6';
+import { iniciarAnalises } from './analises.js?v=411b233cf6';
 import { animarNumeros } from './anim.js?v=19eef1076c';
-import { iniciarFaq } from './faq.js?v=451010295e';
-import { iniciarComparar } from './comparar.js?v=667ca2f243';
+import { iniciarFaq } from './faq.js?v=76d3a0a37d';
+import { iniciarComparar } from './comparar.js?v=09b7c011af';
 
 const R = await carregar('resumo.json');
 const MUN = await carregar('municipios.json');
@@ -19,7 +19,7 @@ const aggMun = r => ({ ibge: r[0], secoes: r[5], aptos: r[6], comp: r[7], biom: 
 const aggZona = z => ({ secoes: z[3], aptos: z[4], comp: z[5], biom: z[6], a: z[7], b: z[8], br: z[9], nu: z[10], alertas: z[11], q17: z[12], q1730: z[13], q19: z[14], q1705: z[15] });
 const aggLocal = l => ({ secoes: l[10], aptos: l[11], comp: l[12], biom: l[13], a: l[14], b: l[15], br: l[16], nu: l[17], alertas: l[18], q17: l[20], q1730: l[21], q19: l[22], q1705: l[23] });
 const munPorIbge = new Map(MUN.filter(m => m[0]).map(m => [m[0], m]));
-const nomeMun = ibge => munPorIbge.get(ibge)?.[2] ?? '';
+const nomeMun = ibge => typeof ibge === 'string' ? titulo(ibge) : munPorIbge.get(ibge)?.[2] ?? '';
 const ufsDaRegiao = id => R.regioes[id];
 const regiaoDaUf = uf => Object.keys(R.regioes).find(k => R.regioes[k].includes(uf));
 const locaisDaUf = uf => carregar('locais/' + uf + '.json');
@@ -36,7 +36,7 @@ const METRICAS = {
   brancosnulos: { nome: 'Brancos + nulos (%)', curto: 'Br.+nulos', valor: g => g.comp ? (g.br + g.nu) / g.comp : NaN, dd: 'brnu', explica: 'Votos em branco e nulos, em % de quem votou.' },
   apos17: { nome: 'Urnas encerradas após 17h05 (%)', curto: 'Após 17h05', valor: g => g.secoes ? g.q1705 / g.secoes : NaN, dd: 'apos17', explica: 'Urnas que fecharam depois de 17:05 de Brasília, em % das urnas: é onde houve fila de verdade. Contando qualquer segundo após 17:00:00, praticamente 100% das urnas entram (o fechamento leva alguns instantes), por isso o corte é 17:05.' },
   apos1730: { nome: 'Urnas encerradas após 17h30 (%)', curto: 'Após 17h30', valor: g => g.secoes ? g.q1730 / g.secoes : NaN, dd: 'apos17', explica: 'Urnas que fecharam depois de 17:30 de Brasília, em % das urnas. Fora do normal: no país, só 1,5% das urnas.' },
-  apos19: { nome: 'Urnas encerradas após 19h (%)', curto: 'Após 19h', valor: g => g.secoes ? g.q19 / g.secoes : NaN, dd: 'apos17', explica: 'Urnas que fecharam depois de 19:00 de Brasília, em % das urnas. É o caso que pede explicação oficial (veja Análise › Horários).' },
+  apos19: { nome: 'Urnas encerradas após 19h (%)', curto: 'Após 19h', valor: g => g.secoes ? g.q19 / g.secoes : NaN, dd: 'apos17', explica: 'Urnas que fecharam a partir das 19:00 de Brasília, em % das urnas. A votação foi prorrogada até as 19h por decisão do STF nos locais ainda abertos às 17h (veja a aba Horários).' },
   var13: { nome: 'Variação do 13 (2022→2026, p.p.)', curto: 'Δ 13 (p.p.)', valor: g => variacao(g, 1), dd: 'placar', div: true, pp: true, hist: true, explica: 'Quanto a % do candidato de número 13 nos votos válidos subiu (vermelho) ou caiu (azul) em relação a 2022, em pontos percentuais. Só para estados e municípios.' },
   varcomp: { nome: 'Variação do comparecimento (2022→2026, p.p.)', curto: 'Δ comparec. (p.p.)', valor: g => variacao(g, 0), dd: 'comp', pp: true, hist: true, explica: 'Quanto o comparecimento subiu ou caiu em relação a 2022, em pontos percentuais. Só para estados e municípios.' },
   alertas: { nome: 'Seções com alerta (%)', curto: 'Seç. c/ alerta', valor: g => g.secoes ? g.alertas / g.secoes : NaN, dd: 'alertas', explica: 'Seções com pelo menos um alerta automático, em % das seções.' }
@@ -45,9 +45,10 @@ let metrica = 'resultado';
 let limites = [];
 const cor = g => metrica === 'resultado' ? corVantagem(g.a, g.b) : METRICAS[metrica].div ? corVariacao(METRICAS[metrica].valor(g)) : corSequencial(METRICAS[metrica].valor(g), limites);
 // Variação 2022→2026 (scripts/historico.mjs): colunas dComparecimentoPP, dPctAValidosPP, …
-let HIST_MUN = null, HIST_UF = null;
+let HIST_MUN = null, HIST_UF = null, HIST_BR = null;
 const COL_UF = ['dComparecimentoPP', 'dPctAValidosPP'];
 function variacao(g, i) {
+  if (g === R.totalBrasil && HIST_BR) return HIST_BR[COL_UF[i]];
   if (g.ibge && HIST_MUN) { const v = HIST_MUN[String(g.ibge)]; return v ? v[i] : NaN; }
   if (g.uf && HIST_UF) { const v = HIST_UF[g.uf]; return v ? v[COL_UF[i]] : NaN; }
   return NaN;
@@ -55,7 +56,7 @@ function variacao(g, i) {
 async function carregarHistorico() {
   if (HIST_MUN) return;
   const [m, r] = await Promise.all([carregar('historico-municipios.json'), carregar('historico-resumo.json')]);
-  HIST_MUN = m.variacao2022a2026.municipios; HIST_UF = r.comparacao['2022-2026'].porUf;
+  HIST_MUN = m.variacao2022a2026.municipios; HIST_UF = r.comparacao['2022-2026'].porUf; HIST_BR = r.comparacao['2022-2026'].brasil;
 }
 // Divergente: vermelho = o 13 subiu, azul = caiu; mais forte = mais pontos.
 const CLASSES_VAR = [0, 1, 3, 6];
@@ -240,7 +241,7 @@ function desenharLegenda() {
     return;
   }
   if (METRICAS[metrica].div) { el.innerHTML = `<span class="leg-nome">${esc(METRICAS[metrica].nome)}</span><span class="leg-nota">vermelho = o 13 subiu em relação a 2022; azul = caiu; faixas de 0–1, 1–3, 3–6 e 6+ pontos; cinza = sem dado (zonas, bairros e escolas não têm comparação)</span>`; legendaCalor(); return; }
-  const n = limites.length, faixas = [], f1 = v => fmtValor(v, METRICAS[metrica], 1);
+  const n = limites.length, faixas = [], f1 = v => fmtValor(v, METRICAS[metrica], limites.length && Math.max(...limites.map(Math.abs)) < 0.02 ? 2 : 1);
   for (let i = 0; i <= n; i++) {
     const de = i === 0 ? null : limites[i - 1], ate = i === n ? null : limites[i];
     const txt = de == null ? '< ' + f1(ate) : ate == null ? '≥ ' + f1(de) : f1(de) + '–' + f1(ate);
@@ -302,7 +303,7 @@ async function selecionar(sel, { semHash = false } = {}) {
     const h2 = p.querySelector('h2');
     if (h2) { const b = document.createElement('button'); b.className = 'botao icone mini compartilhar'; b.title = 'Copiar link deste recorte'; b.setAttribute('aria-label', 'Copiar link deste recorte'); b.innerHTML = icone('link'); b.onclick = copiarLink; h2.append(b); }
     atualizarResumo(sel); animarNumeros(p);
-    if (navigator.vibrate && matchMedia('(pointer: coarse)').matches) navigator.vibrate(8);
+    if (navigator.vibrate && navigator.userActivation?.hasBeenActive && matchMedia('(pointer: coarse)').matches) navigator.vibrate(8);
   }
   catch (e) { p.innerHTML = `<p class="erro">Não consegui abrir este recorte: ${esc(e.message)}</p>`; console.error(e); }
   document.querySelectorAll('.migalha [data-ir]').forEach(b => b.onclick = () => selecionar(JSON.parse(b.dataset.ir)));
@@ -316,9 +317,9 @@ function cabecalho(tipo, nome, g, extra = '') {
   const v = g.a + g.b;
   const M = METRICAS[metrica], foco = k => M.dd === k ? ' class="foco"' : '';
   const vMet = M.valor(g), vBr = M.valor(R.totalBrasil);
-  const blocoFoco = metrica === 'resultado' ? '' : `<div class="metrica-foco" style="--cor:${corSequencial(vMet, limites)}">
+  const blocoFoco = metrica === 'resultado' ? '' : `<div class="metrica-foco" style="--cor:${M.div ? corVariacao(vMet) : corSequencial(vMet, limites)}">
     <div><span class="tipo">Cor do mapa: ${esc(M.nome)}</span><b data-contar>${fmtValor(vMet)}</b>
-    <span class="small">${M.abs ? `${pct(vMet, vBr, 2)} do total do Brasil (${nf(vBr)})` : `Brasil: ${pct(vBr, 1, 2)} · ${Number.isFinite(vMet) && Number.isFinite(vBr) ? (vMet >= vBr ? '+' : '−') + Math.abs(100 * (vMet - vBr)).toFixed(2).replace('.', ',') + ' p.p. em relação à média' : ''}`}</span></div>
+    <span class="small">${M.abs ? `${pct(vMet, vBr, 2)} do total do Brasil (${nf(vBr)})` : M.pp ? `Brasil: ${fmtValor(vBr)}` : `Brasil: ${pct(vBr, 1, 2)} · ${Number.isFinite(vMet) && Number.isFinite(vBr) ? (vMet >= vBr ? '+' : '−') + Math.abs(100 * (vMet - vBr)).toFixed(2).replace('.', ',') + ' p.p. em relação à média' : ''}`}</span></div>
     <p class="small muted">${esc(M.explica)} As listas abaixo estão ordenadas por este indicador.</p></div>`;
   return `<div class="tipo">${tipo}</div><h2>${nome}</h2>${extra}${blocoFoco}
   <div class="placar" role="img" aria-label="${esc(NOME_A)} ${pct(g.a, v)}, ${esc(NOME_B)} ${pct(g.b, v)} dos votos válidos">
@@ -790,7 +791,7 @@ function mostrarPasso(i) {
   const dia = pz.min >= 1440 ? '26/10' : '25/10', m = pz.min % 1440, hora = `${dia} ${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
   rotTempo.innerHTML = `<b>${hora}</b> (horário do recebimento) · <b>${pct(t.secoes, R.totalBrasil.secoes, 2)}</b> das urnas apuradas · ${esc(NOME_A)} <b>${pct(t.a, t.a + t.b, 2)}</b> × <b>${pct(t.b, t.a + t.b, 2)}</b> ${esc(NOME_B)}`;
   const vivo = document.getElementById('cab-brasil');
-  if (vivo && selAtual?.tipo === 'brasil') vivo.innerHTML = cabecalho(`Apuração em andamento · ${hora} · ${pct(t.secoes, R.totalBrasil.secoes, 2)} das urnas`, 'Brasil', t, `<p class="small">Números somados só com os boletins recebidos até este momento. Arraste a barra para ir e voltar.</p>`);
+  if (vivo && selAtual?.tipo === 'brasil') vivo.innerHTML = cabecalho(`${t.secoes >= R.totalBrasil.secoes ? 'Apuração concluída' : 'Apuração em andamento'} · ${hora} · ${pct(t.secoes, R.totalBrasil.secoes, 2)} das urnas`, 'Brasil', t, `<p class="small">Números somados só com os boletins recebidos até este momento. Arraste a barra para ir e voltar.</p>`);
   camadaUf.setStyle(f => { const g = apuracaoAtiva[f.properties.uf]; return { ...estilo(g, f.properties.uf, corCss('--borda-mapa')), fillOpacity: g.secoes ? 0.25 + 0.65 * g.secoes / R.porUf[f.properties.uf].secoes : 0.06 }; });
   camadaUf.eachLayer(l => { if (l.isTooltipOpen()) l.setTooltipContent(l.getTooltip()._content); });
 }
@@ -865,7 +866,7 @@ function mostrarAba(nome) {
   if (nome === 'mapa') setTimeout(() => { mapa.invalidateSize(); if (!mapaVisto) { mapaVisto = true; selecionar(selAtual || { tipo: 'brasil' }, { semHash: true }); } }, 60);
   const aba = document.getElementById('aba-' + nome); if (aba) animarNumeros(aba);
 }
-document.querySelectorAll('[role="tab"]').forEach(b => b.onclick = () => { mostrarAba(b.dataset.aba); if (b.dataset.aba !== 'mapa') history.replaceState(null, '', b.dataset.aba === 'inicio' ? location.pathname : '#aba=' + b.dataset.aba); });
+document.querySelectorAll('[role="tab"]').forEach(b => b.onclick = () => { mostrarAba(b.dataset.aba); history.replaceState(null, '', b.dataset.aba === 'inicio' ? location.pathname : b.dataset.aba === 'mapa' ? '#' + hashDe(selAtual || { tipo: 'brasil' }) : '#aba=' + b.dataset.aba); });
 // Setas ← → entre as abas (acessibilidade).
 document.querySelector('.abas').addEventListener('keydown', e => {
   if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
@@ -892,12 +893,26 @@ iniciarAnalises(R, { NOME_A, NOME_B, irPara: sel => { mostrarAba('mapa'); seleci
 iniciarFaq(R, { NOME_A, NOME_B });
 iniciarComparar(R, { NOME_A, NOME_B, irPara: sel => { mostrarAba('mapa'); selecionar(sel); } });
 const irParaMapa = sel => { mostrarAba('mapa'); selecionar(sel); };
-const irAba = nome => { mostrarAba(nome); window.scrollTo({ top: 0, behavior: 'smooth' }); };
-for (const [arq, fn, args] of [
+const irAba = nome => { mostrarAba(nome); history.replaceState(null, '', nome === 'inicio' ? location.pathname : nome === 'mapa' ? '#' + hashDe(selAtual || { tipo: 'brasil' }) : '#aba=' + nome); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+// CSS do módulo carregado sob demanda (mantém a versão ?v= do deploy, se houver, pelo mesmo carimbo do estilo.css).
+function carregarCss(nome) {
+  if (document.querySelector(`link[data-mod="${nome}"]`)) return;
+  const v = (document.querySelector('link[href*="estilo.css"]')?.getAttribute('href').split('?')[1]) || '';
+  const l = Object.assign(document.createElement('link'), { rel: 'stylesheet', href: `${nome}.css${v ? '?' + v + '-' + nome : ''}` });
+  l.dataset.mod = nome; document.head.append(l);
+}
+for (const [arq, fn, args, aba] of [
   ['./inicio.js?v=9c02df0453', 'iniciarInicio', { NOME_A, NOME_B, irAba, irPara: irParaMapa, focarBusca: () => entrada.focus() }],
-  ['./explorar.js?v=5a8c5407fa', 'iniciarExplorar', { NOME_A, NOME_B, irPara: irParaMapa }],
-  ['./candidatos.js?v=4e63b20511', 'iniciarCandidatos', { NOME_A, NOME_B }]
-]) import(arq).then(m => m[fn]?.(R, args)).catch(e => console.warn('aba indisponível:', arq, e));
+  ['./explorar.js?v=342f144d51', 'iniciarExplorar', { NOME_A, NOME_B, irPara: irParaMapa }],
+  ['./candidatos.js?v=4e63b20511', 'iniciarCandidatos', { NOME_A, NOME_B }],
+  // ['./mundo.js?v=pendente', 'iniciarMundo', { NOME_A, NOME_B, irAba }, 'mundo'],      ← liga quando o módulo existir
+  // ['./governo.js?v=pendente', 'iniciarGoverno', { NOME_A, NOME_B, irAba }, 'governos'],
+]) import(arq).then(m => {
+  if (!m[fn]) return;
+  m[fn](R, args);
+  // A aba só aparece quando o módulo existe (os módulos novos chegam aos poucos).
+  if (aba) { document.querySelector(`[role="tab"][data-aba="${aba}"]`)?.removeAttribute('hidden'); carregarCss(aba === 'governos' ? 'governo' : aba); }
+}).catch(() => { /* módulo ainda não publicado: a aba continua escondida */ });
 // Sem endereço na URL: começa pela página inicial. Com #aba=nome: abre a aba. Com recorte (#uf=…): abre o mapa.
 const abaHash = /^#aba=(\w+)/.exec(location.hash)?.[1];
 if (!location.hash || location.hash === '#') { await selecionar({ tipo: 'brasil' }, { semHash: true }); mostrarAba('inicio'); }
