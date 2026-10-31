@@ -203,6 +203,16 @@ ul.alertas { padding-left: 18px; margin: 6px 0; font-size: 14px; }
 .contexto-num { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .contexto-num dd { font-size: 14px; }
 
+.anos { display: grid; gap: 12px; }
+.ano-cab { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: baseline; }
+.ano-cab b { font-size: 18px; }
+.hist2 { gap: 12px; }
+h4.sub { margin: 14px 0 0; font-size: 14px; color: var(--tinta-2); }
+.grafico .eixo.forte { fill: var(--tinta); font-weight: 700; font-size: 13px; }
+.linha-anim { stroke-dasharray: 2000; stroke-dashoffset: 0; animation: traca 1.4s ease both; }
+@keyframes traca { from { stroke-dashoffset: 2000; } }
+@media (prefers-reduced-motion: reduce) { .linha-anim { animation: none; } }
+
 /* ---------- Mapa: legenda de calor, capitais, endereço ---------- */
 .legenda-calor { background: color-mix(in srgb, var(--superficie) 92%, transparent); border: 1px solid var(--borda); border-radius: 10px; padding: 6px 8px; box-shadow: var(--sombra); min-width: 180px; max-width: 240px; font-size: 11px; color: var(--tinta-2); }
 .lc-titulo { font-weight: 700; color: var(--tinta); margin-bottom: 4px; font-size: 12px; }
@@ -211,6 +221,7 @@ ul.alertas { padding-left: 18px; margin: 6px 0; font-size: 14px; }
 .lc-rot { display: flex; justify-content: space-between; gap: 6px; margin-top: 3px; }
 .leaflet-tooltip.rotulo-capital { background: transparent; border: 0; box-shadow: none; padding: 0; font-size: 11px; font-weight: 700; color: var(--tinta); text-shadow: 0 0 3px var(--superficie), 0 0 3px var(--superficie), 0 0 2px var(--superficie); display: none; }
 #mapa.rotulos-capitais .leaflet-tooltip.rotulo-capital { display: block; }
+.zona-perto { margin: 8px 0; padding: 8px 10px; border-radius: 10px; background: var(--superficie-2); font-size: 14px; }
 #sugestoes li.sug-endereco { border-top: 1px solid var(--linha); margin-top: 4px; }
 
 /* ---------- Perguntas comuns (conversa) ---------- */
