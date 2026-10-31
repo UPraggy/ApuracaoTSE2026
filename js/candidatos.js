@@ -135,7 +135,7 @@ export function calcularPerfil(R, MUN, C) {
 // ---------- Texto "O que os números dizem" (regras simétricas para os dois) ----------
 // Perto de 50%, uma casa decimal engana ("50,0%"): mostra duas.
 const pctL = x => pct(x, 1, Math.abs(x - 0.5) < 0.005 ? 2 : 1);
-const minusc = t => t.charAt(0).toLowerCase() + t.slice(1);
+const minusc = t => /^[A-ZÀ-Ú]{2}/.test(t) ? t : t.charAt(0).toLowerCase() + t.slice(1);
 function textos(P, nA, nB) {
   const L = [], T = P.totais, nome = k => k === 'a' ? `${esc(nA)} (13)` : `${esc(nB)} (22)`;
   const lider = c => c.pctA >= 0.5 ? ['a', c.pctA] : ['b', 1 - c.pctA];
@@ -263,10 +263,10 @@ export async function iniciarCandidatos(R, { NOME_A, NOME_B }) {
     <h2>Candidatos: onde está o voto de cada um</h2>
     <p class="lead">Como são, em média, os <b>municípios</b> onde cada candidato recebeu seus votos: renda, programas sociais, saneamento, saúde, idade e escolaridade. Os dois recebem exatamente o mesmo cálculo, na ordem do número na urna.</p>
     <div class="cand-aviso" role="note">${ICONE('alerta')}<div><b>Como ler:</b> os números são somados <b>por município</b>. Mostram em que tipo de lugar cada candidato teve a maior parte dos votos. As fontes têm anos diferentes (Censo 2022, PIB 2023, IDHM 2010, Bolsa Família e BPC de set/2026).</div></div>
-    <div class="cand-cabeca">
-      <div class="cand-card a"><span class="cand-num">13</span><div><b>${esc(nA)}</b><br><span class="muted">${nf(P.totais.a)} votos · ${pct(P.totais.a, P.totais.a + P.totais.b, 2)} dos válidos</span></div></div>
-      <div class="cand-card b"><span class="cand-num">22</span><div><b>${esc(nB)}</b><br><span class="muted">${nf(P.totais.b)} votos · ${pct(P.totais.b, P.totais.a + P.totais.b, 2)} dos válidos</span></div></div>
-    </div>
+    <section class="bloco cand-concl-bloco"><h3>${ICONE('analise')}Conclusão: o voto de cada candidato, pelos dados</h3>
+      <div class="cand-concls">${conclusoes(P, nA, nB)}</div>
+      <p class="fonte">Gerado pelas mesmas regras para os dois, a partir das tabelas desta página. "Onde teve a maioria" = mais da metade dos votos válidos daquele grupo de municípios.</p>
+    </section>
     <div class="cards cand-destaques">${destaque.map(i => `<div class="card"><span class="rot">${esc(i.nome)}</span><span class="cand-par"><span><i class="d a"></i><b>${esc(fmt(i, i.A))}</b> <small>13</small></span><span><i class="d b"></i><b>${esc(fmt(i, i.B))}</b> <small>22</small></span></span><span class="rot muted">média de todos os votantes: ${esc(fmt(i, i.V))}</span></div>`).join('')}</div>
     <section class="bloco"><h3>${ICONE('chat')}O que os números dizem</h3>
       <div class="cand-bot">${textos(P, nA, nB).map((t, k) => `<div class="bolha painel" style="--k:${k}">${t}</div>`).join('')}</div>
@@ -282,10 +282,6 @@ export async function iniciarCandidatos(R, { NOME_A, NOME_B }) {
     <h3 class="cand-sec">Em que tipo de lugar estão os votos</h3>
     <p class="muted small">Cada barra soma 100%. Compare a barra de cada candidato com a de todos os votantes: onde ela é mais larga, o voto daquele candidato está mais concentrado naquele tipo de lugar.</p>
     ${P.distribuicoes.map(d => blocoDistribuicao(d, nA, nB)).join('')}
-    <section class="bloco"><h3>${ICONE('analise')}Conclusão: o voto de cada candidato, pelos dados</h3>
-      <div class="cand-concls">${conclusoes(P, nA, nB)}</div>
-      <p class="fonte">Gerado pelas mesmas regras para os dois, a partir das tabelas desta página. "Onde teve a maioria" = mais da metade dos votos válidos daquele grupo de municípios.</p>
-    </section>
     <section class="bloco"><h3>${ICONE('livro')}Como calculamos</h3>
       <ul class="cand-metodo">
         <li><b>Média do eleitor do 13</b> = soma, em todos os municípios, de (votos do 13 no município × indicador do município) ÷ total de votos do 13. O mesmo vale para o 22. Município com mais votos pesa mais, então um voto em São Paulo e um voto num município pequeno contam igual.</li>
