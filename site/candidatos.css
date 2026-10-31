@@ -102,3 +102,21 @@
 .cand-barras .cb.b { background: var(--cor-b); animation-delay: .06s; }
 .cand-leg-regua i.d { display: inline-block; width: 12px; height: 9px; border-radius: 0 4px 4px 0; margin-right: 6px; }
 @media (prefers-reduced-motion: reduce) { .cand-barras .cb { animation: none; } }
+
+/* Conclusão no topo, com a cor de cada candidato */
+.cand-concl { border-left: 6px solid var(--cor-a); border-top: 1px solid var(--linha); background: color-mix(in srgb, var(--cor-a) 7%, var(--superficie-2)); }
+.cand-concl.b { border-left-color: var(--cor-b); border-top-color: var(--linha); background: color-mix(in srgb, var(--cor-b) 7%, var(--superficie-2)); }
+.cand-concl .cand-num { width: 40px; height: 40px; font-size: 20px; background: var(--cor-a); }
+.cand-concl.b .cand-num { background: var(--cor-b); }
+.cand-concl.a .cand-concl-topo b { color: var(--cor-a); }
+.cand-concl.b .cand-concl-topo b { color: var(--cor-b); }
+.cand-concl li b { color: var(--tinta); }
+/* Celular: barras curtas e tabela mais estreita (votantes e população ficam no toque/mouse da barra) */
+@media (max-width: 640px) {
+  .cand-tab table { min-width: 0; }
+  .cand-col-regua { width: 26%; min-width: 70px; }
+  .cand-barras { max-width: 110px; }
+  .cand-barras .cb { height: 7px; }
+  .cand-tab th:nth-child(5), .cand-tab td:nth-child(5), .cand-tab th:nth-child(6), .cand-tab td:nth-child(6) { display: none; }
+  .cand-tab th, .cand-tab td { padding: 6px 5px; font-size: 12px; }
+}
