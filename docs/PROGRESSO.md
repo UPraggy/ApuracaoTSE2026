@@ -63,3 +63,16 @@
   - número de urna repetido no exterior;
   - unanimidades.
 - **Revisão:** biometria sempre sem o exterior; abas com degradê e setas do teclado; topo compacto no celular; FAQ só na Início e no Método; marcas de hora cheia nos gráficos; "Flávio" com acento; rodapé completo. O deploy agora carimba todos os CSS e os `import()` dinâmicos.
+
+## 01/11/2026 — Brasil × Mundo, Governos, correções do verificador
+
+- **Brasil × Mundo** (3ª aba, `scripts/mundo.mjs` → `mundo.json`): 22 indicadores, ranking com os 5 primeiros e os 4 vizinhos acima e abaixo do Brasil, filtros (tema, indicador, visão, ano) e posição por mandato desde 1994. Saneamento vem primeiro.
+- **Governos** (`scripts/governo.mjs` → `governo.json`, `docs/ANALISE-GOVERNOS.md`): 8 mandatos de 1995 a 2026, com pobreza, Bolsa Família (inclusive as saídas por renda, só a partir de 2023), saneamento, educação e renda.
+  - Veredito medido contra as metas oficiais: ONU 1.1/1.2 dentro do ritmo; Marco do Saneamento abaixo do ritmo; IDEB e analfabetismo com o prazo vencido.
+- **Segurança:** `homicidiosPor100k` por município, de 2022 a 2024 (SIM); por UF, mortes violentas, roubos de veículos e estupros de 2025 (Sinesp). Já aparece em Candidatos e Explorar.
+- **Correções do verificador:** um critério só para "a partir de 19h" (6.352 em todo o site), Alertas com a prorrogação oficial, NaN em bairros, números com vírgula, FAQ, links para o método, coluna "% Flávio" ao lado de "% Lula", celular.
+- **Explorar:** saiu o "cruzar com" e a dispersão; ficou o ranking com o resumo.
+- **Candidatos:**
+  - Ordem: perfil médio, depois a conclusão por candidato, depois o resto.
+  - Barras simples no perfil.
+  - Textos no formato "onde há mais X, a maior parte votou em Y", sem o termo "falácia".
