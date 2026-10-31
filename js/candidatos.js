@@ -263,6 +263,13 @@ export async function iniciarCandidatos(R, { NOME_A, NOME_B }) {
     <h2>Candidatos: onde está o voto de cada um</h2>
     <p class="lead">Como são, em média, os <b>municípios</b> onde cada candidato recebeu seus votos: renda, programas sociais, saneamento, saúde, idade e escolaridade. Os dois recebem exatamente o mesmo cálculo, na ordem do número na urna.</p>
     <div class="cand-aviso" role="note">${ICONE('alerta')}<div><b>Como ler:</b> os números são somados <b>por município</b>. Mostram em que tipo de lugar cada candidato teve a maior parte dos votos. As fontes têm anos diferentes (Censo 2022, PIB 2023, IDHM 2010, Bolsa Família e BPC de set/2026).</div></div>
+    <section class="bloco"><h3>${ICONE('analise')}Perfil médio, indicador por indicador</h3>
+      <div class="cand-leg-regua"><span><i class="d a"></i>Municípios do voto do 13</span><span><i class="d b"></i>Municípios do voto do 22</span></div>
+      <p class="muted small">Em cada linha, a barra maior é o valor mais alto. As colunas à direita trazem os números, incluindo a média de todos os votantes e da população.</p>
+      ${grupos.map(g => `<h4 class="sub">${esc(g)}</h4><div class="tabela-rolagem cand-tab"><table><thead><tr><th>Indicador</th><th class="cand-col-regua">Comparação</th><th class="num">13</th><th class="num">22</th><th class="num">Votantes</th><th class="num">População</th><th class="num">Diferença (13 − 22)</th></tr></thead><tbody>
+        ${P.indicadores.filter(i => i.grupo === g).map(i => `<tr><td>${esc(i.nome)}${i.cobertura < 0.99 ? ` <small class="muted" title="Parte dos votantes cujo município tem este dado">(${pct(i.cobertura, 1, 0)} com dado)</small>` : ''}</td><td class="cand-col-regua">${regua(i, nA, nB)}</td><td class="num">${esc(fmt(i, i.A))}</td><td class="num">${esc(fmt(i, i.B))}</td><td class="num">${esc(fmt(i, i.V))}</td><td class="num">${esc(fmt(i, i.P))}</td><td class="num">${esc(fmtDif(i, i.dif))}</td></tr>`).join('')}
+      </tbody></table></div>`).join('')}
+    </section>
     <section class="bloco cand-concl-bloco"><h3>${ICONE('analise')}Conclusão: o voto de cada candidato, pelos dados</h3>
       <div class="cand-concls">${conclusoes(P, nA, nB)}</div>
       <p class="fonte">Gerado pelas mesmas regras para os dois, a partir das tabelas desta página. "Onde teve a maioria" = mais da metade dos votos válidos daquele grupo de municípios.</p>
@@ -271,13 +278,6 @@ export async function iniciarCandidatos(R, { NOME_A, NOME_B }) {
     <section class="bloco"><h3>${ICONE('chat')}O que os números dizem</h3>
       <div class="cand-bot">${textos(P, nA, nB).map((t, k) => `<div class="bolha painel" style="--k:${k}">${t}</div>`).join('')}</div>
       <p class="fonte">Texto gerado automaticamente por regras fixas a partir dos números desta página: os mesmos cálculos e as mesmas frases para os dois candidatos.</p>
-    </section>
-    <section class="bloco"><h3>${ICONE('analise')}Perfil médio, indicador por indicador</h3>
-      <div class="cand-leg-regua"><span><i class="d a"></i>Municípios do voto do 13</span><span><i class="d b"></i>Municípios do voto do 22</span></div>
-      <p class="muted small">Em cada linha, a barra maior é o valor mais alto. As colunas à direita trazem os números, incluindo a média de todos os votantes e da população.</p>
-      ${grupos.map(g => `<h4 class="sub">${esc(g)}</h4><div class="tabela-rolagem cand-tab"><table><thead><tr><th>Indicador</th><th class="cand-col-regua">Comparação</th><th class="num">13</th><th class="num">22</th><th class="num">Votantes</th><th class="num">População</th><th class="num">Diferença (13 − 22)</th></tr></thead><tbody>
-        ${P.indicadores.filter(i => i.grupo === g).map(i => `<tr><td>${esc(i.nome)}${i.cobertura < 0.99 ? ` <small class="muted" title="Parte dos votantes cujo município tem este dado">(${pct(i.cobertura, 1, 0)} com dado)</small>` : ''}</td><td class="cand-col-regua">${regua(i, nA, nB)}</td><td class="num">${esc(fmt(i, i.A))}</td><td class="num">${esc(fmt(i, i.B))}</td><td class="num">${esc(fmt(i, i.V))}</td><td class="num">${esc(fmt(i, i.P))}</td><td class="num">${esc(fmtDif(i, i.dif))}</td></tr>`).join('')}
-      </tbody></table></div>`).join('')}
     </section>
     <h3 class="cand-sec">Em que tipo de lugar estão os votos</h3>
     <p class="muted small">Cada barra soma 100%. Compare a barra de cada candidato com a de todos os votantes: onde ela é mais larga, o voto daquele candidato está mais concentrado naquele tipo de lugar.</p>

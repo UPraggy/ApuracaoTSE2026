@@ -896,7 +896,7 @@ const irAba = nome => { mostrarAba(nome); window.scrollTo({ top: 0, behavior: 's
 for (const [arq, fn, args] of [
   ['./inicio.js?v=9c02df0453', 'iniciarInicio', { NOME_A, NOME_B, irAba, irPara: irParaMapa, focarBusca: () => entrada.focus() }],
   ['./explorar.js?v=5a8c5407fa', 'iniciarExplorar', { NOME_A, NOME_B, irPara: irParaMapa }],
-  ['./candidatos.js?v=2c71701057', 'iniciarCandidatos', { NOME_A, NOME_B }]
+  ['./candidatos.js?v=4e63b20511', 'iniciarCandidatos', { NOME_A, NOME_B }]
 ]) import(arq).then(m => m[fn]?.(R, args)).catch(e => console.warn('aba indisponível:', arq, e));
 // Sem endereço na URL: começa pela página inicial. Com #aba=nome: abre a aba. Com recorte (#uf=…): abre o mapa.
 const abaHash = /^#aba=(\w+)/.exec(location.hash)?.[1];
