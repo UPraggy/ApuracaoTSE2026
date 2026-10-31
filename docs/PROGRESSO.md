@@ -30,3 +30,14 @@
 **Próximos passos**
 - Ligar `votos-apos-17h.json` no site (simulação do dia desde as 8h, votos depois das 17h por zona).
 - Ligar os indicadores sociais novos no bloco "Quem mora e quem vota aqui".
+
+## 31/10/2026 — logs das urnas, simulação e gráficos interativos
+
+- **Votos depois das 17h** (`scripts/logs-urna.mjs`, 16.038 logs lidos; votos no log = comparecimento do BU em 100% dos casos): ≈ 34.911 ± 3.339 no país (TSE: 34.393), 1.979 depois das 18h (TSE: 1.981 entre 18h e 19h) e 11 depois das 19h (TSE: 13). Liberações sem a digital depois das 17h: ≈ 1.193, mesma taxa do resto do dia.
+- **O degrau das 19h tem explicação oficial**, conferida na nota do TSE de 25/10, 18:44: o ministro Cristiano Zanin (STF) prorrogou a votação até as 19h nos locais ainda abertos às 17h, e o TSE suspendeu o recebimento dos BUs até as 19h. Nas 6.352 urnas desse grupo, o último voto mediano foi às 16:59 e 53% não tiveram nenhum voto depois das 17h.
+- `scripts/resumo-logs.mjs` → `site/dados/logs-resumo.json` (21 KB) alimenta o site. O `votos-apos-17h.json` (5,9 MB) fica como dado aberto.
+- **Site:**
+  - Simular o dia (comparecimento por UF a cada 15 min).
+  - Reprodução da apuração com o painel do Brasil ao vivo e qualquer cor do mapa. O BU traz, por bloco, os 11 campos.
+  - Corrida da apuração de 2022 e 2026, com linha guia, dica, legenda clicável, botão Tocar e setas do teclado (`grafico.js`).
+  - Proporção ao lado de todo número, indicadores sociais em %, tema escuro por padrão.
