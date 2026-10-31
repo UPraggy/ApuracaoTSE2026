@@ -9,7 +9,7 @@ export const UF_NOME = {
 };
 export const REGIAO_NOME = { N: 'Norte', NE: 'Nordeste', CO: 'Centro-Oeste', SE: 'Sudeste', S: 'Sul' };
 
-const VERSAO_DADOS = '?v=fa1c23281a'; // o deploy troca por ?v=<hash dos dados>
+const VERSAO_DADOS = '?v=4cd48b8018'; // o deploy troca por ?v=<hash dos dados>
 const cache = new Map();
 export function carregar(arquivo) {
   if (!cache.has(arquivo)) cache.set(arquivo, fetch('dados/' + arquivo + VERSAO_DADOS).then(r => { if (!r.ok) throw Error(arquivo + ': HTTP ' + r.status); return r.json(); }));
@@ -23,7 +23,10 @@ export const pp = (x, casas = 2) => x == null ? '—' : (x > 0 ? '+' : x < 0 ? '
 export const hhmm = min => { const m = Math.round(min); return String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); };
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 export const norm = s => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
-export const titulo = s => String(s ?? '').toLowerCase().replace(/(^|[\s(/-])(\p{L})/gu, (m, a, b) => a + b.toUpperCase()).replace(/\b(D[aeo]s?|E)\b/g, w => w.toLowerCase());
+// Acentos que o cadastro do TSE não traz nos nomes de urna.
+const ACENTOS = { 'Flavio Bolsonaro': 'Flávio Bolsonaro', 'Aecio Neves': 'Aécio Neves' };
+const tituloBase = s => String(s ?? '').toLowerCase().replace(/(^|[\s(/-])(\p{L})/gu, (m, a, b) => a + b.toUpperCase()).replace(/\b(D[aeo]s?|E)\b/g, w => w.toLowerCase());
+export const titulo = s => { const t = tituloBase(s); return ACENTOS[t] || t; };
 
 // Sigla com descrição ao passar o mouse.
 export const sigla = uf => `<abbr title="${esc(UF_NOME[uf] || uf)}">${uf === 'ZZ' ? 'Exterior (ZZ)' : esc(uf)}</abbr>`;

@@ -9,7 +9,10 @@
 <meta name="description" content="Mapa e análise dos boletins de urna do 2º turno de 2026 (Presidente): resultado por estado, município, zona, bairro e local de votação, biometria, horários e alertas automáticos. Dados abertos do TSE e malhas do IBGE.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M8 17l5 5 11-12' stroke='white' stroke-width='3.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<link rel="stylesheet" href="estilo.css?v=a4526033fa">
+<link rel="stylesheet" href="estilo.css?v=5cf5eedc57">
+<link rel="stylesheet" href="inicio.css?v=e8fa787406">
+<link rel="stylesheet" href="explorar.css?v=29724f4c04">
+<link rel="stylesheet" href="candidatos.css?v=fd62a3c241">
 <script>/* escuro por padrão; o botão de tema guarda a escolha */ document.documentElement.dataset.theme = 'dark'; try { const t = localStorage.getItem('tema'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
 </head>
 <body>
@@ -54,20 +57,23 @@
     </div>
   </div>
   <nav class="abas" role="tablist" aria-label="Seções do painel">
-    <button role="tab" data-aba="mapa" aria-selected="true"><svg class="ic" aria-hidden="true"><use href="#i-mapa"/></svg>Mapa</button>
-    <button role="tab" data-aba="geral" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-analise"/></svg>Análise</button>
-    <button role="tab" data-aba="comparar" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-comparar"/></svg>2022 × 2026</button>
-    <button role="tab" data-aba="biometria" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-digital"/></svg>Biometria</button>
-    <button role="tab" data-aba="horarios" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-relogio"/></svg>Horários</button>
-    <button role="tab" data-aba="estados" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-bandeira"/></svg>Estados</button>
-    <button role="tab" data-aba="alertas" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-alerta"/></svg>Alertas</button>
-    <button role="tab" data-aba="sobre" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-livro"/></svg>Método e fontes</button>
-    <a class="aba-link" href="#faq"><svg class="ic" aria-hidden="true"><use href="#i-chat"/></svg>Perguntas</a>
+    <button role="tab" id="tab-inicio" aria-controls="aba-inicio" data-aba="inicio" aria-selected="true"><svg class="ic" aria-hidden="true"><use href="#i-casa"/></svg>Início</button>
+    <button role="tab" id="tab-mapa" aria-controls="aba-mapa" data-aba="mapa" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-mapa"/></svg>Mapa</button>
+    <button role="tab" id="tab-geral" aria-controls="aba-geral" data-aba="geral" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-analise"/></svg>Análise</button>
+    <button role="tab" id="tab-candidatos" aria-controls="aba-candidatos" data-aba="candidatos" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-urna"/></svg>Candidatos</button>
+    <button role="tab" id="tab-comparar" aria-controls="aba-comparar" data-aba="comparar" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-comparar"/></svg>2022 × 2026</button>
+    <button role="tab" id="tab-explorar" aria-controls="aba-explorar" data-aba="explorar" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-camadas"/></svg>Explorar</button>
+    <button role="tab" id="tab-horarios" aria-controls="aba-horarios" data-aba="horarios" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-relogio"/></svg>Horários</button>
+    <button role="tab" id="tab-biometria" aria-controls="aba-biometria" data-aba="biometria" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-digital"/></svg>Biometria</button>
+    <button role="tab" id="tab-estados" aria-controls="aba-estados" data-aba="estados" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-bandeira"/></svg>Estados</button>
+    <button role="tab" id="tab-alertas" aria-controls="aba-alertas" data-aba="alertas" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-alerta"/></svg>Alertas</button>
+    <button role="tab" id="tab-sobre" aria-controls="aba-sobre" data-aba="sobre" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-livro"/></svg>Método e fontes</button>
   </nav>
 </header>
 
 <main>
-  <section id="aba-mapa" role="tabpanel" class="aba-mapa">
+  <section id="aba-inicio" role="tabpanel" aria-labelledby="tab-inicio"></section>
+  <section id="aba-mapa" role="tabpanel" class="aba-mapa" aria-labelledby="tab-mapa" hidden>
     <div class="mapa-col">
       <div class="ferramentas">
         <label>Cor <select id="metrica"></select></label>
@@ -97,6 +103,8 @@
 
   <section id="aba-geral" role="tabpanel" hidden></section>
   <section id="aba-comparar" role="tabpanel" hidden></section>
+  <section id="aba-candidatos" role="tabpanel" hidden></section>
+  <section id="aba-explorar" role="tabpanel" hidden></section>
   <section id="aba-biometria" role="tabpanel" hidden></section>
   <section id="aba-horarios" role="tabpanel" hidden></section>
   <section id="aba-estados" role="tabpanel" hidden></section>
@@ -149,9 +157,12 @@
   </section>
 </main>
 <section id="faq" class="faq" aria-label="Perguntas comuns"></section>
-<footer class="rodape small">Dados públicos do TSE e do IBGE. Painel independente, sem vínculo com a Justiça Eleitoral.</footer>
+<footer class="rodape small">
+  <p>Painel independente feito com dados públicos: <a href="https://dadosabertos.tse.jus.br/" target="_blank" rel="noopener">TSE</a> · <a href="https://www.ibge.gov.br/" target="_blank" rel="noopener">IBGE</a> · <a href="https://portaldatransparencia.gov.br/" target="_blank" rel="noopener">Portal da Transparência</a> · <a href="https://datasus.saude.gov.br/" target="_blank" rel="noopener">DATASUS</a>. Sem vínculo com a Justiça Eleitoral ou com partidos.</p>
+  <p>Boletins coletados em 30/10/2026 · <a href="https://github.com/UPraggy/ApuracaoTSE2026" target="_blank" rel="noopener">código e método no GitHub</a></p>
+</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script type="module" src="js/app.js?v=3cbad68f47"></script>
+<script type="module" src="js/app.js?v=cd8423c6de"></script>
 </body>
 </html>

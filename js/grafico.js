@@ -1,18 +1,19 @@
 // Gráfico de linhas interativo: linha guia e dica que seguem o mouse ou o dedo, legenda que liga e desliga
 // cada série e botão "tocar" que desenha a linha do começo ao fim (a apuração andando).
-import { esc } from './util.js?v=9a319dbd9e';
+import { esc } from './util.js?v=752a33c587';
 
 const NS = 'http://www.w3.org/2000/svg';
 
-export function linhaInterativa(alvo, { series, xmin, xmax, ymin, ymax, fx, fy, rotulo, referencia = null, dica = null, tocar = false }) {
+export function linhaInterativa(alvo, { series, xmin, xmax, ymin, ymax, fx, fy, rotulo, referencia = null, dica = null, tocar = false, faixa = null, ticksX = null }) {
   const L = 640, H = 270, m = { t: 14, r: 14, b: 34, l: 52 }, w = L - m.l - m.r, h = H - m.t - m.b;
   const X = x => m.l + w * (x - xmin) / (xmax - xmin), Y = y => m.t + h - h * (y - ymin) / (ymax - ymin);
-  const ty = [0, 0.25, 0.5, 0.75, 1].map(f => ymin + f * (ymax - ymin)), tx = [0, 0.25, 0.5, 0.75, 1].map(f => xmin + f * (xmax - xmin));
+  const ty = [0, 0.25, 0.5, 0.75, 1].map(f => ymin + f * (ymax - ymin)), tx = ticksX || [0, 0.25, 0.5, 0.75, 1].map(f => xmin + f * (xmax - xmin));
   const id = 'clip' + Math.random().toString(36).slice(2, 8);
+  const faixas = faixa ? (Array.isArray(faixa) ? faixa : [faixa]) : [];
   alvo.classList.add('graf-int');
   alvo.innerHTML = `
     <div class="graf-topo">
-      <div class="legenda-graf">${series.map((s, i) => `<button class="serie-btn" data-i="${i}" aria-pressed="true"><i style="background:${s.cor}"></i>${esc(s.nome)}</button>`).join('')}</div>
+      <div class="legenda-graf">${series.map((s, i) => `<button class="serie-btn" data-i="${i}" aria-pressed="true"><i style="background:${s.cor}"></i>${esc(s.nome)}</button>`).join('')}${faixas.map(f => `<span class="faixa-leg"><i style="background:${f.cor}"></i>${esc(f.nome)}</span>`).join('')}</div>
       ${tocar ? `<button class="botao mini-txt tocar"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg>Tocar</button>` : ''}
     </div>
     <div class="graf-area">
@@ -21,6 +22,7 @@ export function linhaInterativa(alvo, { series, xmin, xmax, ymin, ymax, fx, fy, 
         ${ty.map(t => `<line x1="${m.l}" x2="${L - m.r}" y1="${Y(t)}" y2="${Y(t)}" class="grade"/><text x="${m.l - 6}" y="${Y(t) + 4}" class="eixo" text-anchor="end">${fy(t)}</text>`).join('')}
         ${tx.map(t => `<text x="${X(t)}" y="${H - 12}" class="eixo" text-anchor="middle">${fx(t)}</text>`).join('')}
         ${referencia != null ? `<line x1="${m.l}" x2="${L - m.r}" y1="${Y(referencia)}" y2="${Y(referencia)}" class="ref"/>` : ''}
+        ${faixas.map(faixa => `<path class="faixa" d="${faixa.pts.map((p, k) => (k ? 'L' : 'M') + X(p[0]).toFixed(1) + ',' + Y(p[2]).toFixed(1)).join('')}${faixa.pts.slice().reverse().map(p => 'L' + X(p[0]).toFixed(1) + ',' + Y(p[1]).toFixed(1)).join('')}Z" fill="${faixa.cor}"/>`).join('')}
         <g clip-path="url(#${id})">${series.map((s, i) => `<path data-i="${i}" d="${s.pts.map((p, k) => (k ? 'L' : 'M') + X(p[0]).toFixed(1) + ',' + Y(p[1]).toFixed(1)).join('')}" fill="none" stroke="${s.cor}" stroke-width="2.4" class="linha-anim"/>`).join('')}</g>
         <line class="guia" x1="0" x2="0" y1="${m.t}" y2="${m.t + h}" visibility="hidden"/>
         ${series.map((s, i) => `<circle class="marca" data-i="${i}" r="5" fill="${s.cor}" visibility="hidden"/>`).join('')}

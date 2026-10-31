@@ -1,9 +1,9 @@
 // Painel da apuração: mapa de cor (UF → município → local de votação), busca e painel de detalhes.
-import { UF_NOME, REGIAO_NOME, carregar, nf, pct, pp, hhmm, esc, norm, titulo, sigla, vazio, somar, corVantagem, CLASSES_VANTAGEM, classesQuantis, corSequencial, corCss } from './util.js?v=9a319dbd9e';
-import { iniciarAnalises } from './analises.js?v=0b3607a963';
+import { UF_NOME, REGIAO_NOME, carregar, nf, pct, pp, hhmm, esc, norm, titulo, sigla, vazio, somar, corVantagem, CLASSES_VANTAGEM, classesQuantis, corSequencial, corCss } from './util.js?v=752a33c587';
+import { iniciarAnalises } from './analises.js?v=f975a4433d';
 import { animarNumeros } from './anim.js?v=19eef1076c';
-import { iniciarFaq } from './faq.js?v=711ecf2111';
-import { iniciarComparar } from './comparar.js?v=cd83712756';
+import { iniciarFaq } from './faq.js?v=451010295e';
+import { iniciarComparar } from './comparar.js?v=667ca2f243';
 
 const R = await carregar('resumo.json');
 const MUN = await carregar('municipios.json');
@@ -274,7 +274,9 @@ function reestilizar() {
 }
 function recalcularLimitesPontos(lista) { if (metrica !== 'resultado' && !METRICAS[metrica].div) limites = classesQuantis(lista.map(l => METRICAS[metrica].valor(aggLocal(l)))); desenharLegenda(); }
 
+const mapaVisivel = () => { const c = mapa.getContainer(); return c.offsetWidth > 0 && c.offsetHeight > 0; };
 function enquadrar(camadas) {
+  if (!mapaVisivel()) return;
   const b = L.latLngBounds([]);
   for (const c of camadas) if (c?.getBounds) { const x = c.getBounds(); if (x.isValid()) b.extend(x); }
   if (b.isValid()) mapa.flyToBounds(b, { padding: [20, 20], duration: 0.6, maxZoom: 15 });
@@ -332,7 +334,7 @@ function cabecalho(tipo, nome, g, extra = '') {
     <div${foco('brnu')}><dt>Brancos</dt><dd>${nf(g.br)} <small>${pct(g.br, g.comp)}</small></dd></div>
     <div${foco('brnu')}><dt>Nulos</dt><dd>${nf(g.nu)} <small>${pct(g.nu, g.comp)}</small></dd></div>
     <div${foco('biom')} title="Eleitores com biometria cadastrada que foram liberados para votar sem a digital (campo QT_ELEI_BIOM_SEM_HABILITACAO)"><dt>Sem habilitação biométrica</dt><dd>${nf(g.biom)} <small>${pct(g.biom, g.comp, 2)}</small></dd></div>
-    <div${foco('apos17')} title="Urnas que fecharam depois de 17:05, 17:30 e 19:00 (horário de Brasília). Depois de 17:00:00 em ponto: quase todas."><dt>Urnas fechadas após 17h05 · 17h30 · 19h</dt><dd>${nf(g.q1705)} <small>${pct(g.q1705, g.secoes)}</small> · ${g.q1730 == null ? '<small>—</small>' : nf(g.q1730)} · ${nf(g.q19)}</dd></div>
+    <div class="largo${M.dd === 'apos17' ? ' foco' : ''}" title="Urnas que fecharam depois de 17:05, 17:30 e 19:00 (horário de Brasília). Depois de 17:00:00 em ponto: quase todas."><dt>Urnas fechadas após 17h05 · 17h30 · 19h</dt><dd>${nf(g.q1705)} <small>${pct(g.q1705, g.secoes)}</small> · ${g.q1730 == null ? '<small>—</small>' : nf(g.q1730)} · ${nf(g.q19)}</dd></div>
     <div${foco('alertas')} title="Seções com pelo menos um alerta automático (veja a aba Alertas)"><dt>Seções com alerta</dt><dd>${nf(g.alertas)}</dd></div>
   </dl>`;
 }
@@ -381,9 +383,9 @@ const ROTAS = {
   async brasil(sel, p) {
     ufMunicipios = nivelBrasil === 'mun' ? '*' : null; foco = null; pontos.clearLayers();
     await desenharPoligonos();
-    mapa.flyToBounds(camadaUf.getBounds(), { padding: [8, 8], duration: 0.6 });
+    if (mapaVisivel()) mapa.flyToBounds(camadaUf.getBounds(), { padding: [8, 8], duration: 0.6 });
     const zz = R.porUf.ZZ;
-    p.innerHTML = migalhas([['Brasil']]) + `<div id="cab-brasil">` + cabecalho('País', 'Brasil', R.totalBrasil, `<p class="small">Sem o exterior. Com ${sigla('ZZ')}: ${nf(R.total.comp)} votantes · diferença final ${nf(Math.abs(R.total.a - R.total.b))} votos.</p>`) + `</div>`;
+    p.innerHTML = migalhas([['Brasil']]) + `<div id="cab-brasil">` + cabecalho('País', 'Brasil', R.totalBrasil, `<p class="small">Números sem o exterior. Com o ${sigla('ZZ')}: ${nf(R.total.comp)} votantes e diferença de ${nf(Math.abs(R.total.a - R.total.b))} votos (${pct(Math.abs(R.total.a - R.total.b), R.total.a + R.total.b, 2)} dos válidos).</p>`) + `</div>`;
     await blocoContexto(p, 'BR', 'uf');
     tabela(p, 'Regiões', [{ t: 'Região', v: r => REGIAO_NOME[r.id], busca: r => REGIAO_NOME[r.id] }, colVantagem(r => r.g), colComp(r => r.g), colBio(r => r.g)],
       Object.keys(R.regioes).map(id => ({ id, g: R.regioes[id].reduce((s, uf) => somar(s, R.porUf[uf]), vazio()) })), r => selecionar({ tipo: 'regiao', id: r.id }));
@@ -852,13 +854,25 @@ sliderDia.oninput = async () => { await carregarDia(); if (timerDia) { clearInte
 deslizador.oninput = async () => { if (selAtual?.tipo !== 'brasil') await selecionar({ tipo: 'brasil' }); if (timer) { clearInterval(timer); timer = null; btnPlay.innerHTML = `${icone('play')}Reproduzir apuração`; } mostrarPasso(+deslizador.value); };
 
 // ---------- Abas e tema ----------
+let mapaVisto = false;
 function mostrarAba(nome) {
+  document.body.dataset.aba = nome; // as perguntas comuns aparecem só na Início e no Método (CSS)
   document.querySelectorAll('[role="tab"]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.aba === nome)));
+  document.querySelector(`[role="tab"][data-aba="${nome}"]`)?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
   document.querySelectorAll('[role="tabpanel"]').forEach(s => s.hidden = s.id !== 'aba-' + nome);
-  if (nome === 'mapa') setTimeout(() => mapa.invalidateSize(), 50);
+  if (nome === 'mapa') mapa.invalidateSize();
+  // O mapa pode ter nascido escondido (Início): na primeira vez que aparece, recalcula o tamanho e reenquadra.
+  if (nome === 'mapa') setTimeout(() => { mapa.invalidateSize(); if (!mapaVisto) { mapaVisto = true; selecionar(selAtual || { tipo: 'brasil' }, { semHash: true }); } }, 60);
   const aba = document.getElementById('aba-' + nome); if (aba) animarNumeros(aba);
 }
-document.querySelectorAll('[role="tab"]').forEach(b => b.onclick = () => mostrarAba(b.dataset.aba));
+document.querySelectorAll('[role="tab"]').forEach(b => b.onclick = () => { mostrarAba(b.dataset.aba); if (b.dataset.aba !== 'mapa') history.replaceState(null, '', b.dataset.aba === 'inicio' ? location.pathname : '#aba=' + b.dataset.aba); });
+// Setas ← → entre as abas (acessibilidade).
+document.querySelector('.abas').addEventListener('keydown', e => {
+  if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+  const abas = [...document.querySelectorAll('[role="tab"]')], i = abas.indexOf(document.activeElement);
+  if (i < 0) return;
+  const prox = abas[(i + (e.key === 'ArrowRight' ? 1 : -1) + abas.length) % abas.length]; prox.focus(); prox.click();
+});
 function aplicarTema() {
   const escolhido = document.documentElement.dataset.theme;
   const escuro = escolhido ? escolhido === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
@@ -877,6 +891,17 @@ aplicarTema();
 iniciarAnalises(R, { NOME_A, NOME_B, irPara: sel => { mostrarAba('mapa'); selecionar(sel); }, mostrarAba: nome => { mostrarAba(nome); window.scrollTo({ top: 0, behavior: 'smooth' }); } });
 iniciarFaq(R, { NOME_A, NOME_B });
 iniciarComparar(R, { NOME_A, NOME_B, irPara: sel => { mostrarAba('mapa'); selecionar(sel); } });
-await selecionar(selDoHash(), { semHash: true });
-window.addEventListener('popstate', () => selecionar(selDoHash(), { semHash: true }));
+const irParaMapa = sel => { mostrarAba('mapa'); selecionar(sel); };
+const irAba = nome => { mostrarAba(nome); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+for (const [arq, fn, args] of [
+  ['./inicio.js?v=9c02df0453', 'iniciarInicio', { NOME_A, NOME_B, irAba, irPara: irParaMapa, focarBusca: () => entrada.focus() }],
+  ['./explorar.js?v=5a8c5407fa', 'iniciarExplorar', { NOME_A, NOME_B, irPara: irParaMapa }],
+  ['./candidatos.js?v=6b9004206d', 'iniciarCandidatos', { NOME_A, NOME_B }]
+]) import(arq).then(m => m[fn]?.(R, args)).catch(e => console.warn('aba indisponível:', arq, e));
+// Sem endereço na URL: começa pela página inicial. Com #aba=nome: abre a aba. Com recorte (#uf=…): abre o mapa.
+const abaHash = /^#aba=(\w+)/.exec(location.hash)?.[1];
+if (!location.hash || location.hash === '#') { await selecionar({ tipo: 'brasil' }, { semHash: true }); mostrarAba('inicio'); }
+else if (abaHash) { await selecionar({ tipo: 'brasil' }, { semHash: true }); mostrarAba(abaHash); }
+else { mapaVisto = true; mostrarAba('mapa'); await selecionar(selDoHash(), { semHash: true }); }
+window.addEventListener('popstate', () => { if (/^#aba=/.test(location.hash) || !location.hash) return; mostrarAba('mapa'); selecionar(selDoHash(), { semHash: true }); });
 document.body.classList.add('pronto');

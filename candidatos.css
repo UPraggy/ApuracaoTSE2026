@@ -1,0 +1,86 @@
+/* Aba Candidatos. Usa os tokens de estilo.css (--cor-a = 13, --cor-b = 22). */
+:root {
+  --cand-cat1: #1baf7a; --cand-cat2: #eda100; --cand-cat3: #6250d6; --cand-cat4: #e87ba4; --cand-cat5: #008300;
+  --cand-q1: #d9d4f7; --cand-q2: #ab9eef; --cand-q3: #7d68e0; --cand-q4: #5440b8; --cand-q5: #33267a;
+  --cand-pop: #898781;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --cand-cat1: #199e70; --cand-cat2: #c98500; --cand-cat3: #9085e9; --cand-cat4: #d55181; --cand-cat5: #2f9e2f;
+    --cand-q1: #2e2852; --cand-q2: #4a3f8c; --cand-q3: #6c5fc4; --cand-q4: #9a8fe6; --cand-q5: #cbc3ff;
+  }
+}
+:root[data-theme="dark"] {
+  --cand-cat1: #199e70; --cand-cat2: #c98500; --cand-cat3: #9085e9; --cand-cat4: #d55181; --cand-cat5: #2f9e2f;
+  --cand-q1: #2e2852; --cand-q2: #4a3f8c; --cand-q3: #6c5fc4; --cand-q4: #9a8fe6; --cand-q5: #cbc3ff;
+}
+
+.cand-aviso { display: flex; gap: 10px; align-items: flex-start; background: color-mix(in srgb, #fab219 14%, var(--superficie)); border: 1px solid #fab219; border-radius: 12px; padding: 12px 14px; margin: 12px 0; font-size: 14px; }
+.cand-aviso .ic { color: #fab219; margin-top: 2px; }
+.cand-cabeca { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 12px 0; }
+.cand-card { display: flex; gap: 12px; align-items: center; background: var(--superficie); border: 1px solid var(--linha); border-radius: 14px; padding: 12px 14px; border-left: 6px solid var(--cor-a); }
+.cand-card.b { border-left-color: var(--cor-b); }
+.cand-num { font-size: 26px; font-weight: 800; width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; color: #fff; background: var(--cor-a); flex: none; }
+.cand-card.b .cand-num { background: var(--cor-b); }
+.cand-par { display: flex; flex-direction: column; gap: 2px; margin: 4px 0; font-size: 15px; }
+.cand-par small { color: var(--muted); }
+
+/* Bolinhas de legenda */
+.d { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: 0; }
+.d.a { background: var(--cor-a); } .d.b { background: var(--cor-b); }
+.d.v { background: var(--tinta-2); border-radius: 2px; width: 3px; height: 12px; }
+.d.p { background: transparent; border: 2px solid var(--cand-pop); }
+
+/* Texto do "bot" */
+.cand-bot { display: flex; flex-direction: column; gap: 8px; }
+.cand-bot .bolha { max-width: 100%; animation-delay: calc(var(--k, 0) * 120ms); }
+
+/* Régua comparativa (dumbbell) */
+.cand-leg-regua, .cand-leg { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--tinta-2); margin: 4px 0 6px; }
+.cand-leg i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.cand-tab table { min-width: 720px; }
+.cand-col-regua { width: 34%; min-width: 180px; }
+.cand-regua { position: relative; height: 22px; outline: none; cursor: default; }
+.cand-trilho { position: absolute; left: 0; right: 0; top: 10px; height: 2px; border-radius: 2px; background: var(--linha); }
+.cand-liga { position: absolute; top: 9px; height: 4px; left: 50%; width: 0; border-radius: 2px; background: linear-gradient(90deg, color-mix(in srgb, var(--cor-a) 55%, transparent), color-mix(in srgb, var(--cor-b) 55%, transparent)); transition: left .8s cubic-bezier(.2,.8,.2,1), width .8s cubic-bezier(.2,.8,.2,1); }
+.cand-ponto, .cand-vot, .cand-pop { position: absolute; top: 11px; left: 50%; transform: translate(-50%, -50%); transition: left .8s cubic-bezier(.2,.8,.2,1); }
+.cand-ponto { width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--superficie); z-index: 2; }
+.cand-ponto.a { background: var(--cor-a); } .cand-ponto.b { background: var(--cor-b); }
+.cand-vot { width: 3px; height: 16px; border-radius: 2px; background: var(--tinta-2); z-index: 1; }
+.cand-pop { width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--cand-pop); background: transparent; }
+.cand-pronto .cand-ponto, .cand-pronto .cand-vot, .cand-pronto .cand-pop { left: var(--x); }
+.cand-pronto .cand-liga { left: var(--de); width: calc(var(--ate) - var(--de)); }
+.cand-ponto.b { transition-delay: .08s; }
+.cand-dica { position: absolute; z-index: 5; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%) translateY(4px); min-width: 220px; background: var(--superficie); border: 1px solid var(--borda); box-shadow: var(--sombra); border-radius: 10px; padding: 8px 10px; font-size: 12px; line-height: 1.55; opacity: 0; pointer-events: none; transition: opacity .15s ease, transform .15s ease; white-space: normal; text-align: left; }
+.cand-regua:hover .cand-dica, .cand-regua:focus .cand-dica { opacity: 1; transform: translateX(-50%) translateY(0); }
+.cand-regua:focus-visible .cand-trilho { outline: 2px solid var(--acento); outline-offset: 4px; }
+.cand-tab.tabela-rolagem { overflow: visible; max-height: none; }
+
+/* Barras empilhadas (100%) */
+.cand-sec { margin: 22px 0 4px; }
+.cand-pilha { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 10px; align-items: center; margin: 6px 0; }
+.cand-pilha-rot { font-size: 13px; font-weight: 600; }
+.cand-pilha-rot small { display: block; font-weight: 400; color: var(--muted); }
+.cand-pilha-barra { display: flex; height: 26px; border-radius: 8px; overflow: hidden; gap: 2px; background: var(--superficie); }
+.cand-pilha-barra span { width: 0; display: grid; place-items: center; font-size: 11px; font-weight: 700; color: #fff; text-shadow: 0 0 3px #000, 0 0 2px #000, 0 1px 2px #000; /* legível nos tons claros e escuros */ overflow: hidden; white-space: nowrap; transition: width .9s cubic-bezier(.2,.8,.2,1); }
+.cand-pronto .cand-pilha-barra span { width: var(--w); }
+.cand-pilha-barra span:hover { filter: brightness(1.12); }
+.cand-mini { display: inline-block; width: 46px; height: 6px; border-radius: 3px; margin-right: 6px; vertical-align: 1px; background: linear-gradient(90deg, var(--cor-a) var(--w), var(--cor-b) var(--w)); }
+.cand-metodo, .cand-fontes { padding-left: 18px; margin: 6px 0; display: grid; gap: 6px; font-size: 14px; }
+.cand-fontes a { color: var(--tinta-2); }
+
+@media (max-width: 760px) {
+  .cand-tab.tabela-rolagem { overflow-x: auto; }
+  .cand-dica { bottom: auto; top: calc(100% + 6px); }
+}
+@media (max-width: 640px) {
+  .cand-cabeca { grid-template-columns: 1fr; }
+  .cand-pilha { grid-template-columns: 1fr; gap: 4px; }
+  .cand-col-regua { min-width: 150px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cand-ponto, .cand-vot, .cand-pop, .cand-liga, .cand-pilha-barra span, .cand-dica { transition: none; }
+  .cand-ponto, .cand-vot, .cand-pop { left: var(--x); }
+  .cand-liga { left: var(--de); width: calc(var(--ate) - var(--de)); }
+  .cand-pilha-barra span { width: var(--w); }
+}
