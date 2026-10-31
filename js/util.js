@@ -59,3 +59,14 @@ export function corSequencial(valor, limites) {
   return mix(css('--seq-0'), css('--seq-1'), n ? k / n : 0.5);
 }
 export { css as corCss };
+
+// Fontes citadas sob cada bloco, para o eleitor saber de onde veio cada número.
+export const FONTES = {
+  bu: ['TSE · Boletins de urna, 2º turno 2026 (dados abertos, coletados em 30/10/2026)', 'https://dadosabertos.tse.jus.br/dataset/resultados-2026-boletim-de-urna'],
+  locais: ['TSE · Eleitorado por local de votação 2026', 'https://dadosabertos.tse.jus.br/'],
+  malhas: ['IBGE · Malhas territoriais (API v3)', 'https://servicodados.ibge.gov.br/api/docs/malhas?versao=3'],
+  censo: ['IBGE · Censo Demográfico 2022', 'https://censo2022.ibge.gov.br/'],
+  investigacao: ['Cálculos deste painel sobre os boletins do TSE (método aberto no GitHub)', 'https://github.com/UPraggy/ApuracaoTSE2026/blob/main/docs/ANALISE-INCONSISTENCIAS.md'],
+  logs: ['TSE · Arquivos de urna transmitidos para totalização (logs)', 'https://dadosabertos.tse.jus.br/dataset/resultados-2026-arquivos-transmitidos-para-totalizacao']
+};
+export const fonte = (...chaves) => `<p class="fonte"><span aria-hidden="true">ⓘ</span> Fonte: ${chaves.map(k => FONTES[k] ? `<a href="${FONTES[k][1]}" target="_blank" rel="noopener">${esc(FONTES[k][0])}</a>` : esc(k)).join(' · ')}</p>`;
