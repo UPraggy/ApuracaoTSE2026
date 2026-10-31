@@ -11,3 +11,4 @@ dados/contexto/
 dados/historico/
 # Logs das urnas baixados por scripts/logs-urna.mjs (GB): refazer com node scripts/logs-urna.mjs tudo
 dados/logs/
+*.stackdump

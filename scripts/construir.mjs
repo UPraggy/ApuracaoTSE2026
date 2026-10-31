@@ -294,6 +294,7 @@ const apuracao = [...blocosApur.entries()].sort((a, b) => a[0] - b[0]).map(([min
 // ---------- Arquivos do site ----------
 await fsp.mkdir(path.join(SAIDA, 'locais'), { recursive: true });
 await fsp.mkdir(path.join(SAIDA, 'geo'), { recursive: true });
+await fsp.mkdir(path.join(SAIDA, 'secoes'), { recursive: true });
 
 const municipios = [...porMun.values()].map(M => {
   const info = ibgeInfo.get(M.ibge) || {};
@@ -315,6 +316,7 @@ const resumo = {
       municipio: ['ibge', 'uf', 'nome', 'tse', 'zonas', 'secoes', 'aptos', 'comp', 'biom', 'a', 'b', 'branco', 'nulo', 'secoesComAlerta', 'regiaoIntermediaria', 'regiaoImediata', 'fechouApos17', 'fechouApos1730', 'fechouApos19', 'fechouApos1705'],
       zona: ['uf', 'zona', 'municipios', 'secoes', 'aptos', 'comp', 'biom', 'a', 'b', 'branco', 'nulo', 'secoesComAlerta', 'fechouApos17', 'fechouApos1730', 'fechouApos19', 'fechouApos1705'],
       local: ['id', 'ibge', 'zona', 'local', 'nome', 'bairro', 'endereco', 'tipo', 'lat', 'lon', 'secoes', 'aptos', 'comp', 'biom', 'a', 'b', 'branco', 'nulo', 'secoesComAlerta', 'tse', 'fechouApos17', 'fechouApos1730', 'fechouApos19', 'fechouApos1705'],
+      secao: ['zona', 'secao', 'localId', 'aptos', 'comp', 'abst', 'biom', 'a', 'b', 'branco', 'nulo', 'aberturaLocalMin', 'encerramentoLocalMin', 'encerramentoBsbMin', 'recebidoMin(+1440 = dia seguinte)', 'tipoUrnaSeNaoApurada', 'agregada', 'alertas'],
       alerta: ['uf', 'ibge', 'municipio', 'zona', 'secao', 'local', 'aptos', 'comp', 'biom', 'a', 'b', 'branco', 'nulo', 'encerramentoBsbMin', 'tipos']
     }
   },
@@ -340,6 +342,15 @@ for (const uf of ufs) {
   }
   busca[uf] = [bairros, nomes];
   await fsp.writeFile(path.join(SAIDA, 'locais', uf + '.json'), JSON.stringify(lista));
+  // Seções da UF (um "boletim" resumido por urna), para a busca por zona e seção. Carregado só quando pedido.
+  const idDoLocal = new Map();
+  let id = 0;
+  for (const k of porLocal.keys()) if (k.startsWith(uf + '|')) idDoLocal.set(k, id++);
+  const hm = m => m == null ? null : Math.round(m);
+  const receb = v => { const m = /(\d{4}-\d\d-\d\d) (\d\d):(\d\d)/.exec(v || ''); return m ? (m[1] === '2026-10-25' ? 0 : 1440) + +m[2] * 60 + +m[3] : null; };
+  const secs = todas.filter(s => s.uf === uf).map(s => [s.zona, s.sec, idDoLocal.get(s.chaveLocal), s.aptos, s.comp, s.abst, s.biom, s.a, s.b, s.branco, s.nulo, hm(s.abre), hm(s.fecha), hm(s.fechaBsb), receb(s.recebido), s.tipoUrna === 'Apurada' ? '' : s.tipoUrna, s.agregadas ? 1 : 0, s.alertas.join(',')]);
+  secs.sort((x, y) => x[0] - y[0] || x[1] - y[1]);
+  await fsp.writeFile(path.join(SAIDA, 'secoes', uf + '.json'), JSON.stringify(secs));
 }
 await fsp.writeFile(path.join(SAIDA, 'busca-locais.json'), JSON.stringify(busca));
 await fsp.writeFile(path.join(SAIDA, 'alertas.json'), JSON.stringify(alertasSecoes));
