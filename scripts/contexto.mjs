@@ -503,6 +503,88 @@ function valoresSociais(S, loc, locs, popEst) {
   ];
 }
 
+// =====================================================================
+// Segurança pública (colunas acrescentadas no fim, 30/10/2026):
+//  - homicidiosPor100k (município e UF): SIM/DATASUS, óbitos por agressão (CID-10 X85–Y09) por município de
+//    residência, soma dos 3 últimos anos FINAIS (preliminares e prévias ficam fora) ÷ 3 ÷ população média do triênio.
+//  - mviPor100k, roubosVeiculosPor100k, estuprosPor100k (só UF): MJSP, Sinesp VDE (base de dados dos gestores
+//    estaduais), último ano com os 12 meses de todas as UFs, ÷ estimativa de população do IBGE do mesmo ano.
+// =====================================================================
+console.log('Segurança pública...');
+const ANO_CENSO_POP = 2022;
+const { lerXlsx } = await import('./xlsx.mjs');
+// SIM: anos finais disponíveis no TabNet
+const extOp = await tabnetOpcoes('sim/cnv/ext10br.def');
+const extHtml = await fsp.readFile(path.join(BRUTOS, 'form_sim_cnv_ext10br_def.html'), 'utf8');
+const extNaoFinal = [...extHtml.matchAll(/Dados de (\d{4})[^<]{0,30}?(Preliminar|pr.via)/gi)].map(m => Number(m[1]));
+const anosExt = extOp.arquivos.map(a => 2000 + Number(/(\d\d)\.dbf/.exec(a)[1])).filter(a => a < anoAtual && !extNaoFinal.includes(a));
+const ANO_HOM = Math.max(...anosExt), ANOS_HOM = [ANO_HOM - 2, ANO_HOM - 1, ANO_HOM];
+const nomeHom = `sim_agressoes_${ANOS_HOM.join('_')}`;
+const hom = await tabnet(nomeHom, 'sim/cnv/ext10br.def', [['Linha', 'Município'], ['Coluna', '--Não-Ativa--'], ['Incremento', 'Óbitos_p/Residênc'], ...ANOS_HOM.map(a => ['Arquivos', `extbr${String(a).slice(2)}.dbf`]), ['SMunicípio', 'TODAS_AS_CATEGORIAS__'], ['SGrande_Grupo_CID10', '4'], ['formato', 'prn'], ['mostre', 'Mostra'], ['zeradas', 'exibirlz']]);
+const HOM = new Map(hom.linhas.map(l => [cod6para7.get(l[0]) ?? l[0], l[1]]));
+// "MUNICIPIO IGNORADO - UF": residentes na UF sem município informado (entram só no total da UF)
+const homIgn = {};
+for (const m of (await fsp.readFile(path.join(BRUTOS, `tabnet_${nomeHom}.txt`), 'utf8')).matchAll(/"\s*MUNICIPIO IGNORADO - ([A-Z]{2})";(\d+|-)/g)) homIgn[m[1]] = m[2] === '-' ? 0 : Number(m[2]);
+// População média do triênio: Censo 2022 no ano do Censo, estimativa do IBGE (tabela 6579) nos anos com estimativa,
+// interpolação linear nos anos sem nenhuma das duas (ex.: 2023).
+const anosEst = per6579.map(p => Number(p.id));
+const ESTS = {};
+for (const a of new Set([...ANOS_HOM, ...anosEst.filter(x => x > Math.min(...ANOS_HOM) - 4 && x < Math.max(...ANOS_HOM) + 4)])) {
+  if (a === ANO_CENSO_POP || !anosEst.includes(a)) continue;
+  ESTS[a] = { m: indexar(await sidra(`6579_${a}_n6`, `/t/6579/n6/all/v/9324/p/${a}`)), u: indexar(await sidra(`6579_${a}_n3n1`, `/t/6579/n3/all/n1/all/v/9324/p/${a}`)) };
+}
+function popAno(nivel, loc, a) {
+  const conhecido = x => (x === ANO_CENSO_POP ? (nivel === 'm' ? M : U).pop.get(loc) : ESTS[x]?.[nivel].get(loc)) ?? null;
+  const v = conhecido(a); if (v != null) return v;
+  const disp = [ANO_CENSO_POP, ...Object.keys(ESTS).map(Number)].filter(x => conhecido(x) != null).sort((x, y) => x - y);
+  const antes = disp.filter(x => x < a).pop(), depois = disp.find(x => x > a);
+  if (antes == null || depois == null) return null;
+  return conhecido(antes) + ((conhecido(depois) - conhecido(antes)) * (a - antes)) / (depois - antes);
+}
+const popMediaHom = (nivel, loc) => { const ps = ANOS_HOM.map(a => popAno(nivel, loc, a)); return ps.some(p => p == null) ? null : ps.reduce((x, y) => x + y, 0) / ps.length; };
+const taxaHom = (obitos, pop) => (obitos == null || !pop ? null : r((100000 * obitos) / ANOS_HOM.length / pop, 1));
+
+// Sinesp VDE (MJSP): planilha anual; usa o ano mais recente com 12 meses de homicídio doloso em todas as UFs
+const SINESP_URL = a => `https://www.gov.br/mj/pt-br/assuntos/sua-seguranca/seguranca-publica/estatistica/download/dnsp-base-de-dados/bancovde-${a}.xlsx/@@download/file`;
+const EV_MVI = ['Homicídio doloso', 'Feminicídio', 'Roubo seguido de morte (latrocínio)', 'Lesão corporal seguida de morte', 'Morte por intervenção de Agente do Estado'];
+const EV_ESTUPRO = ['Estupro', 'Estupro de vulnerável'];
+async function sinespAno(a) {
+  const cache = path.join(BRUTOS, `sinesp_vde_${a}_agregado.json`);
+  const xlsx = await baixarArquivo(SINESP_URL(a), `sinesp_bancovde-${a}.xlsx`);
+  const tam = fs.statSync(xlsx).size;
+  if (!FORCAR && fs.existsSync(cache)) { const c = JSON.parse(await fsp.readFile(cache, 'utf8')); if (c.xlsxBytes === tam) return c; }
+  const wb = await lerXlsx(xlsx);
+  const L = wb.linhas(wb.nomes[0]);
+  const ix = Object.fromEntries(L[0].map((h, i) => [h, i]));
+  const uf = {}, meses = {};
+  for (const l of L.slice(1)) {
+    const ev = l[ix.evento], u = l[ix.uf];
+    if (!ev || !u) continue;
+    const v = (l[ix.total_vitima] ?? 0) + (l[ix.total] ?? 0); // eventos de vítima usam total_vitima; ocorrências usam total
+    const o = (uf[u] ??= {});
+    o[ev] = (o[ev] ?? 0) + v;
+    if (ev === 'Homicídio doloso' && v > 0) ((meses[u] ??= {})[l[ix.data_referencia]] = 1);
+  }
+  const out = { xlsxBytes: tam, ano: a, uf, mesesHomicidio: Object.fromEntries(Object.entries(meses).map(([u, m]) => [u, Object.keys(m).length])) };
+  await fsp.writeFile(cache, JSON.stringify(out));
+  return out;
+}
+let SIN = null;
+for (let a = anoAtual - 1; a >= anoAtual - 3 && !SIN; a--) {
+  try { const s = await sinespAno(a); if (UFS.every(u => s.mesesHomicidio[u] === 12)) SIN = s; else console.log(`  Sinesp ${a}: incompleto`); }
+  catch (e) { console.warn(`  Sinesp ${a}: ${e.message.split('\n')[0]}`); }
+}
+const ANO_SIN = SIN?.ano ?? null;
+const popSin = ANO_SIN && anosEst.includes(ANO_SIN) ? indexar(await sidra(`6579_${ANO_SIN}_n3n1`, `/t/6579/n3/all/n1/all/v/9324/p/${ANO_SIN}`)) : null;
+function valoresSinesp(ufs, loc) {
+  if (!SIN || !popSin) return [null, null, null];
+  const pop = popSin.get(loc); if (!pop) return [null, null, null];
+  const soma = evs => ufs.reduce((t, u) => t + evs.reduce((s, ev) => s + (SIN.uf[u]?.[ev] ?? 0), 0), 0);
+  return [r((100000 * soma(EV_MVI)) / pop, 1), r((100000 * soma(['Roubo de veículo'])) / pop, 1), r((100000 * soma(EV_ESTUPRO)) / pop, 1)];
+}
+const SEGURANCA_MUN = ['homicidiosPor100k'];
+const SEGURANCA_UF = ['homicidiosPor100k', 'mviPor100k', 'roubosVeiculosPor100k', 'estuprosPor100k'];
+
 // ---------- montagem ----------
 const ANO_CENSO = 2022;
 const sidraUrl = t => `https://sidra.ibge.gov.br/tabela/${t}`;
@@ -550,8 +632,17 @@ const CAMPOS_SOCIAIS = [
 ];
 if (CAMPOS_SOCIAIS.map(c => c[0]).join() !== SOCIAIS.join()) throw new Error('CAMPOS_SOCIAIS fora de ordem');
 const colunasBase = CAMPOS.map(c => c[0]);
-const colunas = [...colunasBase, ...SOCIAIS];
+const colunas = [...colunasBase, ...SOCIAIS, ...SEGURANCA_MUN];
+const fHom = { nome: `Ministério da Saúde, SIM (TabNet), óbitos por agressão (CID-10 X85–Y09) por município de residência, média de ${ANOS_HOM[0]}–${ANO_HOM} (anos finais) ÷ população média do triênio (Censo 2022, estimativas do IBGE da tabela 6579 e interpolação linear no ano sem nenhuma das duas). UF = soma dos municípios + residentes com município ignorado`, ano: ANO_HOM, anos: ANOS_HOM, url: 'http://tabnet.datasus.gov.br/cgi/deftohtm.exe?sim/cnv/ext10br.def', unidade: 'óbitos por 100 mil hab. por ano' };
+const fSin = (o, extra) => ({ nome: `Ministério da Justiça e Segurança Pública, Sinesp VDE ${ANO_SIN} (base dos gestores estaduais, bancovde-${ANO_SIN}.xlsx): ${extra} ÷ estimativa de população ${ANO_SIN} do IBGE (tabela 6579)`, ano: ANO_SIN, url: 'https://www.gov.br/mj/pt-br/assuntos/sua-seguranca/seguranca-publica/estatistica/dados-nacionais-1/base-de-dados-e-notas-metodologicas-dos-gestores-estaduais-sinesp-vde-2022-e-2023', unidade: o });
+const fontesSeg = {
+  homicidiosPor100k: fHom,
+  mviPor100k: fSin('vítimas por 100 mil hab.', 'mortes violentas intencionais = vítimas de homicídio doloso + feminicídio + latrocínio + lesão corporal seguida de morte + morte por intervenção de agente do Estado (polícias estaduais, PF e PRF)'),
+  roubosVeiculosPor100k: fSin('ocorrências por 100 mil hab.', 'ocorrências de roubo de veículo'),
+  estuprosPor100k: fSin('vítimas por 100 mil hab.', 'vítimas de estupro + estupro de vulnerável'),
+};
 const fontes = Object.fromEntries([...CAMPOS, ...CAMPOS_SOCIAIS].map(([k, u, f]) => [k, { ...f, unidade: u }]));
+fontes.homicidiosPor100k = fHom;
 
 function valoresTSE(o) {
   if (!o) return Array(8).fill(null);
@@ -574,7 +665,7 @@ const pibImplicito = {}; // por UF: soma de PIB e da população implícita (PIB
 for (const ibge of ibgeDoSite) {
   const loc = String(ibge);
   const pibpc = pibpc6.get(loc.slice(0, 6)) ?? null;
-  const v = [...valoresIBGE(M, loc, pibpc), ...valoresTSE(tsePorIbge.get(loc)), ...valoresSociais(SM, loc, [loc], M.est.get(loc))];
+  const v = [...valoresIBGE(M, loc, pibpc), ...valoresTSE(tsePorIbge.get(loc)), ...valoresSociais(SM, loc, [loc], M.est.get(loc)), taxaHom(HOM.get(loc), popMediaHom('m', loc))];
   dadosMun[loc] = v;
   const pib = M.pib.get(loc);
   if (pib != null && pibpc) {
@@ -594,14 +685,20 @@ const locsUF = uf => ibgeDoSite.map(String).filter(c => ufDe(c) === uf);
 dadosUF.BR = [...valoresIBGE(U, '1', pibBR.pib / pibBR.pop), ...valoresTSE(somaTSE(u => u !== 'ZZ'))];
 dadosUF.ZZ = [...Array(11).fill(null), ...valoresTSE(somaTSE(u => u === 'ZZ'))];
 // Ordem das colunas de UF: base, giniRendaPc (já existia nessa posição) e depois os indicadores sociais.
-const colunasUF = [...colunasBase, 'giniRendaPc', ...SOCIAIS];
+const colunasUF = [...colunasBase, 'giniRendaPc', ...SOCIAIS, ...SEGURANCA_UF];
 for (const [uf, v] of Object.entries(dadosUF)) {
   v.push(uf === 'ZZ' ? null : r(gini.get(uf === 'BR' ? '1' : String(UF_COD[uf])), 3));
   if (uf === 'ZZ') v.push(...Array(SOCIAIS.length).fill(null));
   else if (uf === 'BR') v.push(...valoresSociais(SU, '1', ibgeDoSite.map(String), U.est.get('1')));
   else v.push(...valoresSociais(SU, String(UF_COD[uf]), locsUF(uf), U.est.get(String(UF_COD[uf]))));
+  // Segurança: homicídios (SIM, soma dos municípios + ignorados da UF) e Sinesp VDE por UF
+  if (uf === 'ZZ') { v.push(...Array(SEGURANCA_UF.length).fill(null)); continue; }
+  const ufsAqui = uf === 'BR' ? UFS : [uf], loc = uf === 'BR' ? '1' : String(UF_COD[uf]);
+  const locs = uf === 'BR' ? ibgeDoSite.map(String) : locsUF(uf);
+  const obitos = locs.reduce((t, c) => t + (HOM.get(c) ?? 0), 0) + ufsAqui.reduce((t, u) => t + (homIgn[u] ?? 0), 0);
+  v.push(taxaHom(obitos, popMediaHom('u', loc)), ...valoresSinesp(ufsAqui, loc));
 }
-const fontesUF = { ...fontes, giniRendaPc: { nome: 'IBGE, Censo 2022, tabela 10301 (v13418 Índice de Gini do rendimento domiciliar per capita)', ano: ANO_CENSO, url: sidraUrl(10301), unidade: 'índice 0-1' } };
+const fontesUF = { ...fontes, ...fontesSeg, giniRendaPc: { nome: 'IBGE, Censo 2022, tabela 10301 (v13418 Índice de Gini do rendimento domiciliar per capita)', ano: ANO_CENSO, url: sidraUrl(10301), unidade: 'índice 0-1' } };
 
 const gerado = new Date().toISOString();
 const notas = 'Valores null = sem dado na fonte. Percentuais com 1 casa. Ver docs/CONTEXTO-DADOS.md.';
@@ -621,5 +718,6 @@ console.log(`TSE: ${tse.lidas} linhas, gerado em ${tse.geracao}; eleitores Brasi
 console.log(`Estimativa de população: ${ANO_EST}; PIB: ${ANO_PIB}`);
 console.log(`Bolsa Família ${bfAg.competencia}: ${[...BF.mapa.values()].reduce((a, o) => a + o.n, 0)} famílias mapeadas; sem IBGE: ${BF.sem.join('; ') || 'nenhum'}`);
 console.log(`BPC ${bpcAg.competencia}: ${[...BPC.mapa.values()].reduce((a, o) => a + o.n, 0)} benefícios mapeados; sem IBGE: ${BPC.sem.join('; ') || 'nenhum'}`);
+console.log(`Homicídios (SIM) ${ANOS_HOM.join('-')}: ${[...HOM.values()].reduce((a, b) => a + b, 0)} óbitos em municípios + ${Object.values(homIgn).reduce((a, b) => a + b, 0)} com município ignorado; BR ${dadosUF.BR[colunasUF.indexOf('homicidiosPor100k')]}/100 mil. Sinesp VDE ${ANO_SIN}: MVI BR ${dadosUF.BR[colunasUF.indexOf('mviPor100k')]}, roubo de veículo ${dadosUF.BR[colunasUF.indexOf('roubosVeiculosPor100k')]}, estupro ${dadosUF.BR[colunasUF.indexOf('estuprosPor100k')]} por 100 mil`);
 console.log(`APS ${apsComp}; SINASC ${ANO_NV} (preliminares: ${nvOp.prelim.join(',') || '-'}); mortalidade ${ANOS_MI.join('-')}; leitos ${COMP_LT}`);
 for (const f of ['contexto-municipios.json', 'contexto-uf.json']) console.log(`  site/dados/${f}: ${(fs.statSync(path.join(SAIDA, f)).size / 1024).toFixed(0)} KB`);

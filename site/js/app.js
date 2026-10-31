@@ -905,7 +905,7 @@ for (const [arq, fn, args, aba] of [
   ['./inicio.js', 'iniciarInicio', { NOME_A, NOME_B, irAba, irPara: irParaMapa, focarBusca: () => entrada.focus() }],
   ['./explorar.js', 'iniciarExplorar', { NOME_A, NOME_B, irPara: irParaMapa }],
   ['./candidatos.js', 'iniciarCandidatos', { NOME_A, NOME_B }],
-  // ['./mundo.js', 'iniciarMundo', { NOME_A, NOME_B, irAba }, 'mundo'],      ← liga quando o módulo existir
+  ['./mundo.js', 'iniciarMundo', { NOME_A, NOME_B, irAba }, 'mundo'],
   // ['./governo.js', 'iniciarGoverno', { NOME_A, NOME_B, irAba }, 'governos'],
 ]) import(arq).then(m => {
   if (!m[fn]) return;

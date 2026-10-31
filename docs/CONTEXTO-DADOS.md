@@ -13,7 +13,7 @@ Formato: `{ gerado, notas, colunas: [...], fontes: { campo: { nome, ano, url, un
 
 Os brutos (`dados/contexto/brutos/`, ~930 MB: ZIP do TSE 408 MB, Bolsa Família 329 MB, BPC 193 MB) estão no `.gitignore`. Os CSV do Portal da Transparência trazem nome e CPF mascarado dos beneficiários; o script só guarda contagens e somas por município (`*_agregado.json`), e nada pessoal vai para o site.
 
-**Ordem das colunas.** Município: as 19 colunas-base e depois as 15 sociais (34 no total). UF: as 19 de base, `giniRendaPc` (posição 20, como antes) e depois as mesmas 15 sociais (35 no total). Colunas novas entram sempre no fim.
+**Ordem das colunas.** Município: as 19 colunas-base, as 15 sociais e `homicidiosPor100k` (35 no total). UF: as 19 de base, `giniRendaPc` (posição 20, como antes), as mesmas 15 sociais e as 4 de segurança `homicidiosPor100k`, `mviPor100k`, `roubosVeiculosPor100k`, `estuprosPor100k` (39 no total). Colunas novas entram sempre no fim.
 
 ## Campos e fontes exatas
 
@@ -127,3 +127,31 @@ Brasil: 18.652.854 famílias no Bolsa Família (set/2026), 6.620.994 BPC, cobert
 - **Perfil do eleitorado** é a fotografia do cadastro gerada em 14/07/2026 (após o fechamento do cadastro para 2026). Escolaridade e gênero são autodeclarados e raramente atualizados: `eleitPctAnalfabeto` e `eleitPctLeEscreve` refletem o que o eleitor declarou ao se alistar, muitas vezes décadas atrás, e não se comparam diretamente com `alfabetizacao15` do Censo. Percentuais do TSE têm o total de eleitores como denominador (inclui "não informado"; faixa etária "Inválida" fica fora dos numeradores).
 - **Idade**: `pct60mais` e `pct16a29` do Censo usam toda a população como denominador; `eleitPct60mais` usa o eleitorado. Por isso o percentual de 60+ entre eleitores é sempre maior.
 - **Biometria do perfil** é cadastral (eleitor com digitais coletadas), diferente do campo de biometria dos boletins de urna (eleitor que votou liberado pela digital).
+
+## Segurança pública (acrescentada em 30/10/2026)
+
+| Campo | Onde | Unidade | Fonte exata | Período |
+|---|---|---|---|---|
+| `homicidiosPor100k` | município e UF | óbitos por 100 mil hab. por ano | Ministério da Saúde, SIM via [TabNet](http://tabnet.datasus.gov.br/cgi/deftohtm.exe?sim/cnv/ext10br.def) (`sim/cnv/ext10br.def`): linha Município, incremento "Óbitos p/Residênc", seleção Grande Grupo CID-10 = "X85-Y09 Agressões", arquivos `extbr22/23/24.dbf` somados. Taxa = (soma dos 3 anos ÷ 3) ÷ população média do triênio × 100 mil | 2022–2024 (os 3 últimos anos **finais**; 2025 está "Preliminar" e 2026 é "prévia" no TabNet) |
+| `mviPor100k` | só UF | vítimas por 100 mil hab. | Ministério da Justiça e Segurança Pública, [Sinesp VDE, base dos gestores estaduais](https://www.gov.br/mj/pt-br/assuntos/sua-seguranca/seguranca-publica/estatistica/dados-nacionais-1/base-de-dados-e-notas-metodologicas-dos-gestores-estaduais-sinesp-vde-2022-e-2023), `bancovde-2025.xlsx` (atualizado em 26/10/2026): vítimas de homicídio doloso + feminicídio + roubo seguido de morte (latrocínio) + lesão corporal seguida de morte + morte por intervenção de agente do Estado (polícias estaduais, PF e PRF) ÷ estimativa de população 2025 do IBGE (SIDRA 6579) | 2025 |
+| `roubosVeiculosPor100k` | só UF | ocorrências por 100 mil hab. | mesma base, evento "Roubo de veículo" (coluna `total` = ocorrências) | 2025 |
+| `estuprosPor100k` | só UF | vítimas por 100 mil hab. | mesma base, eventos "Estupro" + "Estupro de vulnerável" (coluna `total_vitima`; linhas duplicadas no mesmo mês são somadas, como manda a nota do MJSP) | 2025 |
+
+**População média do triênio (SIM).** Censo 2022 em 2022, estimativa do IBGE (tabela 6579) em 2024 e interpolação linear em 2023 (o IBGE não publicou estimativa para 2023). Município sem Censo 2022 (5101837 Boa Esperança do Norte, instalado em 2025) fica `null`; os óbitos de lá estão nos municípios de origem.
+
+**UF e Brasil.** `homicidiosPor100k` da UF soma os municípios **e** as linhas "MUNICIPIO IGNORADO - UF" do TabNet (1.508 óbitos no triênio), dividindo pela população média da UF. O Sinesp é somado por UF (inclui linhas "NÃO INFORMADO" de município). O script escolhe sozinho o último ano do Sinesp com os 12 meses de homicídio doloso informados por todas as 27 UFs.
+
+**Feminicídio fica fora de "homicídio doloso" no Sinesp VDE** (há 115 municípios em 2025 com mais feminicídios que homicídios dolosos), por isso o MVI soma os dois. O conceito segue o de mortes violentas intencionais do Fórum Brasileiro de Segurança Pública.
+
+Cobertura: `homicidiosPor100k` em 5.570 de 5.571 municípios (falta 5101837); 695 municípios têm taxa 0 (nenhum óbito por agressão de residente em 3 anos; 644 deles com menos de 10 mil habitantes). UFs: 27/27 e BR nos quatro campos; ZZ = `null`.
+
+Brasil: 20,5 homicídios por 100 mil (SIM, 2022–2024); Sinesp 2025: MVI 19,3, roubo de veículo 49,0 e estupro (inclui vulnerável) 39,2 por 100 mil.
+
+### Limitações (segurança)
+
+- **SIM ≠ polícia.** O SIM conta óbitos pela declaração de óbito (saúde), por residência da vítima; o Sinesp conta registros policiais por local do fato. Os números não batem e não devem ser somados.
+- **Mortes de intenção indeterminada** (CID Y10–Y34) não entram em `homicidiosPor100k`. Onde a classificação é ruim, parte dos homicídios fica nesse grupo e a taxa sai menor. É o caso conhecido da cidade de São Paulo (2,5 por 100 mil no SIM, 876 óbitos por agressão em 3 anos). O Atlas da Violência (IPEA/FBSP) estima esses "homicídios ocultos" à parte; aqui não há correção.
+- **Municípios pequenos** variam muito mesmo com 3 anos: 1 óbito num município de 2 mil habitantes vira ~17 por 100 mil. Para comparar, prefira grupos de municípios ou UFs.
+- **Estupro e roubo dependem de registro**: taxas maiores podem refletir mais denúncia e melhor registro, não só mais crime. O Sinesp é preenchido pelas secretarias estaduais, com definições e sistemas diferentes (ver as notas metodológicas de cada UF na página do MJSP).
+- **Mortes por intervenção de agente do Estado** entram no MVI; o FBSP faz o mesmo. Quem quiser só homicídios use `homicidiosPor100k`.
+- O **Anuário Brasileiro de Segurança Pública** (FBSP) não tem API nem planilha estável por UF para download automático; o Sinesp VDE é a base oficial do governo federal que o próprio Anuário usa como uma das fontes.
