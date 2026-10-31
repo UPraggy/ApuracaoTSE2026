@@ -54,8 +54,7 @@ for (const n of js) {
 const idx = join(DIR, 'index.html');
 writeFileSync(idx, readFileSync(idx, 'utf8').replace(/(src|href)="((?:js\/[\w-]+\.js)|estilo\.css)"/g, (_, attr, arq) => `${attr}="${arq}?v=${hash(arq)}"`));
 writeFileSync(join(DIR, '.nojekyll'), '');
-if (cname) writeFileSync(join(DIR, 'CNAME'), cname + '
-');
+if (cname) writeFileSync(join(DIR, 'CNAME'), cname + '\n');
 
 git(['add', '-A']);
 if (!git(['status', '--porcelain'], DIR, true).trim()) { console.log('✓ Nada mudou desde a última publicação.'); process.exit(0); }
