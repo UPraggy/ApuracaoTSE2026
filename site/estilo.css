@@ -126,6 +126,14 @@ main { max-width: 1400px; margin: auto; padding: 16px; }
 .numeros dt { font-size: 12px; color: var(--muted); }
 .numeros dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
 .numeros small { color: var(--muted); font-weight: 400; }
+.metrica-foco { margin: 10px 0 4px; padding: 10px 12px; border-radius: 12px; background: var(--superficie-2); border-left: 6px solid var(--cor); animation: entra .35s ease both; }
+.metrica-foco > div { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.metrica-foco .tipo { flex-basis: 100%; }
+.metrica-foco b { font-size: 26px; letter-spacing: -.01em; }
+.metrica-foco p { margin: 4px 0 0; }
+.numeros div.foco { outline: 2px solid var(--acento); background: color-mix(in srgb, var(--acento) 12%, var(--superficie-2)); }
+th.foco { color: var(--tinta); background: color-mix(in srgb, var(--acento) 18%, var(--superficie-2)); }
+td.foco { font-weight: 600; }
 .nota { background: var(--superficie-2); border-left: 3px solid var(--acento); padding: 10px 12px; border-radius: 0 10px 10px 0; font-size: 14px; margin: 10px 0; }
 
 /* ---------- Tabelas ---------- */
@@ -178,6 +186,64 @@ ul.alertas { padding-left: 18px; margin: 6px 0; font-size: 14px; }
 
 .resumo-mapa { display: none; }
 
+/* ---------- Análise guiada ---------- */
+.lead { font-size: 17px; color: var(--tinta-2); max-width: 900px; margin: 0 0 6px; }
+.fonte { font-size: 12px; color: var(--muted); margin: 6px 0 0; }
+.fonte a { color: var(--tinta-2); }
+.verificacoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px; }
+.verif { display: flex; gap: 12px; text-align: left; background: var(--superficie-2); border: 1px solid var(--linha); border-radius: 12px; padding: 12px; cursor: pointer; transition: transform .2s ease, border-color .2s ease; }
+.verif:hover { transform: translateY(-2px); border-color: var(--borda); }
+.verif .selo { flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; color: #fff; }
+.verif.ok .selo { background: #0ca30c; } .verif.atencao .selo { background: #fab219; color: #0b0b0b; } .verif.info .selo { background: var(--acento); }
+.verif-txt { display: flex; flex-direction: column; gap: 3px; font-size: 14px; }
+.verif-st { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; color: var(--muted); }
+.verif.atencao { border-color: #fab219; }
+.verif.ok, .verif.info, .verif.atencao { color: var(--tinta); }
+.link-ver { color: var(--acento); font-size: 13px; }
+.contexto-num { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.contexto-num dd { font-size: 14px; }
+
+/* ---------- Mapa: legenda de calor, capitais, endereço ---------- */
+.legenda-calor { background: color-mix(in srgb, var(--superficie) 92%, transparent); border: 1px solid var(--borda); border-radius: 10px; padding: 6px 8px; box-shadow: var(--sombra); min-width: 180px; max-width: 240px; font-size: 11px; color: var(--tinta-2); }
+.lc-titulo { font-weight: 700; color: var(--tinta); margin-bottom: 4px; font-size: 12px; }
+.lc-barra { display: flex; height: 12px; border-radius: 6px; overflow: hidden; }
+.lc-barra i { flex: 1; }
+.lc-rot { display: flex; justify-content: space-between; gap: 6px; margin-top: 3px; }
+.leaflet-tooltip.rotulo-capital { background: transparent; border: 0; box-shadow: none; padding: 0; font-size: 11px; font-weight: 700; color: var(--tinta); text-shadow: 0 0 3px var(--superficie), 0 0 3px var(--superficie), 0 0 2px var(--superficie); display: none; }
+#mapa.rotulos-capitais .leaflet-tooltip.rotulo-capital { display: block; }
+#sugestoes li.sug-endereco { border-top: 1px solid var(--linha); margin-top: 4px; }
+
+/* ---------- Perguntas comuns (conversa) ---------- */
+.faq { max-width: 900px; margin: 10px auto 0; padding: 0 16px; }
+.chat { display: flex; flex-direction: column; gap: 8px; max-height: 420px; overflow-y: auto; padding: 12px; background: var(--superficie); border: 1px solid var(--linha); border-radius: 14px; scroll-behavior: smooth; }
+.bolha { max-width: 82%; padding: 9px 12px; border-radius: 14px; font-size: 14px; line-height: 1.45; animation: bolha .3s ease both; }
+.bolha.painel { align-self: flex-start; background: var(--superficie-2); border-bottom-left-radius: 4px; }
+.bolha.eu { align-self: flex-end; background: var(--acento); color: #fff; border-bottom-right-radius: 4px; }
+.bolha.eu a { color: #fff; }
+.digitando { display: inline-flex; gap: 4px; } .digitando i { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: pisca 1s infinite; } .digitando i:nth-child(2) { animation-delay: .15s; } .digitando i:nth-child(3) { animation-delay: .3s; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.chip-q { background: var(--superficie); border: 1px solid var(--borda); border-radius: 99px; padding: 6px 12px; cursor: pointer; font-size: 13px; transition: background .2s ease; }
+.chip-q:hover { background: var(--superficie-2); }
+.chat-form { display: flex; gap: 8px; }
+.chat-form input { flex: 1; min-width: 0; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--borda); background: var(--superficie); color: var(--tinta); font: inherit; font-size: 16px; }
+
+/* ---------- Movimento ---------- */
+@keyframes bolha { from { opacity: 0; transform: translateY(6px) scale(.98); } }
+@keyframes pisca { 50% { opacity: .25; } }
+@keyframes sobe { from { opacity: 0; transform: translateY(8px); } }
+@keyframes cresceX { from { transform: scaleX(0); } }
+@keyframes cresceY { from { transform: scaleY(0); } }
+.card, .verif, .numeros > div, .bloco { animation: sobe .45s ease both; animation-delay: calc(var(--i, 0) * 45ms); }
+.seg.a { transform-origin: left; animation: cresceX .8s cubic-bezier(.2,.8,.2,1) both; }
+.seg.b { transform-origin: right; animation: cresceX .8s cubic-bezier(.2,.8,.2,1) both; }
+.grafico rect[pointer-events="none"] { transform-box: fill-box; transform-origin: bottom; animation: cresceY .7s cubic-bezier(.2,.8,.2,1) both; }
+.grafico circle { animation: sobe .5s ease both; }
+.mini-barra { animation: cresceX .7s ease both; transform-origin: left; }
+@media (prefers-reduced-motion: reduce) {
+  .card, .verif, .numeros > div, .bloco, .seg.a, .seg.b, .grafico rect, .grafico circle, .mini-barra, .bolha, .metrica-foco { animation: none !important; }
+  .verif { transition: none; }
+}
+
 /* ---------- Tablet e celular ---------- */
 @media (max-width: 980px) {
   .aba-mapa { grid-template-columns: 1fr; }
@@ -214,4 +280,9 @@ ul.alertas { padding-left: 18px; margin: 6px 0; font-size: 14px; }
   .card .valor { font-size: 20px; }
   .bloco { padding: 12px; }
   #sugestoes { position: fixed; left: 12px; right: 12px; top: auto; max-height: 55vh; }
+  .legenda-calor { min-width: 150px; max-width: 190px; font-size: 10px; padding: 5px 7px; }
+  .lc-titulo { font-size: 11px; }
+  .verificacoes { grid-template-columns: 1fr; }
+  .bolha { max-width: 92%; }
+  .lead { font-size: 15px; }
 }

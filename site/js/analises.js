@@ -1,5 +1,5 @@
-// Abas de análise: visão geral (com contexto IBGE e histórico), biometria, horários, estados e alertas.
-import { UF_NOME, carregar, nf, pct, pp, hhmm, esc, sigla, corVantagem, corCss } from './util.js';
+// Abas de análise: análise guiada (com contexto IBGE e histórico), biometria, horários, estados e alertas.
+import { UF_NOME, carregar, nf, pct, pp, hhmm, esc, sigla, corVantagem, corCss, fonte } from './util.js';
 
 // População: Censo IBGE 2022 (mesmos números do painel anterior).
 const POP_IBGE = { RO: 1581016, AC: 830026, AM: 3941175, RR: 636303, PA: 8116132, AP: 733508, TO: 1511459, MA: 6775152, PI: 3269200, CE: 8791688, RN: 3302406, PB: 3974495, PE: 9058155, AL: 3127511, SE: 2209558, BA: 14136417, MG: 20538718, ES: 3833486, RJ: 16054524, SP: 44420459, PR: 11443208, SC: 7609601, RS: 10880506, MS: 2756700, MT: 3658813, GO: 7055228, DF: 2817068 };
@@ -32,44 +32,51 @@ function pontosDiferenca(linhas, series, { rotulo }) {
 const legenda = series => `<div class="legenda-graf">${series.map(s => `<span><i style="background:${s.cor}"></i>${esc(s.nome)}</span>`).join('')}</div>`;
 const faixaTxt = f => `${Math.round(f.ini * 100)}–${f.fim >= 1 ? '100' : Math.round(f.fim * 100)}%`;
 
-export function iniciarAnalises(R, { NOME_A, NOME_B, irPara }) {
+export function iniciarAnalises(R, { NOME_A, NOME_B, irPara, mostrarAba }) {
   const T = R.total, TB = R.totalBrasil;
 
-  // ---------- Visão geral ----------
-  const conf = R.conferenciaImagens;
-  const linhaConf = (rot, [obs, img], obsNota = '') => `<tr><td>${rot}</td><td class="num">${nf(obs)}</td><td class="num">${nf(img)}</td><td class="num">${obs === img ? '<span class="ok">✔ igual</span>' : nf(obs - img)}</td><td class="small">${obsNota}</td></tr>`;
+  // ---------- Análise (leitura guiada) ----------
+  // Números da investigação vêm de scripts/investigar.mjs (docs/ANALISE-INCONSISTENCIAS.md).
+  const H0 = R.horario, ca = R.alertas.contagem;
+  const VERIF = [
+    { st: 'ok', t: 'As contas de cada urna fecham', d: `Em ${nf(T.secoes)} boletins: nenhum com mais votantes que eleitores aptos, nenhum com votos que não somam o comparecimento, nenhum emitido antes do encerramento, nenhuma seção duplicada.`, aba: 'alertas' },
+    { st: 'ok', t: 'A distribuição dos votos parece natural', d: 'O teste do último dígito dá uniforme (p = 0,88 e 0,23), a % por seção tem um único pico e os resultados idênticos no mesmo local (53 pares) estão dentro do esperado pelo acaso (41 a 64).', aba: 'alertas' },
+    { st: 'atencao', t: 'Um segundo horário de fechamento às 19h', d: `${nf(H0.apos19)} urnas fecharam depois das 19h de Brasília, quase todas entre 19:00 e 19:15, concentradas em zonas do RJ, SP, BA, PE e PB. Abriram às 8h, e o resultado delas é parecido com o das vizinhas (−0,26 ponto). O padrão parece um horário combinado. Quem explica são os TREs, pelos logs e atas.`, aba: 'horarios' },
+    { st: 'info', t: 'Biometria: diferença pequena dentro da mesma escola', d: `${nf(T.biom)} eleitores (${pct(T.biom, T.comp, 2)}) foram liberados sem a digital. Comparando seções da mesma escola, a % de cada candidato quase não muda com isso (${pp(R.biometria.inclinacao.ppPor10)} ponto a cada +10 pontos na taxa). O boletim não diz em quem essas pessoas votaram.`, aba: 'biometria' },
+    { st: 'info', t: 'Seções para conferir no boletim impresso', d: `420 seções destoam muito das vizinhas no mesmo prédio, ${nf(ca.biom_alta)} liberaram metade ou mais sem digital e 84 abriram depois das 9h. As ${nf(ca.unanime)} unanimidades ficam quase todas em aldeias e comunidades rurais.`, aba: 'alertas' },
+    { st: 'info', t: 'Horário de "recebimento" não mostra a chegada real', d: 'Nenhum boletim aparece recebido entre 17:10 e 19:00, e depois chegam cerca de 5.500 a cada 10 minutos. O campo parece registrar o processamento no sistema. Não diz nada sobre os votos.', aba: 'horarios' }
+  ];
+  const ST = { ok: ['✓', 'Consistente'], atencao: ['!', 'Pede explicação oficial'], info: ['i', 'Contexto'] };
   document.getElementById('aba-geral').innerHTML = `
-    <h2>Visão geral</h2>
+    <h2>Análise</h2>
+    <p class="lead">O que os <b>boletins de urna oficiais</b> mostram sobre o 2º turno de 2026, verificação por verificação. Cada item diz o que foi testado, o que deu e onde ver o detalhe. Os dois candidatos recebem o mesmo tratamento, na ordem do número na urna.</p>
     <div class="cards">
-      <div class="card"><span class="valor">${nf(T.secoes)}</span><span class="rot">seções (urnas) com boletim</span></div>
-      <div class="card"><span class="valor">${nf(T.comp)}</span><span class="rot">votantes · ${pct(T.comp, T.aptos)} dos aptos</span></div>
-      <div class="card"><span class="valor">${pct(T.a, T.a + T.b, 2)}</span><span class="rot"><i class="ponto a"></i>${esc(NOME_A)} · ${nf(T.a)}</span></div>
-      <div class="card"><span class="valor">${pct(T.b, T.a + T.b, 2)}</span><span class="rot"><i class="ponto b"></i>${esc(NOME_B)} · ${nf(T.b)}</span></div>
-      <div class="card"><span class="valor">${nf(T.biom)}</span><span class="rot">sem habilitação biométrica · ${pct(T.biom, T.comp, 2)}</span></div>
-      <div class="card"><span class="valor">${nf(R.alertas.secoesComAlerta)}</span><span class="rot">seções com algum alerta automático</span></div>
+      <div class="card"><span class="valor">${pct(T.a, T.a + T.b, 2)}</span><span class="rot"><i class="ponto a"></i>${esc(NOME_A)} (13) · ${nf(T.a)} votos</span></div>
+      <div class="card"><span class="valor">${pct(T.b, T.a + T.b, 2)}</span><span class="rot"><i class="ponto b"></i>${esc(NOME_B)} (22) · ${nf(T.b)} votos</span></div>
+      <div class="card"><span class="valor">${nf(Math.abs(T.a - T.b))}</span><span class="rot">votos de diferença</span></div>
+      <div class="card"><span class="valor">${nf(T.aptos)}</span><span class="rot">aptos para votar</span></div>
+      <div class="card"><span class="valor">${nf(T.comp)}</span><span class="rot">compareceram · ${pct(T.comp, T.aptos)} dos aptos</span></div>
+      <div class="card"><span class="valor">${pct(T.br + T.nu, T.comp, 2)}</span><span class="rot">brancos e nulos</span></div>
     </div>
-    <section class="bloco"><h3>Conferência dos números das imagens</h3>
-      <p class="muted">Os números circulados nas imagens foram recalculados direto dos boletins. Bater a soma confirma a conta, <b>não</b> a conclusão tirada dela.</p>
-      <div class="tabela-rolagem"><table><thead><tr><th>Número</th><th class="num">Boletins (TSE)</th><th class="num">Imagem</th><th class="num">Diferença</th><th>Observação</th></tr></thead><tbody>
-        ${linhaConf('Eleitores sem habilitação biométrica', conf.semBiometria, 'Campo QT_ELEI_BIOM_SEM_HABILITACAO somado.')}
-        ${linhaConf('Seções', conf.secoes)}
-        ${linhaConf('Comparecimento', conf.comparecimento)}
-        ${linhaConf('Diferença entre os candidatos', conf.margem)}
-        ${linhaConf('Urnas encerradas após 17h', conf.apos17, `Horário de Brasília, contando qualquer segundo depois de 17:00:00. No horário local bruto: ${nf(R.horario.bruto_apos17)}. Após 17:05: ${nf(R.horario.apos1705)}. Critério da imagem desconhecido.`)}
-        ${linhaConf('Urnas encerradas após 19h', conf.apos19, `Horário de Brasília. No horário local bruto: ${nf(R.horario.bruto_apos19)}.`)}
-      </tbody></table></div>
+    ${fonte('bu')}
+    <section class="bloco"><h3>Verificações</h3>
+      <div class="verificacoes">${VERIF.map(v => `<button class="verif ${v.st}" data-aba-ir="${v.aba}"><span class="selo" aria-hidden="true">${ST[v.st][0]}</span><span class="verif-txt"><span class="verif-st">${ST[v.st][1]}</span><b>${v.t}</b><span>${v.d}</span><span class="link-ver">Ver detalhes →</span></span></button>`).join('')}</div>
+      ${fonte('investigacao')}
     </section>
+    <div id="comparacao-anos"></div>
     <section class="bloco grid2">
       <div><h3>Linha do tempo do 2º turno</h3>
-        ${[...HIST, { ano: '2026 · 2º turno (estes boletins)', aptos: T.aptos, comp: T.comp, abst: T.abst, secoes: T.secoes, resultado: `${NOME_A} ${nf(T.a)} · ${NOME_B} ${nf(T.b)}`, fonte: R.meta.fonte }].map(h => `<article class="card hist"><h4>${h.ano}</h4><p>Seções ${nf(h.secoes)} · Aptos ${nf(h.aptos)}<br>Comparecimento <b>${nf(h.comp)}</b> (${pct(h.comp, h.aptos)}) · Abstenção ${pct(h.abst, h.aptos)}<br>${esc(h.resultado)}</p><a href="${h.fonte}" target="_blank" rel="noopener">Fonte TSE</a></article>`).join('')}
+        ${[...HIST, { ano: '2026 · 2º turno (estes boletins)', aptos: T.aptos, comp: T.comp, abst: T.abst, secoes: T.secoes, resultado: `${NOME_A} ${nf(T.a)} · ${NOME_B} ${nf(T.b)}`, fonte: R.meta.fonte }].map(h => `<article class="card hist"><h4>${h.ano}</h4><p>Seções ${nf(h.secoes)} · Aptos ${nf(h.aptos)}<br>Comparecimento <b>${nf(h.comp)}</b> (${pct(h.comp, h.aptos)}) · Abstenção ${pct(h.abst, h.aptos)}<br>${esc(h.resultado)}</p><a href="${h.fonte}" target="_blank" rel="noopener">Fonte: TSE</a></article>`).join('')}
       </div>
-      <div><h3>Habitantes (Censo IBGE 2022) e eleitorado</h3>
-        <p class="muted small">Razão só para dar escala: anos e conceitos diferentes (população total × eleitores aptos em 2026).</p>
+      <div><h3>Habitantes e eleitorado por estado</h3>
+        <p class="muted small">Razão só para dar escala: anos e conceitos diferentes (população total de 2022 × eleitores aptos em 2026).</p>
         <div class="tabela-rolagem alta"><table><thead><tr><th>UF</th><th class="num">Habitantes</th><th class="num">Aptos</th><th class="num">Aptos / hab.</th><th class="num">Comparec.</th></tr></thead><tbody>
           ${Object.keys(POP_IBGE).sort().map(uf => { const g = R.porUf[uf]; return `<tr data-uf="${uf}" tabindex="0"><td>${sigla(uf)}</td><td class="num">${nf(POP_IBGE[uf])}</td><td class="num">${nf(g.aptos)}</td><td class="num">${pct(g.aptos, POP_IBGE[uf])}</td><td class="num">${pct(g.comp, g.aptos)}</td></tr>`; }).join('')}
         </tbody></table></div>
+        ${fonte('censo', 'bu')}
       </div>
     </section>`;
+  document.getElementById('aba-geral').addEventListener('click', e => { const b = e.target.closest('[data-aba-ir]'); if (b) mostrarAba(b.dataset.abaIr); });
 
   // ---------- Biometria ----------
   const B = R.biometria, fx = B.nacional;

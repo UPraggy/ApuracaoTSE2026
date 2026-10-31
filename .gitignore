@@ -5,3 +5,9 @@ dados/*.zip
 dados/investigacao.json
 .cache/
 node_modules/
+# Brutos do contexto (IBGE/SIDRA + perfil do eleitorado TSE, ~400 MB): refazer com node scripts/contexto.mjs
+dados/contexto/
+# Boletins de 2014/2018/2022 e caches (scripts/historico.mjs baixa de novo)
+dados/historico/
+# Logs das urnas baixados por scripts/logs-urna.mjs (GB): refazer com node scripts/logs-urna.mjs tudo
+dados/logs/

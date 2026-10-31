@@ -27,7 +27,7 @@
   </div>
   <nav class="abas" role="tablist" aria-label="Seções do painel">
     <button role="tab" data-aba="mapa" aria-selected="true">Mapa</button>
-    <button role="tab" data-aba="geral" aria-selected="false">Visão geral</button>
+    <button role="tab" data-aba="geral" aria-selected="false">Análise</button>
     <button role="tab" data-aba="biometria" aria-selected="false">Biometria</button>
     <button role="tab" data-aba="horarios" aria-selected="false">Horários</button>
     <button role="tab" data-aba="estados" aria-selected="false">Estados</button>
@@ -71,6 +71,7 @@
         <h3>De onde vêm os dados</h3>
         <ul>
           <li><b>Boletins de urna</b>: <a href="https://dadosabertos.tse.jus.br/dataset/resultados-2026-boletim-de-urna" target="_blank" rel="noopener">Portal de Dados Abertos do TSE</a>, 2º turno, 28 arquivos (26 estados, DF e exterior), coletados em 30/10/2026. Cada ZIP foi conferido com o SHA-512 publicado pelo TSE.</li>
+          <li><b>Habitantes, idade, renda e PIB</b>: IBGE (Censo 2022, Estimativas 2026, PIB dos Municípios 2023) via <a href="https://sidra.ibge.gov.br/" target="_blank" rel="noopener">SIDRA</a>. <b>Perfil do eleitorado</b>: TSE 2026.</li>
           <li><b>Locais de votação</b> (nome da escola, endereço, bairro, coordenadas): cadastro "Eleitorado — local de votação 2026" do TSE.</li>
           <li><b>Malhas</b> dos estados e municípios: <a href="https://servicodados.ibge.gov.br/api/docs/malhas?versao=3" target="_blank" rel="noopener">API de malhas do IBGE</a>, qualidade mínima. Regiões intermediárias e imediatas: <a href="https://servicodados.ibge.gov.br/api/docs/localidades" target="_blank" rel="noopener">API de localidades do IBGE</a>.</li>
           <li><b>Código TSE ↔ código IBGE</b> dos municípios: <a href="https://github.com/betafcc/Municipios-Brasileiros-TSE" target="_blank" rel="noopener">betafcc/Municipios-Brasileiros-TSE</a>, mais Boa Esperança do Norte (MT), incluída à mão.</li>
@@ -108,6 +109,7 @@
     </div>
   </section>
 </main>
+<section id="faq" class="faq" aria-label="Perguntas comuns"></section>
 <footer class="rodape small">Dados públicos do TSE e do IBGE. Painel independente, sem vínculo com a Justiça Eleitoral.</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
