@@ -9,7 +9,7 @@ export const UF_NOME = {
 };
 export const REGIAO_NOME = { N: 'Norte', NE: 'Nordeste', CO: 'Centro-Oeste', SE: 'Sudeste', S: 'Sul' };
 
-const VERSAO_DADOS = '?v=5edc4dc6bd'; // o deploy troca por ?v=<hash dos dados>
+const VERSAO_DADOS = '?v=1867896f1e'; // o deploy troca por ?v=<hash dos dados>
 const cache = new Map();
 export function carregar(arquivo) {
   if (!cache.has(arquivo)) cache.set(arquivo, fetch('dados/' + arquivo + VERSAO_DADOS).then(r => { if (!r.ok) throw Error(arquivo + ': HTTP ' + r.status); return r.json(); }));

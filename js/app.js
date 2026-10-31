@@ -1,6 +1,6 @@
 // Painel da apuração: mapa de cor (UF → município → local de votação), busca e painel de detalhes.
-import { UF_NOME, REGIAO_NOME, carregar, nf, pct, pp, hhmm, esc, norm, titulo, sigla, vazio, somar, corVantagem, CLASSES_VANTAGEM, classesQuantis, corSequencial, corCss } from './util.js?v=ea3d1a9ee8';
-import { iniciarAnalises } from './analises.js?v=03998d0c5f';
+import { UF_NOME, REGIAO_NOME, carregar, nf, pct, pp, hhmm, esc, norm, titulo, sigla, vazio, somar, corVantagem, CLASSES_VANTAGEM, classesQuantis, corSequencial, corCss } from './util.js?v=160f88b15a';
+import { iniciarAnalises } from './analises.js?v=ee50d29a15';
 import { animarNumeros } from './anim.js?v=19eef1076c';
 import { iniciarFaq } from './faq.js?v=76d3a0a37d';
 import { iniciarComparar } from './comparar.js?v=09b7c011af';
@@ -906,7 +906,7 @@ for (const [arq, fn, args, aba] of [
   ['./explorar.js?v=8835371190', 'iniciarExplorar', { NOME_A, NOME_B, irPara: irParaMapa }],
   ['./candidatos.js?v=a8e7a90a61', 'iniciarCandidatos', { NOME_A, NOME_B }],
   ['./mundo.js?v=9b872a95e8', 'iniciarMundo', { NOME_A, NOME_B, irAba }, 'mundo'],
-  // ['./governo.js?v=pendente', 'iniciarGoverno', { NOME_A, NOME_B, irAba }, 'governos'],
+  ['./governo.js?v=a4d2504741', 'iniciarGoverno', { NOME_A, NOME_B, irAba }, 'governos'],
 ]) import(arq).then(m => {
   if (!m[fn]) return;
   m[fn](R, args);

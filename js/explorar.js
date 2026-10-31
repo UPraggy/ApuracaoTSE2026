@@ -1,7 +1,7 @@
 // Aba "Explorar": escolhe um indicador (eleição, programas sociais, saneamento, saúde, renda, eleitorado),
 // mostra o ranking por estado ou município e um "bot"
 // escreve a análise a partir dos números (regras fixas, sem IA).
-import { UF_NOME, REGIAO_NOME, carregar, nf, pp, esc, norm, titulo, fonte } from './util.js?v=ea3d1a9ee8';
+import { UF_NOME, REGIAO_NOME, carregar, nf, pp, esc, norm, titulo, fonte } from './util.js?v=160f88b15a';
 
 // ---------- Indicadores ----------
 // u = unidade: % · pp · rs (R$) · mil (por mil) · mil2 · idx · dens · bf (a cada 100 domicílios)
