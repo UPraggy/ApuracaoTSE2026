@@ -15,3 +15,18 @@
 - Criar o repositório no GitHub (UPraggy/ApuracaoTSE2026, público para ter Pages grátis), `git remote add origin git@github.com:UPraggy/ApuracaoTSE2026.git`, `git push -u origin main`, `npm run deploy` e ligar Settings › Pages › gh-pages.
 - Governadores do 2º turno e o 1º turno, que está catalogado mas ainda não foi baixado.
 - Corrigir o fuso do oeste do AM (UTC-5) e de Fernando de Noronha (UTC-2).
+
+## 30–31/10/2026 — no ar em https://apuracao.rafaelmr.com.br
+
+**Feito**
+- Repo público UPraggy/ApuracaoTSE2026, branch gh-pages com CNAME; Cloudflare: CNAME `apuracao` → upraggy.github.io com proxy (igual ao plantafacil/lnoffice). `npm run deploy` carimba versão em CSS, JS e também nos JSON (`VERSAO_DADOS`), porque o Pages guarda cache por 10 min.
+- Aba Análise (verificações com selo Consistente/Pede explicação/Contexto), aba 2022 × 2026 (historico.mjs: 2014–2022 conferidos com a totalização), fonte sob cada bloco, chat de perguntas comuns no fim, busca estilo Maps (endereço via Nominatim, "Perto de mim"), busca por zona+seção com o boletim da urna, capitais no mapa, legenda de calor sobre o mapa, métricas aptos/votantes/abstenção/após 17h05/17h30/19h/variação 2022→2026, contexto IBGE no painel (contexto.mjs), ícones SVG e microinterações.
+- Achado do histórico: o fechamento às 19h quase não existia em 2022 (21 urnas contra 6.336), e em 2022 havia 394 mil boletins recebidos entre 17:10 e 19:00, contra 0 em 2026.
+
+**Em andamento (agentes)**
+- `scripts/logs-urna.mjs`: votos depois das 17h, liberações sem biometria depois das 17h e curva do dia, a partir dos logs das urnas → `site/dados/votos-apos-17h.json` e `docs/VOTOS-APOS-17H.md`.
+- `contexto.mjs`: saneamento, saúde e auxílios (em %).
+
+**Próximos passos**
+- Ligar `votos-apos-17h.json` no site (simulação do dia desde as 8h, votos depois das 17h por zona).
+- Ligar os indicadores sociais novos no bloco "Quem mora e quem vota aqui".
