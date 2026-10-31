@@ -107,6 +107,9 @@ main { max-width: 1400px; margin: auto; padding: 16px; }
 .apuracao { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; align-items: center; background: var(--superficie); border: 1px solid var(--linha); border-radius: 12px; padding: 10px 12px; }
 .apuracao #tempo { width: 100%; accent-color: var(--acento); }
 .apuracao p { grid-column: 1 / -1; margin: 0; }
+.apuracao.dia { margin-bottom: 8px; }
+.apuracao.dia #tempo-dia { width: 100%; accent-color: var(--serie-1); }
+.destaque-bloco { border-color: var(--acento); }
 
 .painel { background: var(--superficie); border: 1px solid var(--linha); border-radius: 14px; padding: 16px; box-shadow: var(--sombra); min-width: 0; }
 .painel h2 { margin: 2px 0 6px; font-size: 24px; }
@@ -336,3 +339,22 @@ tbody tr { transition: background .12s ease; }
 .grupo-ctx summary::after { content: '+'; margin-left: auto; color: var(--muted); transition: transform .2s ease; }
 .grupo-ctx[open] summary::after { transform: rotate(45deg); }
 .grupo-ctx .numeros { margin: 0 8px 8px; }
+/* ---------- Gráficos interativos ---------- */
+.graf-int { position: relative; }
+.graf-topo { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.serie-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--superficie-2); border: 1px solid var(--linha); border-radius: 99px; padding: 3px 10px; cursor: pointer; font-size: 13px; transition: opacity .2s ease, transform .12s ease; }
+.serie-btn i { width: 10px; height: 10px; border-radius: 50%; }
+.serie-btn[aria-pressed="false"] { opacity: .45; text-decoration: line-through; }
+.serie-btn:active { transform: scale(.95); }
+.botao.mini-txt { padding: 4px 10px; font-size: 13px; }
+.graf-area { position: relative; }
+.graf-area svg { touch-action: pan-y; cursor: crosshair; }
+.graf-area svg:focus-visible { outline: 2px solid var(--acento); border-radius: 8px; }
+.grafico .guia { stroke: var(--muted); stroke-dasharray: 3 3; }
+.grafico .ref { stroke: var(--muted); stroke-dasharray: 6 4; opacity: .7; }
+.grafico .marca { stroke: var(--superficie); stroke-width: 2; }
+.grafico path.apagada { opacity: .08; }
+.graf-dica { position: absolute; top: 8px; --larg: 190px; width: var(--larg); background: var(--superficie); border: 1px solid var(--borda); box-shadow: var(--sombra); border-radius: 10px; padding: 8px 10px; font-size: 12px; pointer-events: none; line-height: 1.5; }
+.graf-dica i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+.corridas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 980px) { .corridas { grid-template-columns: 1fr; } }

@@ -38,13 +38,15 @@ export function iniciarAnalises(R, { NOME_A, NOME_B, irPara, mostrarAba }) {
   // ---------- Análise (leitura guiada) ----------
   // Números da investigação vêm de scripts/investigar.mjs (docs/ANALISE-INCONSISTENCIAS.md).
   const H0 = R.horario, ca = R.alertas.contagem;
+  // Sempre número + proporção: "de cabeça" ninguém sabe se 420 seções é muito ou pouco.
+  const TS = T.secoes, TC = T.comp, pS = n => pct(n, TS, 2) + ' das urnas', pC = n => pct(n, TC, 2) + ' dos votantes';
   const VERIF = [
-    { st: 'ok', t: 'As contas de cada urna fecham', d: `Em ${nf(T.secoes)} boletins: nenhum com mais votantes que eleitores aptos, nenhum com votos que não somam o comparecimento, nenhum emitido antes do encerramento, nenhuma seção duplicada.`, aba: 'alertas' },
-    { st: 'ok', t: 'A distribuição dos votos parece natural', d: 'O teste do último dígito dá uniforme (p = 0,88 e 0,23), a % por seção tem um único pico e os resultados idênticos no mesmo local (53 pares) estão dentro do esperado pelo acaso (41 a 64).', aba: 'alertas' },
-    { st: 'atencao', t: 'Um segundo horário de fechamento às 19h', d: `${nf(H0.apos19)} urnas fecharam depois das 19h de Brasília, quase todas entre 19:00 e 19:15, concentradas em zonas do RJ, SP, BA, PE e PB. Abriram às 8h, e o resultado delas é parecido com o das vizinhas (−0,26 ponto). O padrão parece um horário combinado. Quem explica são os TREs, pelos logs e atas.`, aba: 'horarios' },
-    { st: 'info', t: 'Biometria: diferença pequena dentro da mesma escola', d: `${nf(T.biom)} eleitores (${pct(T.biom, T.comp, 2)}) foram liberados sem a digital. Comparando seções da mesma escola, a % de cada candidato quase não muda com isso (${pp(R.biometria.inclinacao.ppPor10)} ponto a cada +10 pontos na taxa). O boletim não diz em quem essas pessoas votaram.`, aba: 'biometria' },
-    { st: 'info', t: 'Seções para conferir no boletim impresso', d: `420 seções destoam muito das vizinhas no mesmo prédio, ${nf(ca.biom_alta)} liberaram metade ou mais sem digital e 84 abriram depois das 9h. As ${nf(ca.unanime)} unanimidades ficam quase todas em aldeias e comunidades rurais.`, aba: 'alertas' },
-    { st: 'info', t: 'Horário de "recebimento" não mostra a chegada real', d: 'Nenhum boletim aparece recebido entre 17:10 e 19:00, e depois chegam cerca de 5.500 a cada 10 minutos. O campo parece registrar o processamento no sistema. Não diz nada sobre os votos.', aba: 'horarios' }
+    { st: 'ok', t: 'As contas de cada urna fecham', d: `Em <b>100%</b> dos ${nf(TS)} boletins: nenhum com mais votantes que eleitores aptos, nenhum com votos que não somam o comparecimento, nenhum emitido antes do encerramento e nenhuma seção duplicada.`, aba: 'alertas' },
+    { st: 'ok', t: 'A distribuição dos votos parece natural', d: 'O teste do último dígito dá uniforme (p = 0,88 e 0,23), a % por seção tem um único pico e os resultados idênticos no mesmo local (53 pares, <b>0,01%</b> das urnas) ficam dentro do esperado pelo acaso (41 a 64).', aba: 'alertas' },
+    { st: 'info', t: 'Urnas abertas até as 19h: prorrogação oficial', d: `${nf(H0.apos19)} urnas (<b>${pS(H0.apos19)}</b>) fecharam depois das 19h. O ministro Cristiano Zanin (STF) estendeu a votação até as 19h nos locais ainda abertos às 17h. Pelos logs, essas urnas receberam só 4.492 votos depois das 17h (<b>0,24%</b> dos votos delas), e 11 depois das 19h. No país, cerca de 35 mil pessoas votaram depois das 17h (<b>${pC(34911)}</b>); o TSE informou 34.393.`, aba: 'horarios' },
+    { st: 'info', t: 'Biometria: diferença pequena dentro da mesma escola', d: `<b>${pct(T.biom, TC, 2)}</b> de quem votou (${nf(T.biom)} pessoas) foi liberado sem a digital. Comparando seções da mesma escola, a % de cada candidato quase não muda: ${pp(R.biometria.inclinacao.ppPor10)} ponto a cada +10 pontos na taxa. O boletim não diz em quem essas pessoas votaram.`, aba: 'biometria' },
+    { st: 'info', t: 'Seções para conferir no boletim impresso', d: `420 seções (<b>${pS(420)}</b>) destoam muito das vizinhas no mesmo prédio, ${nf(ca.biom_alta)} (<b>${pS(ca.biom_alta)}</b>) liberaram metade ou mais sem digital e 84 (<b>${pS(84)}</b>) abriram depois das 9h. As ${nf(ca.unanime)} unanimidades (<b>${pS(ca.unanime)}</b>) ficam quase todas em aldeias e comunidades rurais.`, aba: 'alertas' },
+    { st: 'info', t: 'Recebimento dos boletins suspenso até as 19h', d: 'Nenhum boletim (<b>0%</b>) aparece recebido entre 17:10 e 19:00. O TSE informou que só retomaria o recebimento e a totalização depois das 19h, por causa da prorrogação. Em 2022, <b>83,7%</b> dos boletins chegaram nesse intervalo.', aba: 'comparar' }
   ];
   const ST = { ok: ['✓', 'Consistente'], atencao: ['!', 'Pede explicação oficial'], info: ['i', 'Contexto'] };
   document.getElementById('aba-geral').innerHTML = `
@@ -115,14 +117,15 @@ export function iniciarAnalises(R, { NOME_A, NOME_B, irPara, mostrarAba }) {
   const H = R.horario;
   document.getElementById('aba-horarios').innerHTML = `
     <h2>Encerramento das urnas</h2>
+    <div id="logs-17h"></div>
     <div class="nota">A votação vai das 8h às 17h <b>de Brasília</b> em todo o país. Quem está na fila às 17h ainda vota, e por isso muitas urnas fecham alguns minutos depois. O boletim grava o horário <b>local</b> da urna, e aqui ele foi convertido para Brasília (AC +2h; AM, RO, RR, MT, MS +1h). Simplificação: o oeste do AM e Fernando de Noronha ficam com o fuso do estado. O horário de encerramento é o da urna, não o de cada voto.</div>
     <div class="cards">
-      <div class="card"><span class="valor">${nf(H.apos17)}</span><span class="rot">após 17:00:00 (Brasília)</span></div>
-      <div class="card"><span class="valor">${nf(H.apos1705)}</span><span class="rot">após 17:05</span></div>
-      <div class="card"><span class="valor">${nf(H.apos1730)}</span><span class="rot">após 17:30</span></div>
-      <div class="card"><span class="valor">${nf(H.apos18)}</span><span class="rot">após 18:00</span></div>
-      <div class="card"><span class="valor">${nf(H.apos19)}</span><span class="rot">após 19:00</span></div>
-      <div class="card"><span class="valor">${nf(H.semHorario)}</span><span class="rot">sem horário (todas no exterior)</span></div>
+      <div class="card"><span class="valor">${pct(H.apos17, T.secoes)}</span><span class="rot">das urnas fecharam após 17:00:00 (${nf(H.apos17)})</span></div>
+      <div class="card"><span class="valor">${pct(H.apos1705, T.secoes)}</span><span class="rot">após 17:05 (${nf(H.apos1705)})</span></div>
+      <div class="card"><span class="valor">${pct(H.apos1730, T.secoes, 2)}</span><span class="rot">após 17:30 (${nf(H.apos1730)})</span></div>
+      <div class="card"><span class="valor">${pct(H.apos18, T.secoes, 2)}</span><span class="rot">após 18:00 (${nf(H.apos18)})</span></div>
+      <div class="card"><span class="valor">${pct(H.apos19, T.secoes, 2)}</span><span class="rot">após 19:00 (${nf(H.apos19)})</span></div>
+      <div class="card"><span class="valor">${pct(H.semHorario, T.secoes, 3)}</span><span class="rot">sem horário (${nf(H.semHorario)}, todas no exterior)</span></div>
     </div>
     <section class="bloco"><h3>Urnas encerradas a cada 5 minutos (Brasília)</h3>
       <p class="muted small">Escala comprimida: quase todas fecham entre 17:00 e 17:05. As barras das pontas juntam tudo antes de 16:30 e depois de 21:00.</p>
@@ -135,6 +138,34 @@ export function iniciarAnalises(R, { NOME_A, NOME_B, irPara, mostrarAba }) {
         ${H.faixas.map(f => `<tr><td>${f.ini === 0 ? 'até 17:05' : hhmm(f.ini) + (f.fim >= 1440 ? ' ou depois' : '–' + hhmm(f.fim))}</td><td class="num">${nf(f.secoes)}</td><td class="num">${nf(f.comp)}</td><td class="num">${pct(f.pctA, 1, 2)}</td><td class="num">${pp(f.ppMun)}</td></tr>`).join('')}
       </tbody></table></div>
     </section>`;
+
+  // Votos depois das 17h pelos logs das urnas (scripts/logs-urna.mjs → logs-resumo.json).
+  carregar('logs-resumo.json').then(L => {
+    const n = L.nacional, s = L.secoes19h, c = s.classes;
+    document.getElementById('logs-17h').innerHTML = `
+      <section class="bloco destaque-bloco"><h3>Quantas pessoas votaram depois das 17h</h3>
+        <p>O boletim só traz a hora em que a urna fechou. O <b>log da urna</b>, publicado pelo TSE, registra a hora de cada voto, mas não em quem. Foram lidos ${nf(L.conferencia?.votosNoLogIgualAoComparecimentoDoBU ?? 16038)} logs, e em todos o número de votos bate com o comparecimento do boletim.</p>
+        <div class="cards">
+          <div class="card"><span class="valor">≈ ${nf(n.votosApos17)}</span><span class="rot">votos depois das 17h no país (± ${nf(n.erroPadraoApos17)}) · <b>${pct(n.votosApos17, T.comp, 2)}</b> de todos os votos · TSE: ${nf(L.tse.votosApos17)}</span></div>
+          <div class="card"><span class="valor">${nf(n.votosApos18)}</span><span class="rot">votos depois das 18h · <b>${pct(n.votosApos18, T.comp, 3)}</b> dos votos · TSE: ${nf(L.tse.entre18e19 + L.tse.apos19)}</span></div>
+          <div class="card"><span class="valor">${nf(n.votosApos19)}</span><span class="rot">votos depois das 19h · <b>${pct(n.votosApos19, T.comp, 5)}</b> dos votos · TSE: ${nf(L.tse.apos19)}</span></div>
+          <div class="card"><span class="valor">≈ ${nf(n.semBiometriaFalhaDigitalApos17)}</span><span class="rot">liberados sem a digital depois das 17h · <b>${pct(n.semBiometriaFalhaDigitalApos17, T.biom, 2)}</b> de todos os liberados sem digital no dia</span></div>
+        </div>
+        <div class="nota"><b>Por que urnas ficaram abertas até as 19h:</b> segundo <a href="${L.prorrogacao.url}" target="_blank" rel="noopener">nota do TSE</a>, o ministro Cristiano Zanin (STF) estendeu a votação até as 19h nos locais que ainda funcionavam às 17h, depois de as duas candidaturas relatarem dificuldade no transporte de eleitores. O TSE suspendeu o recebimento dos boletins até as 19h.</div>
+        <h4 class="sub">O que aconteceu nas ${nf(s.secoes)} urnas que fecharam depois das 19h</h4>
+        <ul class="achados">
+          <li>Último voto típico (mediana): <b>${esc(s.ultimoVotoMediano)}</b>.</li>
+          <li>${nf(c.a_nenhum_voto_depois_das_17h)} (<b>${pct(c.a_nenhum_voto_depois_das_17h, s.secoes)}</b>) não tiveram <b>nenhum</b> voto depois das 17h. ${nf(c.c_1a3_votos_depois_das_17h10)} (<b>${pct(c.c_1a3_votos_depois_das_17h10, s.secoes)}</b>) tiveram de 1 a 3, e só ${nf(c.e_mais_de_10_votos_depois_das_17h10)} (<b>${pct(c.e_mais_de_10_votos_depois_das_17h10, s.secoes, 2)}</b>) tiveram mais de 10 depois das 17h10.</li>
+          <li>${nf(s.pausaDe60minOuMais)} (<b>${pct(s.pausaDe60minOuMais, s.secoes)}</b>) passaram 1 hora ou mais sem nenhum voto antes de encerrar: ficaram ligadas esperando o novo horário.</li>
+          <li>No total: ${nf(s.votosApos17)} votos depois das 17h (<b>${pct(s.votosApos17, s.votos, 2)}</b> dos votos dessas urnas), ${nf(s.votosApos18)} depois das 18h (<b>${pct(s.votosApos18, s.votos, 2)}</b>) e ${nf(s.votosApos19)} depois das 19h.</li>
+          <li>Sem a digital depois das 17h: ${String(s.biometria.apos17).replace('.', ',')}% dos liberados, contra ${String(s.biometria.antes17).replace('.', ',')}% antes das 17h. Nas urnas normais (controle): ${String(L.controle.pctFalhaDigital.apos17).replace('.', ',')}% contra ${String(L.controle.pctFalhaDigital.antes17).replace('.', ',')}%. Não houve aumento depois das 17h.</li>
+        </ul>
+        <div class="tabela-rolagem"><table><thead><tr><th>Zona</th><th class="num">Urnas</th><th class="num">Votos após 17h</th><th class="num">Após 18h</th><th class="num">Após 19h</th><th class="num">Último voto (mediana)</th></tr></thead><tbody>
+          ${s.zonas.map(z => `<tr><td>${sigla(z.uf)} ${esc(z.municipio)} · Z${z.zona}</td><td class="num">${nf(z.secoes)}</td><td class="num">${nf(z.votosApos17)}</td><td class="num">${nf(z.votosApos18)}</td><td class="num">${nf(z.votosApos19)}</td><td class="num">${esc(z.ultimoVotoMediano)}</td></tr>`).join('')}
+        </tbody></table></div>
+        ${fonte('logs')}<p class="fonte">ⓘ Números do TSE: <a href="${L.tse.url}" target="_blank" rel="noopener">levantamento de 27/10/2026</a>. O TSE contou ${nf(L.tse.secoesApos19)} seções encerradas após as 19h; pelo boletim, este painel conta ${nf(H.apos19)} (critério de horário diferente).</p>
+      </section>`;
+  }).catch(() => {});
 
   // ---------- Estados ----------
   const ufs = Object.keys(R.porUf);

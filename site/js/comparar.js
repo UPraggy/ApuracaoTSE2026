@@ -1,5 +1,6 @@
 // Aba "2022 × 2026": resultados de 2014 a 2026 e o fluxo do dia (encerramento e recebimento) lado a lado.
 import { UF_NOME, carregar, nf, pct, pp, hhmm, esc, sigla, titulo, corCss, fonte } from './util.js';
+import { linhaInterativa } from './grafico.js';
 
 const relogio = min => (min >= 1440 ? '+1d ' : '') + hhmm(min % 1440);
 
@@ -37,13 +38,15 @@ export async function iniciarComparar(R, { NOME_A, NOME_B, irPara }) {
   // Recebimento 2026 entre 17:10 e 19:00 a partir da linha do tempo do próprio painel.
   const receb26 = R.apuracao.filter(b => b.min >= 1030 && b.min < 1140).reduce((s, b) => s + Object.values(b.ufs).reduce((q, u) => q + u[0], 0), 0);
   const h22 = F['2022'].horario, h26 = R.horario, r22 = F['2022'].recebimento;
+  // [rótulo, 2022, 2026, [base 2022, base 2026]] → mostrado como % da base (urnas do ano) com o número ao lado.
+  const urnas = [A['2022'].total?.secoes ?? A['2022'].totalBrasil.secoes, R.total.secoes];
   const linhasFluxo = [
-    ['Urnas fechadas depois das 17:05 (fila normal)', h22.apos1705, h26.apos1705],
-    ['Urnas fechadas depois das 17:30', h22.apos1730, h26.apos1730],
-    ['Urnas fechadas depois das 19:00', h22.apos19, h26.apos19],
-    ['Boletins recebidos entre 17:10 e 19:00', r22.entre1710e1900, receb26],
+    ['Urnas fechadas depois das 17:05 (fila normal)', h22.apos1705, h26.apos1705, urnas],
+    ['Urnas fechadas depois das 17:30', h22.apos1730, h26.apos1730, urnas],
+    ['Urnas fechadas depois das 19:00', h22.apos19, h26.apos19, urnas],
+    ['Boletins recebidos entre 17:10 e 19:00', r22.entre1710e1900, receb26, urnas],
     ['Liberados sem a digital (% de quem votou)', F['2022'].biometria.pct + '%', F['2026'].biometria.pct + '%'],
-    ['Seções com algum alerta automático', F['2022'].alertas?.secoesComAlerta ?? '—', R.alertas.secoesComAlerta]
+    ['Seções com algum alerta automático', F['2022'].alertas?.secoesComAlerta ?? '—', R.alertas.secoesComAlerta, urnas]
   ];
   // Zonas que concentraram o fechamento às 19h em 2026: como elas fecharam em 2022.
   const alertas = await carregar('alertas.json');
@@ -75,21 +78,21 @@ export async function iniciarComparar(R, { NOME_A, NOME_B, irPara }) {
     </section>
     <section class="bloco"><h3>O fluxo do dia: 2022 e 2026</h3>
       <div class="tabela-rolagem"><table><thead><tr><th>Indicador</th><th class="num">2022</th><th class="num">2026</th></tr></thead><tbody>
-        ${linhasFluxo.map(([r, a, b]) => `<tr><td>${r}</td><td class="num">${typeof a === 'number' ? nf(a) : esc(a)}</td><td class="num">${typeof b === 'number' ? nf(b) : esc(b)}</td></tr>`).join('')}
+        ${linhasFluxo.map(([r, a, b, base]) => `<tr><td>${r}</td><td class="num">${typeof a === 'number' ? `<b>${pct(a, base?.[0] ?? 1, 2)}</b> <small class="muted">${nf(a)}</small>` : esc(a)}</td><td class="num">${typeof b === 'number' ? `<b>${pct(b, base?.[1] ?? 1, 2)}</b> <small class="muted">${nf(b)}</small>` : esc(b)}</td></tr>`).join('')}
       </tbody></table></div>
-      <div class="nota"><b>O que é diferente em 2026:</b> o fechamento às 19h quase não existia em 2022 (21 urnas). Nas mesmas zonas do RJ e de SP, as urnas fecharam perto das 17h em 2022 e em 2018. Em 2022 o TSE já registrava boletins recebidos entre 17:10 e 19:00 (${nf(r22.entre1710e1900)}); em 2026, nenhum. Os dados mostram <b>que</b> mudou, não <b>por quê</b>. Isso cabe ao TSE e aos TREs explicar, pelos logs e pelas atas.</div>
+      <div class="nota"><b>O que é diferente em 2026, e por quê:</b> o fechamento às 19h quase não existia em 2022 (21 urnas). Nas mesmas zonas do RJ e de SP, as urnas fecharam perto das 17h em 2022 e em 2018. Em 2022 o TSE já registrava boletins recebidos entre 17:10 e 19:00 (${nf(r22.entre1710e1900)}); em 2026, nenhum. A explicação oficial: o ministro Cristiano Zanin (STF) prorrogou a votação até as 19h nos locais ainda abertos às 17h, e o TSE suspendeu o recebimento dos boletins até as 19h (<a href="https://www.tse.jus.br/comunicacao/noticias/2026/Outubro/esclarecimento-sobre-prorrogacao-da-votacao" target="_blank" rel="noopener">nota do TSE</a>). Pelos logs, essas urnas receberam poucos votos depois das 17h (veja a aba Horários).</div>
       <h3>Urnas encerradas por horário (Brasília), mesma escala</h3>
       <div class="grid2 hist2">${histograma(h22.histograma, histMax, '2022', c1)}${histograma(h26.histograma, histMax, '2026', c2)}</div>
       <p class="small muted">Altura em raiz quadrada para os blocos pequenos aparecerem; passe o mouse para ver o número.</p>
       ${fonte('bu')}
     </section>
-    <section class="bloco"><h3>A apuração vista pelo recebimento dos boletins</h3>
-      <div class="legenda-graf"><span><i style="background:${c1}"></i>2022</span><span><i style="background:${c2}"></i>2026</span></div>
-      <h4 class="sub">Seções recebidas ao longo da noite (%)</h4>
-      ${linhas([{ nome: '2022', cor: c1, pts: tempo('2022') }, { nome: '2026', cor: c2, pts: tempo('2026') }], { xmin: 1020, xmax: 1380, ymin: 0, ymax: 100, fx: relogio, fy: v => Math.round(v) + '%', rotulo: 'Seções recebidas por horário' })}
-      <h4 class="sub">% do 13 no total já recebido, conforme a apuração avança</h4>
-      ${linhas([{ nome: '2022', cor: c1, pts: curva('2022') }, { nome: '2026', cor: c2, pts: curva('2026') }], { xmin: 0, xmax: 100, ymin: 38, ymax: 56, fx: v => Math.round(v) + '% recebido', fy: v => v.toFixed(0) + '%', rotulo: 'Percentual do 13 no acumulado' })}
-      <p class="small muted">"Virada" é quando a linha cruza 50%. A ordem de chegada depende de região e horário (o Sudeste costuma chegar antes), e não diz nada sobre os votos.</p>
+    <section class="bloco"><h3>A corrida da apuração, ano a ano</h3>
+      <p class="muted small">% de cada candidato no total já apurado, horário a horário (Brasília), pela ordem em que os boletins chegaram ao TSE. Passe o mouse ou o dedo no gráfico, use as setas do teclado ou toque "Tocar" para ver a apuração andando. Clique no nome de uma linha para escondê-la.</p>
+      <div class="corridas">${['2022', '2026'].filter(a => F[a]?.curva?.pontos?.length).map(a => `<div><h4 class="sub">${a}: ${esc(nomeCand(a, 0))} × ${esc(nomeCand(a, 1))}</h4><div id="corrida-${a}"></div></div>`).join('')}</div>
+      <p class="small muted">A ordem de chegada depende de região e horário (o Sudeste costuma chegar antes), por isso a % muda ao longo da noite e pode haver "virada". Isso não diz nada sobre os votos em si: o resultado final é o mesmo, chegue o boletim antes ou depois. Em 2026 a apuração só começou depois das 19h, por causa da prorrogação. 2014 e 2018 não têm o horário de recebimento nos dados abertos.</p>
+      <h4 class="sub">Boletins recebidos ao longo da noite (% do total de urnas)</h4>
+      <div id="receb-anos"></div>
+      ${fonte('bu')}
     </section>
     ${pico.length ? `<section class="bloco"><h3>Zonas que fecharam às 19h em 2026: como foi em 2022</h3>
       <div class="tabela-rolagem"><table><thead><tr><th>Zona</th><th class="num">Urnas após 19h em 2026</th><th class="num">Após 19h em 2022</th><th class="num">Encerramento mediano 2022</th></tr></thead><tbody>
@@ -102,6 +105,28 @@ export async function iniciarComparar(R, { NOME_A, NOME_B, irPara }) {
       ${fonte('bu')}
     </section>
     <p class="fonte">ⓘ Método e fontes de cada ano: <a href="https://github.com/UPraggy/ApuracaoTSE2026/blob/main/docs/HISTORICO-E-FLUXO.md" target="_blank" rel="noopener">docs/HISTORICO-E-FLUXO.md</a>.</p>`;
+  // Gráficos interativos (grafico.js): corrida de cada ano e recebimento comparado.
+  const cA = corCss('--cor-a'), cB = corCss('--cor-b');
+  for (const ano of ['2022', '2026']) {
+    const alvo = el.querySelector('#corrida-' + ano), pts = F[ano]?.curva?.pontos || [];
+    if (!alvo || !pts.length) continue;
+    const xmin = Math.floor(pts[0].min / 30) * 30, xmax = Math.ceil(pts[pts.length - 1].min / 30) * 30;
+    linhaInterativa(alvo, {
+      series: [
+        { nome: titulo(A[ano].candidatos[0].nome), cor: cA, pts: pts.map(p => [p.min, p.pctA]) },
+        { nome: titulo(A[ano].candidatos[1].nome), cor: cB, pts: pts.map(p => [p.min, 100 - p.pctA]) }
+      ],
+      xmin, xmax, ymin: 35, ymax: 65, referencia: 50, tocar: true, rotulo: `Corrida da apuração em ${ano}`,
+      fx: relogio, fy: v => v.toFixed(2).replace('.', ',') + '%',
+      dica: x => { let k = 0; pts.forEach((p, i) => { if (Math.abs(p.min - x) < Math.abs(pts[k].min - x)) k = i; }); return `${pts[k].pctSecoes.toFixed(1).replace('.', ',')}% das urnas apuradas`; }
+    });
+  }
+  const recebAlvo = el.querySelector('#receb-anos');
+  if (recebAlvo) linhaInterativa(recebAlvo, {
+    series: [{ nome: '2022', cor: c1, pts: tempo('2022') }, { nome: '2026', cor: c2, pts: tempo('2026') }],
+    xmin: 1020, xmax: 1380, ymin: 0, ymax: 100, tocar: true, rotulo: 'Boletins recebidos por horário',
+    fx: relogio, fy: v => v.toFixed(1).replace('.', ',') + '%'
+  });
   el.addEventListener('click', e => { const tr = e.target.closest('tr[data-uf]'); if (tr) irPara({ tipo: 'uf', uf: tr.dataset.uf }); });
   void UF_NOME; void NOME_A; void NOME_B;
 }

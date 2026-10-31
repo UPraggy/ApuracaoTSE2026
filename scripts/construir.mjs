@@ -286,8 +286,9 @@ for (const s of todas) {
   const dia = m[1] === '2026-10-25' ? 0 : 1;
   const min = Math.floor((dia * 1440 + +m[2] * 60 + +m[3]) / 5) * 5;
   let b = blocosApur.get(min); if (!b) blocosApur.set(min, b = {});
-  const u = b[s.uf] || (b[s.uf] = [0, 0, 0]);
-  u[0]++; u[1] += s.a; u[2] += s.b;
+  // [secoes, a, b, aptos, comp, biom, branco, nulo, secoesComAlerta, fecharamApos1705, fecharamApos19]
+  const u = b[s.uf] || (b[s.uf] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+  u[0]++; u[1] += s.a; u[2] += s.b; u[3] += s.aptos || 0; u[4] += s.comp || 0; u[5] += s.biom || 0; u[6] += s.branco; u[7] += s.nulo; u[8] += s.alertas.length ? 1 : 0; u[9] += s.q1705; u[10] += s.q19;
 }
 const apuracao = [...blocosApur.entries()].sort((a, b) => a[0] - b[0]).map(([min, ufsB]) => ({ min, ufs: ufsB }));
 

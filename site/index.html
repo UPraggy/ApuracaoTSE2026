@@ -2,13 +2,15 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0d0d0d">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Apuração TSE 2026</title>
 <meta name="description" content="Mapa e análise dos boletins de urna do 2º turno de 2026 (Presidente): resultado por estado, município, zona, bairro e local de votação, biometria, horários e alertas automáticos. Dados abertos do TSE e malhas do IBGE.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M8 17l5 5 11-12' stroke='white' stroke-width='3.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="estilo.css">
-<script>try { const t = localStorage.getItem('tema'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<script>/* escuro por padrão; o botão de tema guarda a escolha */ document.documentElement.dataset.theme = 'dark'; try { const t = localStorage.getItem('tema'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -78,10 +80,16 @@
       <div id="mapa" aria-label="Mapa do Brasil colorido pelo indicador escolhido. Clique numa área para abrir."></div>
       <div id="resumo-mapa" class="resumo-mapa" aria-live="polite"></div>
       <div id="legenda" class="legenda"></div>
+      <div class="apuracao dia">
+        <button id="play-dia" class="botao" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-relogio"/></svg>Simular o dia</button>
+        <input id="tempo-dia" type="range" min="0" max="51" value="0" aria-label="Horário do dia da votação">
+        <p id="dia-rotulo" class="small">Das 8h às 17h: quanto do eleitorado de cada estado já tinha votado, hora a hora.</p>
+        <p class="fonte">ⓘ Fonte: logs das urnas (TSE), amostra de 16 mil urnas calibrada pelo comparecimento do boletim. O log registra a hora do voto, não o candidato.</p>
+      </div>
       <div class="apuracao">
         <button id="play" class="botao primario" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg>Reproduzir apuração</button>
         <input id="tempo" type="range" min="0" value="0" aria-label="Momento da apuração">
-        <p id="tempo-rotulo" class="small">Arraste para ver o mapa em qualquer momento da apuração.</p>
+        <p id="tempo-rotulo" class="small">Arraste para ver o mapa em qualquer momento da apuração. Troque a cor do mapa para acompanhar biometria, comparecimento ou brancos e nulos.</p>
       </div>
     </div>
     <aside id="painel" class="painel" aria-live="polite"></aside>
