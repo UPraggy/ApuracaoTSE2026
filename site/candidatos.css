@@ -42,10 +42,11 @@
 .cand-col-regua { width: 34%; min-width: 180px; }
 .cand-regua { position: relative; height: 22px; outline: none; cursor: default; }
 .cand-trilho { position: absolute; left: 0; right: 0; top: 10px; height: 2px; border-radius: 2px; background: var(--linha); }
-.cand-liga { position: absolute; top: 9px; height: 4px; left: 50%; width: 0; border-radius: 2px; background: linear-gradient(90deg, color-mix(in srgb, var(--cor-a) 55%, transparent), color-mix(in srgb, var(--cor-b) 55%, transparent)); transition: left .8s cubic-bezier(.2,.8,.2,1), width .8s cubic-bezier(.2,.8,.2,1); }
+.cand-liga { position: absolute; top: 9px; height: 4px; left: 50%; width: 0; border-radius: 2px; background: color-mix(in srgb, var(--muted) 55%, transparent); transition: left .8s cubic-bezier(.2,.8,.2,1), width .8s cubic-bezier(.2,.8,.2,1); }
 .cand-ponto, .cand-vot, .cand-pop { position: absolute; top: 11px; left: 50%; transform: translate(-50%, -50%); transition: left .8s cubic-bezier(.2,.8,.2,1); }
 .cand-ponto { width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--superficie); z-index: 2; }
 .cand-ponto.a { background: var(--cor-a); } .cand-ponto.b { background: var(--cor-b); }
+.cand-centro { position: absolute; left: 50%; top: 3px; width: 1px; height: 16px; background: var(--muted); opacity: .6; }
 .cand-vot { width: 3px; height: 16px; border-radius: 2px; background: var(--tinta-2); z-index: 1; }
 .cand-pop { width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--cand-pop); background: transparent; }
 .cand-pronto .cand-ponto, .cand-pronto .cand-vot, .cand-pronto .cand-pop { left: var(--x); }
@@ -84,3 +85,12 @@
   .cand-liga { left: var(--de); width: calc(var(--ate) - var(--de)); }
   .cand-pilha-barra span { width: var(--w); }
 }
+
+.cand-concls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.cand-concl { border: 1px solid var(--linha); border-top: 4px solid var(--cor-a); border-radius: 12px; padding: 12px 14px; background: var(--superficie-2); animation: sobe .45s ease both; }
+.cand-concl.b { border-top-color: var(--cor-b); animation-delay: .08s; }
+.cand-concl-topo { display: flex; align-items: center; gap: 8px; font-size: 17px; }
+.cand-concl ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14px; }
+.cand-concl p { margin: 6px 0 0; }
+@media (max-width: 760px) { .cand-concls { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .cand-concl { animation: none; } }
