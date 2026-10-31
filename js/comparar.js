@@ -1,5 +1,5 @@
 // Aba "2022 × 2026": resultados de 2014 a 2026 e o fluxo do dia (encerramento e recebimento) lado a lado.
-import { UF_NOME, carregar, nf, pct, pp, hhmm, esc, sigla, titulo, corCss, fonte } from './util.js?v=551bd26ea6';
+import { UF_NOME, carregar, nf, pct, pp, hhmm, esc, sigla, titulo, corCss, fonte } from './util.js?v=29dda3fef3';
 import { linhaInterativa } from './grafico.js?v=acd9d5313e';
 
 // Número com vírgula e 2 casas (os JSON do histórico vêm com ponto).

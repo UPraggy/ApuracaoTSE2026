@@ -1,5 +1,5 @@
 // Perguntas comuns em formato de conversa. Não usa IA: a busca procura as palavras nas perguntas prontas.
-import { nf, pct, esc, norm } from './util.js?v=551bd26ea6';
+import { nf, pct, esc, norm } from './util.js?v=29dda3fef3';
 
 export function iniciarFaq(R, { NOME_A, NOME_B }) {
   const T = R.total, H = R.horario;
