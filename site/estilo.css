@@ -385,3 +385,6 @@ body[data-aba="inicio"] .faq, body[data-aba="sobre"] .faq { display: block; }
 }
 
 .verif .chance { font-size: 13px; color: var(--tinta-2); border-left: 2px solid var(--linha); padding-left: 8px; margin-top: 4px; }
+
+.filtros label { min-width: 0; max-width: 100%; }
+.filtros select { width: 100%; max-width: 100%; }

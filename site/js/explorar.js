@@ -239,7 +239,7 @@ export async function iniciarExplorar(R, { NOME_A, irPara }) {
     else {
       const ord = comX.slice().sort((a, b) => b.x - a.x), mw = media(comX, p => p.x), ms = comX.reduce((s, p) => s + p.x, 0) / comX.length;
       const hi = ord[0], lo = ord[ord.length - 1];
-      msgs.push(`<b>${esc(dx.nome)}</b> em ${comX.length} ${rotNivel} (${esc(recorte)}): média de <b>${fmt(mw, dx.u)}</b> pesando pelo eleitorado${Math.abs(mw - ms) > 1e-9 ? ` (${fmt(ms, dx.u)} na média simples, em que cada ${nivel === 'uf' ? 'estado' : 'município'} conta igual)` : ''}. O maior valor é de <b>${esc(nomeDe(hi))}</b> (${fmt(hi.x, dx.u)}) e o menor de <b>${esc(nomeDe(lo))}</b> (${fmt(lo.x, dx.u)}), uma distância de ${dif(hi.x - lo.x, dx.u)}.`);
+      msgs.push(`<b>${esc(dx.nome)}</b> em ${comX.length} ${rotNivel} (${esc(recorte)}): média de <b>${fmt(mw, dx.u)}</b> pesando pelo eleitorado${Math.abs(mw - ms) > 1e-9 ? ` (${fmt(ms, dx.u)} na média simples, em que cada ${nivel === 'uf' ? 'estado' : 'município'} conta igual)` : ''}. O maior valor: <b>${esc(nomeDe(hi))}</b> (${fmt(hi.x, dx.u)}) e o menor de <b>${esc(nomeDe(lo))}</b> (${fmt(lo.x, dx.u)}), uma distância de ${dif(hi.x - lo.x, dx.u)}.`);
       if (!selReg.value) {
         const regs = Object.keys(R.regioes).map(r => ({ r, v: media(comX.filter(p => p.e.reg === r), p => p.x) })).filter(o => o.v != null).sort((a, b) => b.v - a.v);
         if (regs.length > 1) msgs.push(`Por região (média ponderada): ${regs.map(o => `${REGIAO_NOME[o.r]} ${fmt(o.v, dx.u)}`).join(' · ')}.`);

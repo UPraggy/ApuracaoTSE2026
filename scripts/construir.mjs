@@ -136,7 +136,7 @@ for (const s of todas) {
   s.q17 = s.fechaBsb != null && s.fechaBsb > 17 * 60 ? 1 : 0;
   s.q1705 = s.fechaBsb != null && s.fechaBsb > 17 * 60 + 5 ? 1 : 0;
   s.q1730 = s.fechaBsb != null && s.fechaBsb > 17 * 60 + 30 ? 1 : 0;
-  s.q19 = s.fechaBsb != null && s.fechaBsb > 19 * 60 ? 1 : 0;
+  s.q19 = s.fechaBsb != null && s.fechaBsb >= 19 * 60 ? 1 : 0; // a partir de 19:00, mesmo critério do alerta e dos logs
   s.ibge = tseIbge.get(s.uf + '|' + s.mun) ?? IBGE_POR_NOME[s.uf + '|' + s.munNome] ?? null;
   s.chaveLocal = s.uf + '|' + s.mun + '|' + s.zona + '|' + s.local;
 }
@@ -269,7 +269,7 @@ for (const s of todas) {
   if (t > 17 * 60 + 5) horario.apos1705++;
   if (t > 17 * 60 + 30) horario.apos1730++;
   if (t > 18 * 60) horario.apos18++;
-  if (t > 19 * 60) horario.apos19++;
+  if (t >= 19 * 60) horario.apos19++;
   const blk = Math.floor(Math.min(Math.max(t, 16 * 60 + 30), 21 * 60) / 5) * 5;
   const h = hist.get(blk) || { secoes: 0, a: 0, val: 0 }; h.secoes++; h.a += s.a; h.val += s.val; hist.set(blk, h);
   const f = faixaHora.find(x => t >= x.ini && t < x.fim);
