@@ -1,9 +1,10 @@
 // Publica a pasta site/ no GitHub Pages (raiz do branch gh-pages, com .nojekyll), no mesmo esquema do Planta fácil.
-// Uso:  npm run deploy            (usa o remote "origin")
-//       node scripts/deploy.mjs --remote git@github.com:UPraggy/ApuracaoTSE2026.git [--dry]
+// Uso:  npm run deploy            (usa o remote "origin" e o domínio de deploy.config.json)
+//       node scripts/deploy.mjs --remote git@github.com:UPraggy/ApuracaoTSE2026.git [--cname x.rafaelmr.com.br] [--dry]
+// Sem cname o arquivo CNAME some do gh-pages e o GitHub desliga o domínio próprio.
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { cpSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -21,12 +22,15 @@ for (let k = 2; k < process.argv.length; k++) {
 const falhar = msg => { console.error('\n✖ ' + msg); process.exit(1); };
 const git = (a, cwd = DIR, captura = false) => execFileSync('git', a, { cwd, stdio: captura ? 'pipe' : 'inherit', encoding: 'utf8' });
 
-let remote = args.remote;
+const cfgArq = join(RAIZ, 'deploy.config.json');
+const cfg = existsSync(cfgArq) ? JSON.parse(readFileSync(cfgArq, 'utf8')) : {};
+const cname = String(args.cname ?? cfg.cname ?? '').trim();
+let remote = args.remote || cfg.remote;
 if (!remote) { try { remote = git(['remote', 'get-url', 'origin'], RAIZ, true).trim(); } catch (e) { /* sem origin */ } }
 if (!remote) falhar('Diga para qual repositório publicar: --remote git@github.com:UPraggy/NOME.git');
 const m = remote.match(/[:/]([^/:]+)\/([^/]+?)(\.git)?$/);
 if (!m) falhar('Não entendi o endereço do repositório: ' + remote);
-const url = `https://${m[1].toLowerCase()}.github.io/${m[2]}/`;
+const url = cname ? `https://${cname}/` : `https://${m[1].toLowerCase()}.github.io/${m[2]}/`;
 
 console.log(`→ publicando site/ em ${remote} (${BRANCH})`);
 rmSync(DIR, { recursive: true, force: true });
@@ -50,6 +54,8 @@ for (const n of js) {
 const idx = join(DIR, 'index.html');
 writeFileSync(idx, readFileSync(idx, 'utf8').replace(/(src|href)="((?:js\/[\w-]+\.js)|estilo\.css)"/g, (_, attr, arq) => `${attr}="${arq}?v=${hash(arq)}"`));
 writeFileSync(join(DIR, '.nojekyll'), '');
+if (cname) writeFileSync(join(DIR, 'CNAME'), cname + '
+');
 
 git(['add', '-A']);
 if (!git(['status', '--porcelain'], DIR, true).trim()) { console.log('✓ Nada mudou desde a última publicação.'); process.exit(0); }
