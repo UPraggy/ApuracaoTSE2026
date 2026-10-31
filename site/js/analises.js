@@ -144,6 +144,17 @@ export function iniciarAnalises(R, { NOME_A, NOME_B, irPara }) {
   abaA.innerHTML = `
     <h2>Alertas automáticos</h2>
     <div class="nota">São verificações mecânicas para separar seções que vale a pena olhar de perto. <b>Alerta não é prova de irregularidade.</b> Unanimidade em aldeia ou comunidade pequena, fila longa em cidade grande e seção com muitos idosos (mais falha de digital) têm explicações comuns. As quatro primeiras verificações são de consistência aritmética, e as quatro deram zero.</div>
+    <section class="bloco"><h3>O que a investigação encontrou</h3>
+      <ul class="achados">
+        <li><b>Segundo horário de fechamento às 19h.</b> 489.726 urnas fecharam entre 17:00 e 17:30. Depois quase nada até 18:55, e então 6.311 fecharam entre 19:00 e 19:15, com o mesmo desenho minuto a minuto das 17h. Isso parece um horário programado, não fila. Estão concentradas em RJ (2.805), SP (1.571), BA (936), PE (657) e PB (275), e em algumas zonas quase todas as urnas fecharam assim (Rio Z122 98%, Z238 93%, Salvador Z5 87%). A abertura foi normal, às 8h. Nos 716 locais que têm urnas das duas turmas, o resultado das urnas das 19h difere das vizinhas em só −0,26 ponto. <b>É a principal pergunta para o TSE/TRE:</b> log da urna (hora do último voto) e atas dessas seções.</li>
+        <li><b>Nenhum boletim aparece recebido entre 17:10 e 19:00.</b> O campo <code>DT_BU_RECEBIDO</code> parece marcar o processamento no sistema, não a chegada real. Não informa nada sobre os votos.</li>
+        <li><b>Consistência aritmética zerada:</b> 0 seções duplicadas, 0 com comparecimento maior que aptos, 0 com votos que não fecham, 0 boletins emitidos antes do encerramento.</li>
+        <li><b>Distribuição natural:</b> o teste do último dígito dá uniforme (p = 0,88 e 0,23), a % por seção tem um pico só e os resultados idênticos no mesmo local estão dentro do acaso.</li>
+        <li><b>Para conferir no boletim impresso:</b> 420 seções muito diferentes das vizinhas do mesmo prédio (ex.: MA Açailândia Z71 S468, 36,6% contra 74–84% nas vizinhas), 96 seções com metade ou mais liberada sem digital (PR Tomazina Z19 S55, 225 de 227) e 84 aberturas depois das 9h (MG Itajubá Z134 S295, às 13h08).</li>
+        <li><b>Unanimidades</b> (91) e seções com comparecimento ≥ 95% e ≥ 90% para um lado (97) ficam quase todas em aldeias e comunidades rurais que votam em bloco.</li>
+      </ul>
+      <p class="small muted">Relatório completo com tabelas e exemplos: <code>docs/ANALISE-INCONSISTENCIAS.md</code> no repositório (gerado por <code>scripts/investigar.mjs</code>). Nada disso, sozinho, demonstra fraude.</p>
+    </section>
     <div class="cards alertas-cards">${Object.entries(tipos).map(([k, t]) => `<button class="card filtro-alerta" data-tipo="${k}" aria-pressed="false"><span class="valor ${cont[k] ? '' : 'ok'}">${nf(cont[k])}</span><span class="rot">${esc(t)}</span></button>`).join('')}</div>
     <div class="filtros"><label>Estado <select id="al-uf"><option value="">Todos</option>${ufs.map(u => `<option value="${u}" title="${esc(UF_NOME[u])}">${u === 'ZZ' ? 'Exterior (ZZ)' : u + ' — ' + UF_NOME[u]}</option>`).join('')}</select></label>
     <label>Tipo <select id="al-tipo"><option value="">Todos</option>${Object.entries(tipos).map(([k, t]) => `<option value="${k}">${esc(t)}</option>`).join('')}</select></label>
