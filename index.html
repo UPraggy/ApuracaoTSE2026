@@ -7,10 +7,36 @@
 <meta name="description" content="Mapa e análise dos boletins de urna do 2º turno de 2026 (Presidente): resultado por estado, município, zona, bairro e local de votação, biometria, horários e alertas automáticos. Dados abertos do TSE e malhas do IBGE.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M8 17l5 5 11-12' stroke='white' stroke-width='3.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<link rel="stylesheet" href="estilo.css?v=13b1569b91">
+<link rel="stylesheet" href="estilo.css?v=ad723d19e1">
 <script>try { const t = localStorage.getItem('tema'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-mapa" viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Z M9 4v14 M15 6v14"/></symbol>
+    <symbol id="i-analise" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></symbol>
+    <symbol id="i-comparar" viewBox="0 0 24 24"><path d="M4 20V10 M10 20V4 M16 20v-7 M22 20H2"/></symbol>
+    <symbol id="i-digital" viewBox="0 0 24 24"><path d="M6.5 18c1-2 1.5-4 1.5-6a4 4 0 0 1 8 0c0 3-.5 5.5-1.5 8 M12 12c0 3-.5 6-2 8.5 M4.5 14.5C4.2 13.7 4 12.9 4 12a8 8 0 0 1 16 0c0 1.2-.1 2.4-.3 3.5 M9.5 21c.8-1.4 1.3-3 1.5-4.5"/></symbol>
+    <symbol id="i-relogio" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-bandeira" viewBox="0 0 24 24"><path d="M5 21V4 M5 4h11l-2 4 2 4H5"/></symbol>
+    <symbol id="i-alerta" viewBox="0 0 24 24"><path d="M12 3 2 20h20L12 3Z M12 10v4 M12 17h.01"/></symbol>
+    <symbol id="i-livro" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5Z M4 19a2 2 0 0 1 2-2h13"/></symbol>
+    <symbol id="i-busca" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+    <symbol id="i-pino" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+    <symbol id="i-mira" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3 M12 19v3 M2 12h3 M19 12h3"/></symbol>
+    <symbol id="i-casa" viewBox="0 0 24 24"><path d="m3 11 9-7 9 7 M5 10v10h14V10 M10 20v-6h4v6"/></symbol>
+    <symbol id="i-globo" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18 M12 3c2.5 2.5 3.5 5.5 3.5 9s-1 6.5-3.5 9c-2.5-2.5-3.5-5.5-3.5-9s1-6.5 3.5-9Z"/></symbol>
+    <symbol id="i-cidade" viewBox="0 0 24 24"><path d="M3 21h18 M5 21V9l5-3v15 M10 21V4l9 4v13 M13 10h3 M13 14h3 M13 18h3"/></symbol>
+    <symbol id="i-camadas" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Z M3 13l9 5 9-5"/></symbol>
+    <symbol id="i-escola" viewBox="0 0 24 24"><path d="m2 9 10-5 10 5-10 5L2 9Z M6 11v5c3 2 9 2 12 0v-5 M22 9v6"/></symbol>
+    <symbol id="i-urna" viewBox="0 0 24 24"><path d="M4 11h16v9H4z M8 11V4h8v7 M10 7h4 M4 15h16"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4v16l13-8L7 4Z"/></symbol>
+    <symbol id="i-pausa" viewBox="0 0 24 24"><path d="M7 4h4v16H7z M14 4h4v16h-4z"/></symbol>
+    <symbol id="i-tema" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18Z" fill="currentColor"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1 M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4V5Z M8 9h8 M8 12h5"/></symbol>
+  </defs>
+</svg>
 <header class="topo">
   <div class="topo-linha">
     <div>
@@ -18,22 +44,23 @@
       <h1>Apuração 2026</h1>
     </div>
     <div class="topo-acoes">
-      <div class="busca-box" role="combobox" aria-expanded="false" aria-owns="sugestoes" aria-haspopup="listbox">
-        <input id="busca" type="search" autocomplete="off" placeholder="Estado, cidade, região, bairro, zona ou escola…" aria-label="Buscar estado, cidade, região, bairro, zona eleitoral ou local de votação" aria-autocomplete="list" aria-controls="sugestoes">
+      <div class="busca-box" role="combobox" aria-expanded="false" aria-owns="sugestoes" aria-haspopup="listbox"><svg class="ic busca-ic" aria-hidden="true"><use href="#i-busca"/></svg>
+        <input id="busca" type="search" autocomplete="off" placeholder="Cidade, bairro, escola, endereço ou “zona 5 seção 120 SP”" aria-label="Buscar estado, cidade, região, bairro, zona eleitoral ou local de votação" aria-autocomplete="list" aria-controls="sugestoes">
         <ul id="sugestoes" role="listbox" hidden></ul>
       </div>
-      <button id="tema" class="botao icone" title="Trocar tema claro/escuro" aria-label="Trocar tema claro/escuro">◐</button>
+      <button id="tema" class="botao icone" title="Trocar tema claro/escuro" aria-label="Trocar tema claro/escuro"><svg class="ic" aria-hidden="true"><use href="#i-tema"/></svg></button>
     </div>
   </div>
   <nav class="abas" role="tablist" aria-label="Seções do painel">
-    <button role="tab" data-aba="mapa" aria-selected="true">Mapa</button>
-    <button role="tab" data-aba="geral" aria-selected="false">Análise</button>
-    <button role="tab" data-aba="comparar" aria-selected="false">2022 × 2026</button>
-    <button role="tab" data-aba="biometria" aria-selected="false">Biometria</button>
-    <button role="tab" data-aba="horarios" aria-selected="false">Horários</button>
-    <button role="tab" data-aba="estados" aria-selected="false">Estados</button>
-    <button role="tab" data-aba="alertas" aria-selected="false">Alertas</button>
-    <button role="tab" data-aba="sobre" aria-selected="false">Método e fontes</button>
+    <button role="tab" data-aba="mapa" aria-selected="true"><svg class="ic" aria-hidden="true"><use href="#i-mapa"/></svg>Mapa</button>
+    <button role="tab" data-aba="geral" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-analise"/></svg>Análise</button>
+    <button role="tab" data-aba="comparar" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-comparar"/></svg>2022 × 2026</button>
+    <button role="tab" data-aba="biometria" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-digital"/></svg>Biometria</button>
+    <button role="tab" data-aba="horarios" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-relogio"/></svg>Horários</button>
+    <button role="tab" data-aba="estados" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-bandeira"/></svg>Estados</button>
+    <button role="tab" data-aba="alertas" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-alerta"/></svg>Alertas</button>
+    <button role="tab" data-aba="sobre" aria-selected="false"><svg class="ic" aria-hidden="true"><use href="#i-livro"/></svg>Método e fontes</button>
+    <a class="aba-link" href="#faq"><svg class="ic" aria-hidden="true"><use href="#i-chat"/></svg>Perguntas</a>
   </nav>
 </header>
 
@@ -44,15 +71,15 @@
         <label>Cor <select id="metrica"></select></label>
         <label title="Na vista do Brasil, pintar por estado ou por município">Nível <select id="nivel"><option value="uf">Estados</option><option value="mun">Municípios</option></select></label>
         <label class="check" title="Mostra as ruas (OpenStreetMap/CARTO) quando você aproxima numa cidade, para achar as escolas"><input type="checkbox" id="ruas" checked> Ruas ao aproximar</label>
-        <button id="btn-perto" class="botao" title="Usa a localização do aparelho para mostrar as escolas de votação mais próximas e a zona eleitoral">📍 Perto de mim</button>
-        <button id="btn-brasil" class="botao">Brasil</button>
-        <button id="btn-exterior" class="botao" title="ZZ é o código do TSE para seções fora do Brasil">Exterior (ZZ)</button>
+        <button id="btn-perto" class="botao" title="Usa a localização do aparelho para mostrar as escolas de votação mais próximas e a zona eleitoral"><svg class="ic" aria-hidden="true"><use href="#i-mira"/></svg>Perto de mim</button>
+        <button id="btn-brasil" class="botao"><svg class="ic" aria-hidden="true"><use href="#i-casa"/></svg>Brasil</button>
+        <button id="btn-exterior" class="botao" title="ZZ é o código do TSE para seções fora do Brasil"><svg class="ic" aria-hidden="true"><use href="#i-globo"/></svg>Exterior (ZZ)</button>
       </div>
       <div id="mapa" aria-label="Mapa do Brasil colorido pelo indicador escolhido. Clique numa área para abrir."></div>
       <div id="resumo-mapa" class="resumo-mapa" aria-live="polite"></div>
       <div id="legenda" class="legenda"></div>
       <div class="apuracao">
-        <button id="play" class="botao primario" aria-pressed="false">▶ Reproduzir apuração</button>
+        <button id="play" class="botao primario" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg>Reproduzir apuração</button>
         <input id="tempo" type="range" min="0" value="0" aria-label="Momento da apuração">
         <p id="tempo-rotulo" class="small">Arraste para ver o mapa em qualquer momento da apuração.</p>
       </div>
@@ -117,6 +144,6 @@
 <footer class="rodape small">Dados públicos do TSE e do IBGE. Painel independente, sem vínculo com a Justiça Eleitoral.</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script type="module" src="js/app.js?v=306457b566"></script>
+<script type="module" src="js/app.js?v=b10037dde1"></script>
 </body>
 </html>

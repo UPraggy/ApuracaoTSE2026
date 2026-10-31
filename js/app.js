@@ -1,6 +1,6 @@
 // Painel da apuração: mapa de cor (UF → município → local de votação), busca e painel de detalhes.
-import { UF_NOME, REGIAO_NOME, carregar, nf, pct, pp, esc, norm, titulo, sigla, vazio, somar, corVantagem, CLASSES_VANTAGEM, classesQuantis, corSequencial, corCss } from './util.js?v=41da015051';
-import { iniciarAnalises } from './analises.js?v=26e6396c91';
+import { UF_NOME, REGIAO_NOME, carregar, nf, pct, pp, hhmm, esc, norm, titulo, sigla, vazio, somar, corVantagem, CLASSES_VANTAGEM, classesQuantis, corSequencial, corCss } from './util.js?v=5bd908cf8b';
+import { iniciarAnalises } from './analises.js?v=9aa3b4c2d2';
 import { animarNumeros } from './anim.js?v=19eef1076c';
 import { iniciarFaq } from './faq.js?v=34f0f37c46';
 import { iniciarComparar } from './comparar.js?v=34f66a9946';
@@ -23,6 +23,7 @@ const nomeMun = ibge => munPorIbge.get(ibge)?.[2] ?? '';
 const ufsDaRegiao = id => R.regioes[id];
 const regiaoDaUf = uf => Object.keys(R.regioes).find(k => R.regioes[k].includes(uf));
 const locaisDaUf = uf => carregar('locais/' + uf + '.json');
+const secoesDaUf = uf => carregar('secoes/' + uf + '.json');
 
 // ---------- Métricas do mapa ----------
 const METRICAS = {
@@ -140,6 +141,7 @@ async function paiDe(sel) {
     case 'municipio': return { tipo: 'uf', uf: sel.ibge ? munPorIbge.get(sel.ibge)[1] : 'ZZ' };
     case 'zona': case 'bairro': return sel.ibge ? { tipo: 'municipio', ibge: sel.ibge } : { tipo: 'uf', uf: sel.uf };
     case 'endereco': return { tipo: 'brasil' };
+    case 'secao': return { tipo: 'zona', uf: sel.uf, zona: sel.zona };
     case 'local': { const l = (await locaisDaUf(sel.uf))[sel.id]; return l[1] ? { tipo: 'municipio', ibge: l[1] } : { tipo: 'municipio', uf: 'ZZ', tse: l[19] }; }
     default: return { tipo: 'brasil' };
   }
@@ -169,11 +171,23 @@ new ControleBrasil().addTo(mapa);
 const btnSubir = ctlSubir.getContainer();
 
 // Resumo sob o mapa (útil no celular, onde o painel fica lá embaixo).
+// Ícones (sprite no index.html).
+const icone = nome => `<svg class="ic" aria-hidden="true"><use href="#i-${nome}"/></svg>`;
+// Aviso curto no canto da tela.
+function avisar(txt) {
+  let t = document.getElementById('toast');
+  if (!t) { t = document.createElement('div'); t.id = 'toast'; t.setAttribute('role', 'status'); document.body.append(t); }
+  t.textContent = txt; t.classList.remove('ver'); void t.offsetWidth; t.classList.add('ver');
+}
+async function copiarLink() {
+  try { await navigator.clipboard.writeText(location.href); avisar('Link copiado'); } catch (e) { avisar('Copie o endereço da barra do navegador'); }
+}
 function atualizarResumo(sel) {
   const el = document.getElementById('resumo-mapa');
   const h2 = document.querySelector('#painel h2'), barra = document.querySelector('#painel .placar-nomes');
   if (!el || !h2) return;
-  el.innerHTML = `<div class="resumo-nome">${h2.innerHTML}</div><div class="resumo-placar">${barra ? barra.innerHTML : ''}</div><button class="botao" id="ir-painel">Detalhes ↓</button>`;
+  const nomeLimpo = h2.cloneNode(true); nomeLimpo.querySelector('.compartilhar')?.remove();
+  el.innerHTML = `<div class="resumo-nome">${nomeLimpo.innerHTML}</div><div class="resumo-placar">${barra ? barra.innerHTML : ''}</div><button class="botao" id="ir-painel">Detalhes ↓</button>`;
   el.querySelector('#ir-painel').onclick = () => document.getElementById('painel').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
 }
 
@@ -277,9 +291,16 @@ async function selecionar(sel, { semHash = false } = {}) {
   // pushState: o botão Voltar do navegador/celular volta para o recorte anterior.
   if (!semHash && location.hash.slice(1) !== hashDe(sel)) history.pushState(null, '', '#' + hashDe(sel));
   const p = document.getElementById('painel');
-  p.innerHTML = '<p class="muted">Carregando…</p>';
+  p.innerHTML = '<div class="esqueleto" aria-label="Carregando"><i></i><i></i><i></i><i></i><i></i></div>';
   btnSubir.style.visibility = sel.tipo === 'brasil' ? 'hidden' : 'visible';
-  try { await (ROTAS[sel.tipo] || ROTAS.brasil)(sel, p); atualizarResumo(sel); animarNumeros(p); }
+  try {
+    await (ROTAS[sel.tipo] || ROTAS.brasil)(sel, p);
+    // Botão de compartilhar ao lado do título de qualquer recorte.
+    const h2 = p.querySelector('h2');
+    if (h2) { const b = document.createElement('button'); b.className = 'botao icone mini compartilhar'; b.title = 'Copiar link deste recorte'; b.setAttribute('aria-label', 'Copiar link deste recorte'); b.innerHTML = icone('link'); b.onclick = copiarLink; h2.append(b); }
+    atualizarResumo(sel); animarNumeros(p);
+    if (navigator.vibrate && matchMedia('(pointer: coarse)').matches) navigator.vibrate(8);
+  }
   catch (e) { p.innerHTML = `<p class="erro">Não consegui abrir este recorte: ${esc(e.message)}</p>`; console.error(e); }
   document.querySelectorAll('.migalha [data-ir]').forEach(b => b.onclick = () => selecionar(JSON.parse(b.dataset.ir)));
 }
@@ -465,7 +486,46 @@ const ROTAS = {
     const box = document.createElement('section'); box.className = 'lista';
     box.innerHTML = `<h3>Alertas nas seções deste local <small>(${alertas.length})</small></h3>` + (alertas.length ? `<ul class="alertas">${alertas.map(a => `<li><b>Seção ${a[4]}</b>: ${a[14].split(',').map(t => esc(tipos[t])).join('; ')} <span class="muted">(${nf(a[7])} votantes · ${esc(NOME_A)} ${nf(a[9])} × ${esc(NOME_B)} ${nf(a[10])})</span></li>`).join('')}</ul>` : '<p class="muted">Nenhum alerta automático nas seções deste local.</p>');
     p.append(box);
+    const secs = (await secoesDaUf(sel.uf)).filter(s => s[2] === l[0]);
+    tabela(p, 'Seções (urnas) deste local', [
+      { t: 'Seção', num: true, v: s => s[1], f: s => `<b>${s[1]}</b>` },
+      { t: 'Aptos', num: true, v: s => s[3], f: s => nf(s[3]) },
+      { t: 'Votaram', num: true, v: s => s[4], f: s => nf(s[4]) },
+      { t: esc(NOME_A), num: true, v: s => s[7], f: s => nf(s[7]) },
+      { t: esc(NOME_B), num: true, v: s => s[8], f: s => nf(s[8]) },
+      { t: 'Sem hab. biom.', num: true, v: s => s[6], f: s => nf(s[6]) },
+      { t: 'Fechou (Brasília)', num: true, v: s => s[13], f: s => s[13] == null ? '—' : hhmm(s[13]) },
+      { t: 'Alertas', v: s => s[17], f: s => s[17] ? '<span class="chip-alerta">!</span>' : '' }
+    ], secs, s => selecionar({ tipo: 'secao', uf: sel.uf, zona: s[0], secao: s[1] }), { ordem: [0, 1] });
     tabelaLocais(p, doMun.filter(x => x !== l), sel.uf, 'Outros locais da mesma zona neste município');
+  },
+  async secao(sel, p) {
+    const secs = await secoesDaUf(sel.uf), s = secs.find(x => x[0] === sel.zona && x[1] === sel.secao);
+    if (!s) { p.innerHTML = migalhas([['Brasil', { tipo: 'brasil' }], [sel.uf, { tipo: 'uf', uf: sel.uf }], ['Zona ' + sel.zona, { tipo: 'zona', uf: sel.uf, zona: sel.zona }], ['Seção ' + sel.secao]]) + `<p>Não existe a seção <b>${sel.secao}</b> na zona <b>${sel.zona}</b> de ${sigla(sel.uf)} nos boletins do 2º turno. Ela pode ter sido agregada a outra seção.</p>`; return; }
+    const todos = await locaisDaUf(sel.uf), l = todos[s[2]];
+    if (sel.uf !== 'ZZ' && l) {
+      ufMunicipios = sel.uf; foco = new Set([l[1]]);
+      await desenharPoligonos(); await desenharPontos(todos.filter(x => x[1] === l[1] && x[2] === l[2]), sel.uf, l[0]);
+      if (l[8] != null) mapa.flyTo([l[8], l[9]], 16, { duration: 0.6 });
+    }
+    const g = { secoes: 1, aptos: s[3], comp: s[4], biom: s[6], a: s[7], b: s[8], br: s[9], nu: s[10], alertas: s[17] ? 1 : 0, q17: s[13] > 1020 ? 1 : 0, q1705: s[13] > 1025 ? 1 : 0, q1730: s[13] > 1050 ? 1 : 0, q19: s[13] > 1140 ? 1 : 0 };
+    const fuso = s[13] != null && s[12] != null ? s[13] - s[12] : 0;
+    const t = v => v == null ? '—' : hhmm(v);
+    p.innerHTML = migalhas([['Brasil', { tipo: 'brasil' }], [sel.uf, { tipo: 'uf', uf: sel.uf }], ['Zona ' + sel.zona, { tipo: 'zona', uf: sel.uf, zona: sel.zona }], [l ? esc(titulo(l[4])) : 'Local', l ? { tipo: 'local', uf: sel.uf, id: l[0] } : { tipo: 'zona', uf: sel.uf, zona: sel.zona }], ['Seção ' + sel.secao]]) +
+      cabecalho('Seção eleitoral (uma urna)', `Seção ${sel.secao} · Zona ${sel.zona} · ${sigla(sel.uf)}`, g, l ? `<p class="small">${esc(titulo(l[4]))} · ${esc(titulo(l[6]))} · ${esc(nomeMun(l[1]) || '')}</p>` : '');
+    const box = document.createElement('section'); box.className = 'lista bu';
+    box.innerHTML = `<h3>${icone('urna')} Boletim desta urna</h3>
+      <dl class="numeros">
+        <div><dt>Abertura</dt><dd>${t(s[11])} <small>local</small></dd></div>
+        <div><dt>Encerramento</dt><dd>${t(s[12])} <small>local · ${t(s[13])} Brasília</small></dd></div>
+        <div><dt>Boletim recebido</dt><dd>${s[14] == null ? '—' : (s[14] >= 1440 ? '26/10 ' : '') + t(s[14] % 1440)} <small>Brasília</small></dd></div>
+        <div><dt>Abstenções</dt><dd>${nf(s[5])} <small>${pct(s[5], s[3])}</small></dd></div>
+        <div><dt>Tipo da urna</dt><dd>${esc(s[15] || 'Apurada')}${s[16] ? ' <small>(seção agregada)</small>' : ''}</dd></div>
+        <div><dt>Fuso aplicado</dt><dd>${fuso ? '+' + fuso / 60 + ' h' : 'Brasília'}</dd></div>
+      </dl>
+      ${s[17] ? `<p class="nota">${icone('alerta')} ${s[17].split(',').map(k => esc(R.alertas.tipos[k])).join('; ')}</p>` : '<p class="muted small">Nenhum alerta automático nesta seção.</p>'}
+      <p class="fonte">ⓘ Fonte: <a href="${R.meta.fonte}" target="_blank" rel="noopener">TSE · Boletim de urna</a>. Para ver o boletim original (imagem e QR Code), use <a href="https://resultados.tse.jus.br/" target="_blank" rel="noopener">resultados.tse.jus.br</a> ou o app "Boletim na Mão".</p>`;
+    const prim = p.querySelector('.lista'); prim ? p.insertBefore(box, prim) : p.append(box);
   }
 };
 const UF_ISO = Object.fromEntries(Object.keys(UF_NOME).map(u => ['BR-' + u, u]));
@@ -555,7 +615,7 @@ function tabelaLocais(p, locais, uf, rotulo = 'Locais de votação (escolas e ou
 
 // ---------- Endereço na URL (#uf=SP, #mun=3550308, #zona=SP-1, #local=SP-12, #regiao=NE) ----------
 function hashDe(s) {
-  return { brasil: 'brasil', regiao: 'regiao=' + s.id, uf: 'uf=' + s.uf, municipio: s.ibge ? 'mun=' + s.ibge : 'ext=' + s.tse, zona: `zona=${s.uf}-${s.zona}`, local: `local=${s.uf}-${s.id}`, bairro: `bairro=${s.uf}-${s.ibge}-${encodeURIComponent(s.bairro)}`, regiaoIbge: `rib=${s.uf}-${s.nivel}-${encodeURIComponent(s.nome)}`, endereco: s.lat != null ? `perto=${s.lat.toFixed(4)},${s.lon.toFixed(4)}` : 'end=' + encodeURIComponent(s.q) }[s.tipo] || 'brasil';
+  return { brasil: 'brasil', regiao: 'regiao=' + s.id, uf: 'uf=' + s.uf, municipio: s.ibge ? 'mun=' + s.ibge : 'ext=' + s.tse, zona: `zona=${s.uf}-${s.zona}`, local: `local=${s.uf}-${s.id}`, bairro: `bairro=${s.uf}-${s.ibge}-${encodeURIComponent(s.bairro)}`, regiaoIbge: `rib=${s.uf}-${s.nivel}-${encodeURIComponent(s.nome)}`, secao: `secao=${s.uf}-${s.zona}-${s.secao}`, endereco: s.lat != null ? `perto=${s.lat.toFixed(4)},${s.lon.toFixed(4)}` : 'end=' + encodeURIComponent(s.q) }[s.tipo] || 'brasil';
 }
 function selDoHash() {
   const [k, v = ''] = decodeURIComponent(location.hash.slice(1)).split('=');
@@ -563,7 +623,7 @@ function selDoHash() {
   return {
     regiao: { tipo: 'regiao', id: v }, uf: { tipo: 'uf', uf: v }, mun: { tipo: 'municipio', ibge: +v }, ext: { tipo: 'municipio', uf: 'ZZ', tse: +v },
     zona: { tipo: 'zona', uf: p[0], zona: +p[1] }, local: { tipo: 'local', uf: p[0], id: +p[1] }, bairro: { tipo: 'bairro', uf: p[0], ibge: +p[1], bairro: p.slice(2).join('-') },
-    rib: { tipo: 'regiaoIbge', uf: p[0], nivel: p[1], nome: p.slice(2).join('-') }, end: { tipo: 'endereco', q: v }, perto: { tipo: 'endereco', lat: +v.split(',')[0], lon: +v.split(',')[1] }
+    rib: { tipo: 'regiaoIbge', uf: p[0], nivel: p[1], nome: p.slice(2).join('-') }, end: { tipo: 'endereco', q: v }, secao: { tipo: 'secao', uf: p[0], zona: +p[1], secao: +p[2] }, perto: { tipo: 'endereco', lat: +v.split(',')[0], lon: +v.split(',')[1] }
   }[k] || { tipo: 'brasil' };
 }
 
@@ -603,7 +663,8 @@ async function indexarLocais() {
   if (entrada.value) buscar();
 }
 entrada.addEventListener('focus', indexarLocais, { once: true });
-const PRIORIDADE = { Estado: 0, Região: 1, Município: 2, 'Zona eleitoral': 3, 'Região intermediária': 4, 'Região imediata': 5, Bairro: 6, 'Local de votação': 7, Exterior: 8 };
+const PRIORIDADE = { Seção: 0, Estado: 0, Região: 1, Município: 2, 'Zona eleitoral': 3, 'Região intermediária': 4, 'Região imediata': 5, Bairro: 6, 'Local de votação': 7, Exterior: 8 };
+const ICONE_TIPO = { Estado: 'bandeira', Região: 'globo', Município: 'cidade', 'Zona eleitoral': 'camadas', 'Região intermediária': 'globo', 'Região imediata': 'globo', Bairro: 'casa', 'Local de votação': 'escola', Exterior: 'globo', Endereço: 'pino', Seção: 'urna' };
 let resultados = [], ativo = -1;
 function buscar() {
   const q = norm(entrada.value);
@@ -623,12 +684,23 @@ function buscar() {
     return Math.round((s - PRIORIDADE[it.tipo] * 0.15) * 100) / 100;
   };
   const r = [];
+  // Zona + seção ("zona 5 seção 120", "z5 s120", "ze 5 sec 120 sp"): uma sugestão por zona com esse número.
+  const mz = /\b(?:zona|ze|z)\s*(\d+)/.exec(q), ms = /\b(?:secao|sec|se|s)\s*(\d+)/.exec(q);
+  if (mz && ms) {
+    const nz = +mz[1], ns = +ms[1];
+    for (const z of ZON) if (z[1] === nz && (!ufFiltro || z[0] === ufFiltro)) {
+      const sub = z[2].slice(0, 3).map(nomeMun).join(', ') + ' · ' + z[0];
+      const extra = norm(sub + ' ' + (UF_NOME[z[0]] || ''));
+      const resto = termos.filter(t => !/^(zona|ze|z|secao|sec|se|s)?\d+$/.test(t) && !['zona', 'ze', 'secao', 'sec'].includes(t) && t !== (ufFiltro || '').toLowerCase());
+      if (resto.every(t => extra.includes(t))) r.push([100 + z[5] / 1e9, { tipo: 'Seção', rotulo: `Seção ${ns} · Zona ${nz} · ${z[0]}`, sub, sel: { tipo: 'secao', uf: z[0], zona: nz, secao: ns }, peso: z[5] }]);
+    }
+  }
   for (const it of indice) { const s = pontuar(it); if (s > 0) r.push([s, it]); }
   r.sort((a, b) => b[0] - a[0] || b[1].peso - a[1].peso);
   resultados = r.slice(0, 13).map(x => x[1]); ativo = -1;
   // Sempre oferece procurar o texto como endereço no OpenStreetMap (rua, número, ponto de referência).
   if (q.length >= 4) resultados.push({ tipo: 'Endereço', rotulo: entrada.value.trim(), sub: 'procurar este endereço no mapa e ver as escolas de votação mais próximas', sel: { tipo: 'endereco', q: entrada.value.trim() } });
-  sugestoes.innerHTML = resultados.length ? resultados.map((it, i) => `<li role="option" id="sug-${i}" data-i="${i}"><span class="badge">${it.tipo}</span> <b>${esc(it.rotulo)}</b> <span class="muted">${esc(it.sub)}</span></li>`).join('')
+  sugestoes.innerHTML = resultados.length ? resultados.map((it, i) => `<li role="option" id="sug-${i}" data-i="${i}">${icone(ICONE_TIPO[it.tipo] || 'pino')}<span class="badge">${it.tipo}</span> <b>${esc(it.rotulo)}</b> <span class="muted">${esc(it.sub)}</span></li>`).join('')
     : `<li class="muted">Nada encontrado${locaisIndexados ? '' : ' (carregando escolas e bairros…)'}.</li>`;
   sugestoes.querySelectorAll('li[data-i]').forEach(li => { if (resultados[+li.dataset.i]?.tipo === 'Endereço') li.classList.add('sug-endereco'); });
   sugestoes.hidden = false;
@@ -665,10 +737,10 @@ document.getElementById('btn-brasil').onclick = () => selecionar({ tipo: 'brasil
 // "Perto de mim": a localização fica só no navegador; vai ao OpenStreetMap apenas para saber o estado.
 document.getElementById('btn-perto').onclick = () => {
   if (!navigator.geolocation) { alert('Este navegador não informa a localização. Busque pelo seu bairro ou endereço.'); return; }
-  const b = document.getElementById('btn-perto'); b.disabled = true; b.textContent = '📍 Localizando…';
+  const b = document.getElementById('btn-perto'); b.disabled = true; b.innerHTML = `${icone('mira')}Localizando…`;
   navigator.geolocation.getCurrentPosition(
-    pos => { b.disabled = false; b.textContent = '📍 Perto de mim'; mostrarAba('mapa'); selecionar({ tipo: 'endereco', lat: pos.coords.latitude, lon: pos.coords.longitude }); },
-    () => { b.disabled = false; b.textContent = '📍 Perto de mim'; alert('Não deu para pegar sua localização. Busque pelo seu bairro, escola ou endereço.'); },
+    pos => { b.disabled = false; b.innerHTML = `${icone('mira')}Perto de mim`; mostrarAba('mapa'); selecionar({ tipo: 'endereco', lat: pos.coords.latitude, lon: pos.coords.longitude }); },
+    () => { b.disabled = false; b.innerHTML = `${icone('mira')}Perto de mim`; alert('Não deu para pegar sua localização. Busque pelo seu bairro, escola ou endereço.'); },
     { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 });
 };
 document.getElementById('btn-exterior').onclick = () => selecionar({ tipo: 'uf', uf: 'ZZ' });
@@ -695,17 +767,17 @@ function mostrarPasso(i) {
 async function iniciarApuracao() {
   if (selAtual?.tipo !== 'brasil' || metrica !== 'resultado' || nivelBrasil !== 'uf') { metrica = 'resultado'; selMetrica.value = 'resultado'; nivelBrasil = 'uf'; document.getElementById('nivel').value = 'uf'; await selecionar({ tipo: 'brasil' }); }
   if (+deslizador.value >= passos.length - 1) deslizador.value = 0;
-  btnPlay.textContent = '⏸ Pausar'; btnPlay.setAttribute('aria-pressed', 'true');
+  btnPlay.innerHTML = `${icone('pausa')}Pausar`; btnPlay.setAttribute('aria-pressed', 'true');
   const reduzido = matchMedia('(prefers-reduced-motion: reduce)').matches;
   timer = setInterval(() => { const i = +deslizador.value + 1; if (i >= passos.length) { pararApuracao(false); return; } deslizador.value = i; mostrarPasso(i); }, reduzido ? 400 : 90);
 }
 function pararApuracao(limpar = true) {
   if (timer) { clearInterval(timer); timer = null; }
-  btnPlay.textContent = '▶ Reproduzir apuração'; btnPlay.setAttribute('aria-pressed', 'false');
+  btnPlay.innerHTML = `${icone('play')}Reproduzir apuração`; btnPlay.setAttribute('aria-pressed', 'false');
   if (limpar && apuracaoAtiva) { apuracaoAtiva = null; rotTempo.textContent = 'Arraste para ver o mapa em qualquer momento da apuração.'; deslizador.value = passos.length - 1; camadaUf.setStyle(camadaUf.options.style); }
 }
 btnPlay.onclick = () => timer ? pararApuracao(false) : iniciarApuracao();
-deslizador.oninput = async () => { if (selAtual?.tipo !== 'brasil') await selecionar({ tipo: 'brasil' }); if (timer) { clearInterval(timer); timer = null; btnPlay.textContent = '▶ Reproduzir apuração'; } mostrarPasso(+deslizador.value); };
+deslizador.oninput = async () => { if (selAtual?.tipo !== 'brasil') await selecionar({ tipo: 'brasil' }); if (timer) { clearInterval(timer); timer = null; btnPlay.innerHTML = `${icone('play')}Reproduzir apuração`; } mostrarPasso(+deslizador.value); };
 
 // ---------- Abas e tema ----------
 function mostrarAba(nome) {
