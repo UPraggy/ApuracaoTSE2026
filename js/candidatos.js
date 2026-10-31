@@ -123,51 +123,88 @@ export function calcularPerfil(R, MUN, C) {
     distribuicao('Bolsa Família no município (quintos da população)', rotQ(qBF, x => num(x, 1)), qBF.de, 'Do 1º quinto (municípios com menos famílias no programa por 100 domicílios) ao 5º (com mais).'),
     distribuicao('Moradores com 60+ no município (quintos da população)', rotQ(q60, x => num(x, 1) + '%'), q60.de, 'Do 1º quinto (municípios mais jovens) ao 5º (mais envelhecidos).')
   ];
-  return { indicadores, distribuicoes, totais, municipios: muns.length };
+  // Quintos extras só para o texto "onde tem mais X, a maior parte votou em Y".
+  const EXTRA = [['pibPerCapita', 'PIB por habitante'], ['pctEsgotoRede', 'esgoto ligado à rede'], ['pctDomInternet', 'internet em casa'], ['eleitPctSuperior', 'eleitores com superior completo'], ['alfabetizacao15', 'alfabetização'], ['apsCobertura', 'cobertura da atenção básica']];
+  const quintosTexto = [
+    { tema: 'renda por pessoa', d: distribuicoes[2] }, { tema: 'famílias no Bolsa Família', d: distribuicoes[3] }, { tema: 'moradores com 60 anos ou mais', d: distribuicoes[4] },
+    ...EXTRA.map(([k, tema]) => { const q = quintis(k); return { tema, d: distribuicao(tema, q.faixas.map((_, i) => ({ nome: `${i + 1}º quinto` })), q.de) }; })
+  ];
+  return { indicadores, distribuicoes, quintosTexto, totais, municipios: muns.length };
 }
 
 // ---------- Texto "O que os números dizem" (regras simétricas para os dois) ----------
+// Perto de 50%, uma casa decimal engana ("50,0%"): mostra duas.
+const pctL = x => pct(x, 1, Math.abs(x - 0.5) < 0.005 ? 2 : 1);
+const minusc = t => t.charAt(0).toLowerCase() + t.slice(1);
 function textos(P, nA, nB) {
-  const L = [];
-  const T = P.totais;
-  L.push(`Foram usados ${nf(P.municipios)} municípios, com ${nf(T.a)} votos para ${esc(nA)} (13) e ${nf(T.b)} para ${esc(nB)} (22). Cada média abaixo descreve o <b>município típico onde está um voto</b> de cada candidato: municípios com mais votos pesam mais.`);
-  const ord = P.indicadores.filter(i => i.relativa != null && !i.bu).sort((x, y) => Math.abs(y.relativa) - Math.abs(x.relativa));
-  for (const i of ord.slice(0, 5)) {
-    const maior = i.A > i.B ? '13' : '22', rel = Math.abs(i.relativa * 100);
-    L.push(`<b>${esc(i.nome)}:</b> ${fmt(i, i.A)} onde vota o 13 e ${fmt(i, i.B)} onde vota o 22 (diferença de ${fmtDif(i, i.dif)}, ${num(rel, 0)}% da média geral). O voto do ${maior} está mais concentrado onde esse número é maior.`);
-  }
-  const parecidos = P.indicadores.filter(i => i.relativa != null && !i.bu && Math.abs(i.relativa) < 0.03).map(i => i.nome.toLowerCase());
-  if (parecidos.length) L.push(`Em ${parecidos.length === 1 ? 'um indicador' : parecidos.length + ' indicadores'} os dois perfis ficam a menos de 3% um do outro: ${esc(parecidos.join(', '))}.`);
-  const reg = P.distribuicoes[0].cats, top = k => reg.slice().sort((x, y) => y[k] - x[k])[0];
-  L.push(`<b>Região:</b> a maior fatia dos votos do 13 veio do ${esc(top('shA').nome)} (${pct(top('shA').shA, 1)}) e a maior fatia dos do 22, do ${esc(top('shB').nome)} (${pct(top('shB').shB, 1)}).`);
-  for (const d of P.distribuicoes.slice(2)) {
-    const c = d.cats, p = c[0], u = c[c.length - 1];
-    L.push(`<b>${esc(d.nome.split(' (')[0])}:</b> no 1º quinto da população, o 13 teve ${pct(p.pctA, 1)} dos válidos (o 22, ${pct(1 - p.pctA, 1)}); no 5º quinto, ${pct(u.pctA, 1)} (o 22, ${pct(1 - u.pctA, 1)}).`);
+  const L = [], T = P.totais, nome = k => k === 'a' ? `${esc(nA)} (13)` : `${esc(nB)} (22)`;
+  const lider = c => c.pctA >= 0.5 ? ['a', c.pctA] : ['b', 1 - c.pctA];
+  L.push(`Foram somados os votos de ${nf(P.municipios)} municípios: ${nf(T.a)} para ${nome('a')} e ${nf(T.b)} para ${nome('b')}. As frases abaixo dizem, para cada tipo de lugar, quem teve a maior parte dos votos.`);
+  // Regiões
+  const reg = P.distribuicoes[0].cats.map(c => ({ nome: c.nome, l: lider(c) }));
+  L.push(`<b>Por região:</b> ${reg.map(r => `no ${esc(r.nome)}, a maior parte votou em ${nome(r.l[0])} (${pctL(r.l[1])})`).join('; ')}.`);
+  // Porte
+  const por = P.distribuicoes[1].cats.map(c => ({ nome: c.nome, l: lider(c) }));
+  L.push(`<b>Por tamanho da cidade:</b> ${por.map(r => `nos municípios de ${esc(r.nome)}, maioria de ${nome(r.l[0])} (${pctL(r.l[1])})`).join('; ')}.`);
+  // Quintos: onde tem mais X / menos X
+  for (const { tema, d } of P.quintosTexto) {
+    const c = d.cats, menos = c[0], mais = c[c.length - 1];
+    if (menos.pctA == null || mais.pctA == null) continue;
+    const lm = lider(mais), ln = lider(menos);
+    L.push(`<b>${esc(tema[0].toUpperCase() + tema.slice(1))}:</b> onde há <b>mais</b> ${esc(tema)} (o quinto da população no topo), a maior parte votou em ${nome(lm[0])} (${pctL(lm[1])}); onde há <b>menos</b>, a maior parte votou em ${nome(ln[0])} (${pctL(ln[1])}).`);
   }
   return L;
+}
+
+// Conclusão de cada candidato, montada pelas mesmas regras para os dois.
+function conclusoes(P, nA, nB) {
+  const T = P.totais, val = T.a + T.b;
+  const um = (k, nomeC, num) => {
+    const sh = c => k === 'a' ? c.pctA : 1 - c.pctA, share = c => k === 'a' ? c.shA : c.shB;
+    const reg = P.distribuicoes[0].cats, venceu = reg.filter(c => sh(c) >= 0.5).map(c => `${c.nome} (${pctL(sh(c))})`);
+    const maiorFatia = reg.slice().sort((x, y) => share(y) - share(x))[0];
+    const por = P.distribuicoes[1].cats.filter(c => sh(c) >= 0.5).map(c => c.nome.startsWith('até') ? c.nome : 'de ' + c.nome);
+    const lugares = P.quintosTexto.map(({ tema, d }) => { const c = d.cats, mais = c[c.length - 1], menos = c[0]; if (mais.pctA == null) return null; return sh(mais) >= 0.5 && sh(menos) < 0.5 ? `mais ${tema}` : sh(menos) >= 0.5 && sh(mais) < 0.5 ? `menos ${tema}` : null; }).filter(Boolean);
+    const perfil = P.indicadores.filter(i => i.relativa != null && !i.bu && i.V).map(i => ({ i, d: ((k === 'a' ? i.A : i.B) - i.V) / Math.abs(i.V) })).sort((x, y) => Math.abs(y.d) - Math.abs(x.d)).slice(0, 4)
+      .map(({ i, d }) => `${esc(minusc(i.nome))} ${d > 0 ? 'acima' : 'abaixo'} da média (${esc(fmt(i, k === 'a' ? i.A : i.B))} contra ${esc(fmt(i, i.V))})`);
+    return `<div class="cand-concl ${k}"><div class="cand-concl-topo"><span class="cand-num">${num}</span><b>${esc(nomeC)}</b></div>
+      <p><b>${pct(k === 'a' ? T.a : T.b, val, 2)}</b> dos válidos (${nf(k === 'a' ? T.a : T.b)} votos, sem o exterior).</p>
+      <ul>
+        <li><b>Onde teve a maioria:</b> ${venceu.length ? esc(venceu.join(', ')) : 'nenhuma região'}. A maior fatia dos seus votos veio do ${esc(maiorFatia.nome)} (${pct(share(maiorFatia), 1)} do total dele).</li>
+        <li><b>Tamanho das cidades:</b> maioria nos municípios ${por.length ? esc(por.join(', ')) : 'de nenhum porte'}.</li>
+        <li><b>Tipo de lugar:</b> ${lugares.length ? 'venceu onde há ' + esc(lugares.join(', ')) : 'não houve inversão clara entre os extremos'}.</li>
+        <li><b>Perfil médio dos municípios de onde vieram seus votos:</b> ${perfil.join('; ')}.</li>
+      </ul></div>`;
+  };
+  return um('a', nA, '13') + um('b', nB, '22');
 }
 
 // ---------- Desenho ----------
 const ICONE = n => `<svg class="ic" aria-hidden="true"><use href="#i-${n}"/></svg>`;
 
-function regua(i, nA, nB) {
-  const vals = [i.A, i.B, i.V, i.P].filter(x => x != null && Number.isFinite(x));
-  if (!vals.length) return '';
-  let lo = Math.min(...vals), hi = Math.max(...vals);
-  const pad = (hi - lo) * 0.25 || Math.abs(hi) * 0.05 || 1;
-  lo -= pad; hi += pad;
-  const pos = x => x == null ? null : (100 * (x - lo) / (hi - lo)).toFixed(1);
+// Régua COMUM a todos os indicadores: o centro é a média da população (ou dos votantes) e a posição é a
+// diferença relativa a ela, em %, de −D% a +D%. Assim uma diferença pequena parece pequena em qualquer linha.
+const refDe = i => (i.P != null && Number.isFinite(i.P) && i.P !== 0) ? i.P : i.V;
+const desvio = (i, x) => { const r = refDe(i); return x == null || !Number.isFinite(x) || !r ? null : 100 * (x - r) / Math.abs(r); };
+function escalaComum(indicadores) {
+  const m = Math.max(5, ...indicadores.flatMap(i => [desvio(i, i.A), desvio(i, i.B), desvio(i, i.V)]).filter(Number.isFinite).map(Math.abs));
+  return Math.ceil(m / 5) * 5; // múltiplo de 5%
+}
+function regua(i, nA, nB, D) {
+  if (desvio(i, i.A) == null && desvio(i, i.B) == null) return '';
+  const pos = x => { const d = desvio(i, x); return d == null ? null : (50 + 50 * Math.max(-1, Math.min(1, d / D))).toFixed(1); };
   const pa = pos(i.A), pb = pos(i.B);
   return `<div class="cand-regua" tabindex="0" aria-label="${esc(i.nome)}: 13 ${esc(fmt(i, i.A))}, 22 ${esc(fmt(i, i.B))}">
-    <span class="cand-trilho"></span>
+    <span class="cand-trilho"></span><span class="cand-centro"></span>
     <span class="cand-liga" style="--de:${Math.min(pa, pb)}%;--ate:${Math.max(pa, pb)}%"></span>
     ${i.P != null ? `<span class="cand-pop" style="--x:${pos(i.P)}%" title="População: ${esc(fmt(i, i.P))}"></span>` : ''}
     ${i.V != null ? `<span class="cand-vot" style="--x:${pos(i.V)}%" title="Todos os votantes: ${esc(fmt(i, i.V))}"></span>` : ''}
     <span class="cand-ponto a" style="--x:${pa}%"></span><span class="cand-ponto b" style="--x:${pb}%"></span>
-    <span class="cand-dica"><b>${esc(i.nome)}</b><br><i class="d a"></i>${esc(nA)} (13): <b>${esc(fmt(i, i.A))}</b><br><i class="d b"></i>${esc(nB)} (22): <b>${esc(fmt(i, i.B))}</b><br><i class="d v"></i>Todos os votantes: ${esc(fmt(i, i.V))}<br><i class="d p"></i>População: ${esc(fmt(i, i.P))}<br><span class="muted">Dado disponível para ${pct(i.cobertura, 1, 1)} dos votantes</span></span>
+    <span class="cand-dica"><b>${esc(i.nome)}</b><br><i class="d a"></i>${esc(nA)} (13): <b>${esc(fmt(i, i.A))}</b><br><i class="d b"></i>${esc(nB)} (22): <b>${esc(fmt(i, i.B))}</b><br><i class="d v"></i>Todos os votantes: ${esc(fmt(i, i.V))}<br><i class="d p"></i>População: ${esc(fmt(i, i.P))}<br><span class="muted">13 fica ${fmtDesvio(desvio(i, i.A))} e 22 fica ${fmtDesvio(desvio(i, i.B))} em relação à média da população · dado disponível para ${pct(i.cobertura, 1, 1)} dos votantes</span></span>
   </div>`;
 }
 
+const fmtDesvio = d => d == null ? '—' : (d >= 0 ? '+' : '−') + Math.abs(d).toFixed(1).replace('.', ',') + '%';
 function barraEmpilhada(rotulo, cats, campo, cores) {
   return `<div class="cand-pilha"><span class="cand-pilha-rot">${rotulo}</span><div class="cand-pilha-barra">${cats.map((c, k) => {
     const v = c[campo];
@@ -224,10 +261,11 @@ export async function iniciarCandidatos(R, { NOME_A, NOME_B }) {
   const destaque = ['rendaPcMedia', 'bfPctDomicilios', 'pct60mais', 'eleitPctSuperior'].map(k => I[k]).filter(Boolean);
   const grupos = [...new Set(P.indicadores.map(i => i.grupo))];
 
+  const D = escalaComum(P.indicadores);
   el.innerHTML = `
     <h2>Candidatos: onde está o voto de cada um</h2>
     <p class="lead">Como são, em média, os <b>municípios</b> onde cada candidato recebeu seus votos: renda, programas sociais, saneamento, saúde, idade e escolaridade. Os dois recebem exatamente o mesmo cálculo, na ordem do número na urna.</p>
-    <div class="cand-aviso" role="note">${ICONE('alerta')}<div><b>Leia antes:</b> o voto é secreto e o boletim só traz o total de cada urna. Por isso estes números descrevem os <b>lugares</b> onde cada candidato teve votos, <b>não as pessoas</b>: num município de renda alta também há eleitores de baixa renda, e vice-versa. Isso tem nome, <i>falácia ecológica</i>. As fontes têm anos diferentes (Censo 2022, PIB 2023, IDHM 2010, Bolsa Família e BPC de set/2026). E é <b>associação, não causa</b>: os números não dizem por que alguém votou em quem votou.</div></div>
+    <div class="cand-aviso" role="note">${ICONE('alerta')}<div><b>Como ler:</b> os números são somados <b>por município</b>. Mostram em que tipo de lugar cada candidato teve a maior parte dos votos. As fontes têm anos diferentes (Censo 2022, PIB 2023, IDHM 2010, Bolsa Família e BPC de set/2026).</div></div>
     <div class="cand-cabeca">
       <div class="cand-card a"><span class="cand-num">13</span><div><b>${esc(nA)}</b><br><span class="muted">${nf(P.totais.a)} votos · ${pct(P.totais.a, P.totais.a + P.totais.b, 2)} dos válidos</span></div></div>
       <div class="cand-card b"><span class="cand-num">22</span><div><b>${esc(nB)}</b><br><span class="muted">${nf(P.totais.b)} votos · ${pct(P.totais.b, P.totais.a + P.totais.b, 2)} dos válidos</span></div></div>
@@ -239,14 +277,18 @@ export async function iniciarCandidatos(R, { NOME_A, NOME_B }) {
     </section>
     <section class="bloco"><h3>${ICONE('analise')}Perfil médio, indicador por indicador</h3>
       <div class="cand-leg-regua"><span><i class="d a"></i>Município típico do voto do 13</span><span><i class="d b"></i>do voto do 22</span><span><i class="d v"></i>de todos os votantes</span><span><i class="d p"></i>da população</span></div>
-      <p class="muted small">Passe o mouse ou toque numa régua para ver os valores. Cada régua tem a própria escala, para a diferença aparecer.</p>
+      <p class="muted small">Todas as réguas usam a <b>mesma escala</b>: o traço do meio é a média da população, e a posição mostra quanto cada valor fica acima (direita) ou abaixo (esquerda) dela, de −${D}% a +${D}%. Diferenças pequenas aparecem pequenas. Passe o mouse ou toque numa régua para ver os valores.</p>
       ${grupos.map(g => `<h4 class="sub">${esc(g)}</h4><div class="tabela-rolagem cand-tab"><table><thead><tr><th>Indicador</th><th class="cand-col-regua">Comparação</th><th class="num">13</th><th class="num">22</th><th class="num">Votantes</th><th class="num">População</th><th class="num">Diferença (13 − 22)</th></tr></thead><tbody>
-        ${P.indicadores.filter(i => i.grupo === g).map(i => `<tr><td>${esc(i.nome)}${i.cobertura < 0.99 ? ` <small class="muted" title="Parte dos votantes cujo município tem este dado">(${pct(i.cobertura, 1, 0)} com dado)</small>` : ''}</td><td class="cand-col-regua">${regua(i, nA, nB)}</td><td class="num">${esc(fmt(i, i.A))}</td><td class="num">${esc(fmt(i, i.B))}</td><td class="num">${esc(fmt(i, i.V))}</td><td class="num">${esc(fmt(i, i.P))}</td><td class="num">${esc(fmtDif(i, i.dif))}</td></tr>`).join('')}
+        ${P.indicadores.filter(i => i.grupo === g).map(i => `<tr><td>${esc(i.nome)}${i.cobertura < 0.99 ? ` <small class="muted" title="Parte dos votantes cujo município tem este dado">(${pct(i.cobertura, 1, 0)} com dado)</small>` : ''}</td><td class="cand-col-regua">${regua(i, nA, nB, D)}</td><td class="num">${esc(fmt(i, i.A))}</td><td class="num">${esc(fmt(i, i.B))}</td><td class="num">${esc(fmt(i, i.V))}</td><td class="num">${esc(fmt(i, i.P))}</td><td class="num">${esc(fmtDif(i, i.dif))}</td></tr>`).join('')}
       </tbody></table></div>`).join('')}
     </section>
     <h3 class="cand-sec">Em que tipo de lugar estão os votos</h3>
     <p class="muted small">Cada barra soma 100%. Compare a barra de cada candidato com a de todos os votantes: onde ela é mais larga, o voto daquele candidato está mais concentrado naquele tipo de lugar.</p>
     ${P.distribuicoes.map(d => blocoDistribuicao(d, nA, nB)).join('')}
+    <section class="bloco"><h3>${ICONE('analise')}Conclusão: o voto de cada candidato, pelos dados</h3>
+      <div class="cand-concls">${conclusoes(P, nA, nB)}</div>
+      <p class="fonte">Gerado pelas mesmas regras para os dois, a partir das tabelas desta página. "Onde teve a maioria" = mais da metade dos votos válidos daquele grupo de municípios.</p>
+    </section>
     <section class="bloco"><h3>${ICONE('livro')}Como calculamos</h3>
       <ul class="cand-metodo">
         <li><b>Média do eleitor do 13</b> = soma, em todos os municípios, de (votos do 13 no município × indicador do município) ÷ total de votos do 13. O mesmo vale para o 22. Município com mais votos pesa mais, então um voto em São Paulo e um voto num município pequeno contam igual.</li>
