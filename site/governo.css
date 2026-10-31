@@ -1,0 +1,78 @@
+/* Aba "Governos" (site/js/governo.js). Usa os tokens de estilo.css; faixas de mandato em tons neutros (sem cor de partido). */
+#aba-governos, #aba-governo { --gov-faixa-a: color-mix(in srgb, var(--tinta) 4%, transparent); --gov-faixa-b: transparent; --gov-melhora: var(--ok); --gov-piora: var(--erro); }
+
+.gov-indice { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 4px; }
+.gov-indice a, .gov-indice .gov-mundo { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 99px; background: var(--superficie); border: 1px solid var(--linha); color: var(--tinta); text-decoration: none; font-size: 14px; }
+.gov-indice a:hover, .gov-indice .gov-mundo:hover { background: var(--superficie-2); }
+.gov-indice .gov-mundo { color: var(--acento); cursor: pointer; font: inherit; font-size: 14px; }
+.gov-aviso-topo { margin: 12px 0; }
+.gov-tema { scroll-margin-top: 120px; }
+#gov-tabela { scroll-margin-top: 120px; }
+
+/* Gráficos */
+.gov-graficos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 8px; }
+.gov-graf-bloco { min-width: 0; min-height: 300px; }
+.gov-graf-tit { margin: 4px 0 6px; font-size: 15px; }
+.grafico .gov-faixa.impar { fill: var(--gov-faixa-a); }
+.grafico .gov-faixa.par { fill: var(--gov-faixa-b); }
+.grafico .gov-marco { stroke: var(--tinta-2); stroke-width: 1.2; stroke-dasharray: 2 3; }
+.grafico .gov-quebra { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 1 3; }
+.grafico .gov-quebra-txt { font-size: 9px; fill: var(--muted); }
+.grafico .gov-meta { stroke-width: 1.4; stroke-dasharray: 7 4; opacity: .85; }
+.grafico .gov-meta-txt { font-size: 10px; font-weight: 600; paint-order: stroke; stroke: var(--superficie); stroke-width: 3px; }
+.gov-rotulos { position: relative; height: 20px; margin-top: 2px; font-size: 11px; color: var(--tinta-2); }
+.gov-rotulos span { position: absolute; top: 0; height: 20px; line-height: 20px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-radius: 4px; padding: 0 2px; }
+.gov-rotulos span.impar { background: var(--gov-faixa-a); }
+.gov-meta-leg { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 6px 0 0; color: var(--tinta-2); }
+.gov-meta-leg span { display: inline-flex; align-items: center; gap: 6px; }
+.gov-meta-leg i { display: inline-block; width: 18px; border-top: 2px dashed; }
+.gov-fontes { margin-top: 6px; }
+.gov-fontes .fonte { margin: 3px 0 0; }
+
+/* Cartões por mandato */
+.gov-cartoes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.gov-cartao { background: var(--superficie-2); border: 1px solid var(--linha); border-radius: 12px; padding: 10px 12px; min-width: 0; animation: sobe .45s ease both; animation-delay: calc(var(--i, 0) * 40ms); }
+.gov-cartao-topo { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; margin-bottom: 6px; }
+.gov-cartao-topo small { color: var(--muted); }
+.gov-cartao ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.gov-cartao li { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; line-height: 1.35; }
+.gov-cartao li span { color: var(--tinta-2); min-width: 0; }
+.gov-cartao li b { white-space: nowrap; }
+.melhora { color: var(--gov-melhora); }
+.piora { color: var(--gov-piora); }
+.neutro { color: var(--tinta); }
+.gov-aviso { color: var(--muted); text-decoration: none; cursor: help; font-weight: 400; }
+
+/* Texto e vereditos */
+.gov-texto .bolha p { margin: 0 0 6px; }
+.gov-texto .bolha p:last-child { margin-bottom: 0; }
+.gov-veredito { display: inline-block; padding: 0 8px; border-radius: 99px; font-weight: 600; font-size: 13px; border: 1px solid; }
+.gov-veredito.ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 45%, transparent); background: color-mix(in srgb, var(--ok) 10%, transparent); }
+.gov-veredito.abaixo { color: var(--erro); border-color: color-mix(in srgb, var(--erro) 45%, transparent); background: color-mix(in srgb, var(--erro) 10%, transparent); }
+.gov-saidas .card .fonte { margin-top: 4px; }
+
+/* Tabela comparativa */
+.gov-tab table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 13px; }
+.gov-tab th, .gov-tab td { padding: 7px 9px; border-bottom: 1px solid var(--linha); vertical-align: top; }
+.gov-tab thead th { position: sticky; top: 0; background: var(--superficie); z-index: 2; white-space: nowrap; }
+.gov-tab .gov-col-ind { position: sticky; left: 0; background: var(--superficie); z-index: 1; text-align: left; min-width: 170px; max-width: 220px; font-weight: 600; }
+.gov-tab thead .gov-col-ind { z-index: 3; }
+.gov-tab .gov-col-ind small { display: block; font-weight: 400; color: var(--muted); }
+.gov-tab td small { display: block; color: var(--muted); }
+.gov-tab td b { white-space: nowrap; }
+.gov-tab tr.gov-grupo th { text-align: left; background: var(--superficie-2); color: var(--tinta-2); font-size: 12px; text-transform: uppercase; letter-spacing: .05em; position: sticky; left: 0; }
+.gov-fatores { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.gov-fatores b { display: inline-block; min-width: 42px; }
+
+@media (max-width: 980px) {
+  .gov-graficos { grid-template-columns: 1fr; }
+  .gov-cartoes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .gov-cartoes { grid-template-columns: 1fr; }
+  .gov-rotulos { font-size: 10px; }
+  .gov-tab .gov-col-ind { min-width: 130px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gov-cartao { animation: none; }
+}

@@ -906,7 +906,7 @@ for (const [arq, fn, args, aba] of [
   ['./explorar.js', 'iniciarExplorar', { NOME_A, NOME_B, irPara: irParaMapa }],
   ['./candidatos.js', 'iniciarCandidatos', { NOME_A, NOME_B }],
   ['./mundo.js', 'iniciarMundo', { NOME_A, NOME_B, irAba }, 'mundo'],
-  // ['./governo.js', 'iniciarGoverno', { NOME_A, NOME_B, irAba }, 'governos'],
+  ['./governo.js', 'iniciarGoverno', { NOME_A, NOME_B, irAba }, 'governos'],
 ]) import(arq).then(m => {
   if (!m[fn]) return;
   m[fn](R, args);
