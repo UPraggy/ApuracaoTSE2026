@@ -1,5 +1,5 @@
 // Aba "2022 × 2026": resultados de 2014 a 2026 e o fluxo do dia (encerramento e recebimento) lado a lado.
-import { UF_NOME, carregar, nf, pct, pp, hhmm, esc, sigla, titulo, corCss, fonte } from './util.js?v=5bd908cf8b';
+import { UF_NOME, carregar, nf, pct, pp, hhmm, esc, sigla, titulo, corCss, fonte } from './util.js?v=e7f49fd024';
 
 const relogio = min => (min >= 1440 ? '+1d ' : '') + hhmm(min % 1440);
 
