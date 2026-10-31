@@ -1,0 +1,57 @@
+/* Aba "Explorar": ranking, dispersão e assistente. Cores das regiões = paleta categórica (sem vermelho/azul, que são dos candidatos). */
+:root {
+  --reg-n: #6250d6; --reg-ne: #1baf7a; --reg-co: #eda100; --reg-se: #e87ba4; --reg-s: #008300;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --reg-n: #9085e9; --reg-ne: #199e70; --reg-co: #c98500; --reg-se: #d55181; --reg-s: #2f9e2f; }
+}
+:root[data-theme="dark"] { --reg-n: #9085e9; --reg-ne: #199e70; --reg-co: #c98500; --reg-se: #d55181; --reg-s: #2f9e2f; }
+
+.exp-controles { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: end; margin: 12px 0; }
+.exp-controles label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--tinta-2); min-width: 0; }
+.exp-controles select { max-width: 280px; }
+.exp-grade { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 14px; align-items: start; }
+.exp-grade .bloco { margin: 0; }
+.exp-grade h3 { display: flex; align-items: center; gap: 8px; }
+
+/* Ranking */
+.exp-busca { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--borda); background: var(--superficie); color: var(--tinta); font: inherit; font-size: 15px; margin-bottom: 8px; }
+.exp-barras { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; max-height: 620px; overflow-y: auto; }
+.exp-barras button { width: 100%; display: grid; grid-template-columns: 34px minmax(90px, 1.1fr) minmax(60px, 1.4fr) auto; gap: 8px; align-items: center; background: none; border: 0; padding: 5px 4px; border-radius: 8px; cursor: pointer; text-align: left; font-size: 13px; color: var(--tinta); transition: background .15s ease, transform .12s ease; }
+.exp-barras button:hover, .exp-barras button:focus-visible { background: var(--superficie-2); }
+.exp-barras button:active { transform: scale(.98); }
+.exp-pos { color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
+.exp-nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.exp-trilho { position: relative; height: 10px; background: var(--superficie-2); border-radius: 5px; overflow: hidden; }
+.exp-trilho i { position: absolute; top: 0; bottom: 0; border-radius: 5px; transform-origin: left; animation: exp-cresce .6s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i, 0) * 18ms); }
+.exp-val { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+.exp-sep { text-align: center; color: var(--muted); font-size: 12px; padding: 4px 0; }
+@keyframes exp-cresce { from { transform: scaleX(0); } }
+
+/* Dispersão */
+.exp-leg { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+.exp-svg { touch-action: manipulation; }
+.exp-pt { fill-opacity: .72; stroke: var(--superficie); stroke-width: 1; cursor: pointer; transition: fill-opacity .15s ease, stroke-width .15s ease, opacity .25s ease; animation: exp-surge .5s ease both; }
+.exp-pt.ativo { fill-opacity: 1; stroke: var(--tinta); stroke-width: 2; }
+.exp-pt.oculto { opacity: .06; pointer-events: none; }
+.exp-tend { stroke: var(--tinta-2); stroke-width: 1.6; stroke-dasharray: 6 5; }
+@keyframes exp-surge { from { opacity: 0; } }
+
+/* Assistente */
+.exp-bot-topo { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.exp-bot-topo h3 { display: flex; align-items: center; gap: 8px; margin: 0; }
+.exp-chat { max-height: none; }
+.exp-chat .bolha { max-width: 100%; }
+
+@media (max-width: 980px) {
+  .exp-grade { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .exp-controles { display: grid; grid-template-columns: 1fr 1fr; }
+  .exp-controles label:first-child, .exp-controles label:nth-child(2) { grid-column: 1 / -1; }
+  .exp-controles select { max-width: 100%; width: 100%; }
+  .exp-barras button { grid-template-columns: 28px minmax(80px, 1fr) minmax(40px, .8fr) auto; font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .exp-trilho i, .exp-pt { animation: none; }
+}

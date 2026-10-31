@@ -1,0 +1,76 @@
+/* Página inicial (aba Início). Usa os tokens de estilo.css; escuro por padrão. */
+.ini { max-width: 1040px; margin: 0 auto; display: grid; gap: 22px; padding: 8px 0 12px; }
+.ini > * { animation: sobe .5s ease both; }
+.ini > *:nth-child(2) { animation-delay: .06s; } .ini > *:nth-child(3) { animation-delay: .12s; } .ini > *:nth-child(4) { animation-delay: .18s; }
+.ini > *:nth-child(5) { animation-delay: .24s; } .ini > *:nth-child(6) { animation-delay: .3s; } .ini > *:nth-child(7) { animation-delay: .36s; }
+
+.ini-hero { text-align: center; padding: 18px 8px 0; }
+.ini-titulo { font-size: clamp(28px, 5.4vw, 48px); line-height: 1.08; letter-spacing: -.03em; margin: 8px auto 10px; max-width: 760px; }
+.ini-sub { color: var(--tinta-2); font-size: clamp(15px, 2vw, 18px); margin: 0; }
+
+.ini-placar { background: var(--superficie); border: 1px solid var(--linha); border-radius: 18px; padding: clamp(14px, 3vw, 24px); box-shadow: var(--sombra); }
+.ini-cands { display: flex; justify-content: space-between; gap: 16px; }
+.ini-cand { display: grid; gap: 2px; }
+.ini-cand.b { text-align: right; justify-items: end; }
+.ini-num { font-size: 12px; font-weight: 800; letter-spacing: .08em; color: var(--muted); }
+.ini-nome { font-size: clamp(15px, 2.2vw, 19px); font-weight: 600; }
+.ini-pct { font-size: clamp(34px, 7vw, 60px); line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.ini-cand.a .ini-pct { color: var(--cor-a); } .ini-cand.b .ini-pct { color: var(--cor-b); }
+.ini-votos { color: var(--tinta-2); font-size: 14px; font-variant-numeric: tabular-nums; }
+.ini-barra { position: relative; display: flex; gap: 3px; height: 18px; margin: 16px 0 10px; border-radius: 9px; overflow: hidden; }
+.ini-barra .seg.a { background: var(--cor-a); border-radius: 9px 0 0 9px; }
+.ini-barra .seg.b { background: var(--cor-b); border-radius: 0 9px 9px 0; }
+.ini-meio { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 2px; background: var(--tinta); opacity: .55; transform: translateX(-1px); }
+.ini-dif { margin: 0; text-align: center; color: var(--tinta-2); font-size: 14px; }
+
+.ini-numeros { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.ini-n { background: var(--superficie); border: 1px solid var(--linha); border-radius: 14px; padding: 14px; display: grid; gap: 4px; }
+.ini-n-val { font-size: clamp(22px, 3.4vw, 30px); font-weight: 750; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.ini-n-rot { font-size: 13px; color: var(--tinta-2); line-height: 1.35; }
+
+.ini-busca { display: grid; gap: 8px; }
+.ini-busca-rot { font-weight: 650; font-size: 17px; text-align: center; }
+.ini-busca-caixa { position: relative; display: flex; gap: 8px; max-width: 680px; width: 100%; margin: 0 auto; }
+.ini-busca-caixa .ic { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); width: 20px; height: 20px; pointer-events: none; }
+.ini-busca-caixa input { flex: 1; min-width: 0; padding: 14px 14px 14px 44px; border-radius: 14px; border: 1px solid var(--borda); background: var(--superficie); color: var(--tinta); font: inherit; font-size: 16px; transition: box-shadow .2s ease, border-color .2s ease; }
+.ini-busca-caixa input:focus { outline: none; border-color: var(--acento); box-shadow: 0 0 0 4px color-mix(in srgb, var(--acento) 25%, transparent); }
+.ini-busca-caixa .botao { border-radius: 14px; padding: 0 18px; }
+
+.ini-atalhos { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+.ini-atalho { display: flex; align-items: center; gap: 12px; text-align: left; background: var(--superficie); border: 1px solid var(--linha); border-radius: 14px; padding: 14px; cursor: pointer; color: var(--tinta); transition: transform .18s ease, border-color .18s ease, background .18s ease; }
+.ini-atalho:hover { transform: translateY(-2px); border-color: var(--borda); background: var(--superficie-2); }
+.ini-atalho:active { transform: scale(.98); }
+.ini-atalho:focus-visible, .ini-mais:focus-visible, .ini-fontes a:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+.ini-atalho-ic { flex: none; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: color-mix(in srgb, var(--acento) 16%, var(--superficie-2)); color: var(--acento); }
+.ini-atalho-ic .ic { width: 20px; height: 20px; }
+.ini-atalho-txt { display: grid; gap: 2px; min-width: 0; }
+.ini-atalho-txt span { font-size: 13px; color: var(--tinta-2); line-height: 1.35; }
+.ini-seta { margin-left: auto; color: var(--muted); transition: transform .18s ease; }
+.ini-atalho:hover .ini-seta { transform: translateX(3px); color: var(--acento); }
+
+.ini-verif { background: var(--superficie); border: 1px solid var(--linha); border-radius: 18px; padding: clamp(14px, 3vw, 22px); }
+.ini-verif h2 { font-size: 18px; margin: 0 0 10px; }
+.ini-verif ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.ini-verif li { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; line-height: 1.45; }
+.ini-verif .selo { flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 13px; color: #fff; margin-top: 1px; }
+.ini-verif .selo.ok { background: #0ca30c; } .ini-verif .selo.info { background: var(--acento); }
+.ini-mais { margin-top: 12px; font-size: 14px; }
+
+.ini-fontes { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 10px; padding: 6px 0 4px; font-size: 13px; color: var(--muted); }
+.ini-fontes-t { font-weight: 700; text-transform: uppercase; letter-spacing: .08em; font-size: 11px; margin-right: 4px; }
+.ini-logo { padding: 5px 10px; border: 1px solid var(--linha); border-radius: 99px; color: var(--tinta-2); text-decoration: none; font-weight: 650; transition: border-color .18s ease, color .18s ease; }
+.ini-logo:hover { border-color: var(--borda); color: var(--tinta); }
+.ini-git { color: var(--acento); text-decoration: none; margin-left: 6px; }
+
+@media (max-width: 760px) {
+  .ini-numeros { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ini-hero { padding-top: 6px; }
+}
+@media (max-width: 420px) {
+  .ini-cands { gap: 8px; }
+  .ini-busca-caixa .botao { display: none; }
+  .ini-n { padding: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ini > *, .ini-atalho, .ini-seta, .ini-busca-caixa input { animation: none !important; transition: none !important; }
+}

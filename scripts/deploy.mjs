@@ -55,10 +55,12 @@ writeFileSync(util, readFileSync(util, 'utf8').replace("const VERSAO_DADOS = '';
 const js = readdirSync(join(DIR, 'js')).filter(n => n.endsWith('.js'));
 for (const n of js) {
   const p = join(DIR, 'js', n);
-  writeFileSync(p, readFileSync(p, 'utf8').replace(/from '\.\/([\w-]+\.js)'/g, (_, a) => `from './${a}?v=${hash('js/' + a)}'`));
+  writeFileSync(p, readFileSync(p, 'utf8')
+    .replace(/from '\.\/([\w-]+\.js)'/g, (_, a) => `from './${a}?v=${hash('js/' + a)}'`)
+    .replace(/\['\.\/([\w-]+\.js)'/g, (_, a) => `['./${a}?v=${hash('js/' + a)}'`));
 }
 const idx = join(DIR, 'index.html');
-writeFileSync(idx, readFileSync(idx, 'utf8').replace(/(src|href)="((?:js\/[\w-]+\.js)|estilo\.css)"/g, (_, attr, arq) => `${attr}="${arq}?v=${hash(arq)}"`));
+writeFileSync(idx, readFileSync(idx, 'utf8').replace(/(src|href)="((?:js\/[\w-]+\.js)|[\w-]+\.css)"/g, (_, attr, arq) => `${attr}="${arq}?v=${hash(arq)}"`));
 writeFileSync(join(DIR, '.nojekyll'), '');
 if (cname) writeFileSync(join(DIR, 'CNAME'), cname + '\n');
 
