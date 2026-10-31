@@ -55,3 +55,5 @@
 @media (prefers-reduced-motion: reduce) {
   .exp-trilho i, .exp-pt { animation: none; }
 }
+
+.exp-grade.so-ranking { grid-template-columns: 1fr; }
