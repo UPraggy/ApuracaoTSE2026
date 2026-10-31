@@ -1,9 +1,9 @@
 // Painel da apuração: mapa de cor (UF → município → local de votação), busca e painel de detalhes.
-import { UF_NOME, REGIAO_NOME, carregar, nf, pct, pp, hhmm, esc, norm, titulo, sigla, vazio, somar, corVantagem, CLASSES_VANTAGEM, classesQuantis, corSequencial, corCss } from './util.js?v=e7f49fd024';
-import { iniciarAnalises } from './analises.js?v=3863697b95';
+import { UF_NOME, REGIAO_NOME, carregar, nf, pct, pp, hhmm, esc, norm, titulo, sigla, vazio, somar, corVantagem, CLASSES_VANTAGEM, classesQuantis, corSequencial, corCss } from './util.js?v=9a319dbd9e';
+import { iniciarAnalises } from './analises.js?v=0b3607a963';
 import { animarNumeros } from './anim.js?v=19eef1076c';
-import { iniciarFaq } from './faq.js?v=34f0f37c46';
-import { iniciarComparar } from './comparar.js?v=34f66a9946';
+import { iniciarFaq } from './faq.js?v=711ecf2111';
+import { iniciarComparar } from './comparar.js?v=cd83712756';
 
 const R = await carregar('resumo.json');
 const MUN = await carregar('municipios.json');
@@ -108,6 +108,7 @@ const camadaUf = L.geoJSON(geoUf, {
   onEachFeature: (f, camada) => {
     const uf = f.properties.uf;
     camada.bindTooltip(() => {
+      if (diaAtivo) return `<b>${esc(UF_NOME[uf])} (${uf})</b><br>${pct(diaAtivo[uf] || 0, 1)} de quem votou no estado já tinha votado`;
       const g = apuracaoAtiva ? apuracaoAtiva[uf] : R.porUf[uf];
       const extra = apuracaoAtiva ? ` · ${pct(g.secoes, R.porUf[uf].secoes)} das seções apuradas` : '';
       return `<b>${esc(UF_NOME[uf])} (${uf})</b><br>${fmtMetrica(g)}${extra}`;
@@ -283,7 +284,7 @@ const feicoes = (camada, chaves) => { const out = []; camada?.eachLayer(l => { c
 // ---------- Seleção (o que está aberto no painel e no mapa) ----------
 let selAtual = null, escolhendo = false;
 async function selecionar(sel, { semHash = false } = {}) {
-  pararApuracao();
+  pararApuracao(); if (typeof pararDia === 'function' && diaAtivo) pararDia();
   if (sel.tipo !== 'endereco' && marcaEndereco) { marcaEndereco.remove(); marcaEndereco = null; }
   if (document.activeElement !== entrada && !escolhendo) entrada.value = '';
   escolhendo = false;
@@ -331,7 +332,7 @@ function cabecalho(tipo, nome, g, extra = '') {
     <div${foco('brnu')}><dt>Brancos</dt><dd>${nf(g.br)} <small>${pct(g.br, g.comp)}</small></dd></div>
     <div${foco('brnu')}><dt>Nulos</dt><dd>${nf(g.nu)} <small>${pct(g.nu, g.comp)}</small></dd></div>
     <div${foco('biom')} title="Eleitores com biometria cadastrada que foram liberados para votar sem a digital (campo QT_ELEI_BIOM_SEM_HABILITACAO)"><dt>Sem habilitação biométrica</dt><dd>${nf(g.biom)} <small>${pct(g.biom, g.comp, 2)}</small></dd></div>
-    <div${foco('apos17')} title="Urnas que fecharam depois de 17:05, 17:30 e 19:00 (horário de Brasília). Depois de 17:00:00 em ponto: quase todas."><dt>Urnas fechadas após 17h05 · 17h30 · 19h</dt><dd>${nf(g.q1705)} <small>${pct(g.q1705, g.secoes)}</small> · ${nf(g.q1730)} · ${nf(g.q19)}</dd></div>
+    <div${foco('apos17')} title="Urnas que fecharam depois de 17:05, 17:30 e 19:00 (horário de Brasília). Depois de 17:00:00 em ponto: quase todas."><dt>Urnas fechadas após 17h05 · 17h30 · 19h</dt><dd>${nf(g.q1705)} <small>${pct(g.q1705, g.secoes)}</small> · ${g.q1730 == null ? '<small>—</small>' : nf(g.q1730)} · ${nf(g.q19)}</dd></div>
     <div${foco('alertas')} title="Seções com pelo menos um alerta automático (veja a aba Alertas)"><dt>Seções com alerta</dt><dd>${nf(g.alertas)}</dd></div>
   </dl>`;
 }
@@ -382,7 +383,7 @@ const ROTAS = {
     await desenharPoligonos();
     mapa.flyToBounds(camadaUf.getBounds(), { padding: [8, 8], duration: 0.6 });
     const zz = R.porUf.ZZ;
-    p.innerHTML = migalhas([['Brasil']]) + cabecalho('País', 'Brasil', R.totalBrasil, `<p class="small">Sem o exterior. Com ${sigla('ZZ')}: ${nf(R.total.comp)} votantes · diferença final ${nf(Math.abs(R.total.a - R.total.b))} votos.</p>`);
+    p.innerHTML = migalhas([['Brasil']]) + `<div id="cab-brasil">` + cabecalho('País', 'Brasil', R.totalBrasil, `<p class="small">Sem o exterior. Com ${sigla('ZZ')}: ${nf(R.total.comp)} votantes · diferença final ${nf(Math.abs(R.total.a - R.total.b))} votos.</p>`) + `</div>`;
     await blocoContexto(p, 'BR', 'uf');
     tabela(p, 'Regiões', [{ t: 'Região', v: r => REGIAO_NOME[r.id], busca: r => REGIAO_NOME[r.id] }, colVantagem(r => r.g), colComp(r => r.g), colBio(r => r.g)],
       Object.keys(R.regioes).map(id => ({ id, g: R.regioes[id].reduce((s, uf) => somar(s, R.porUf[uf]), vazio()) })), r => selecionar({ tipo: 'regiao', id: r.id }));
@@ -735,7 +736,12 @@ function escolher(it) { escolhendo = true; sugestoes.hidden = true; entrada.valu
 // ---------- Controles do mapa ----------
 const selMetrica = document.getElementById('metrica');
 selMetrica.innerHTML = Object.entries(METRICAS).map(([k, m]) => `<option value="${k}">${m.nome}</option>`).join('');
-selMetrica.onchange = async () => { if (METRICAS[selMetrica.value].hist) await carregarHistorico(); metrica = selMetrica.value; selecionar(selAtual || { tipo: 'brasil' }, { semHash: true }); };
+selMetrica.onchange = async () => {
+  if (METRICAS[selMetrica.value].hist) await carregarHistorico();
+  metrica = selMetrica.value;
+  if (apuracaoAtiva && !METRICAS[metrica].hist) { recalcularLimites(Object.entries(R.porUf).filter(([u]) => u !== 'ZZ').map(([, g]) => g)); desenharLegenda(); mostrarPasso(+deslizador.value); return; }
+  selecionar(selAtual || { tipo: 'brasil' }, { semHash: true });
+};
 document.getElementById('nivel').onchange = e => { nivelBrasil = e.target.value; selecionar({ tipo: 'brasil' }); };
 // Ruas: ligadas, aparecem sozinhas a partir do zoom 9 (cidade). Desligadas, o mapa fica só com as cores.
 const chkRuas = document.getElementById('ruas');
@@ -763,9 +769,11 @@ document.getElementById('btn-exterior').onclick = () => selecionar({ tipo: 'uf',
 
 // ---------- Reprodução da apuração (ordem de chegada dos boletins ao TSE) ----------
 const passos = (() => {
-  const acum = {}; for (const uf of Object.keys(R.porUf)) acum[uf] = { secoes: 0, a: 0, b: 0 };
+  // Cada bloco traz, por UF: [secoes, a, b, aptos, comp, biom, branco, nulo, alertas, q1705, q19] (scripts/construir.mjs).
+  const CAMPOS = ['secoes', 'a', 'b', 'aptos', 'comp', 'biom', 'br', 'nu', 'alertas', 'q1705', 'q19'];
+  const acum = {}; for (const uf of Object.keys(R.porUf)) acum[uf] = Object.fromEntries(CAMPOS.map(c => [c, 0]));
   return R.apuracao.map(b => {
-    for (const [uf, [s, a, bb]] of Object.entries(b.ufs)) { acum[uf].secoes += s; acum[uf].a += a; acum[uf].b += bb; }
+    for (const [uf, v] of Object.entries(b.ufs)) CAMPOS.forEach((c, k) => { acum[uf][c] += v[k] || 0; });
     return { min: b.min, ufs: Object.fromEntries(Object.entries(acum).map(([u, x]) => [u, { ...x }])) };
   });
 })();
@@ -775,13 +783,18 @@ let timer = null;
 function mostrarPasso(i) {
   const pz = passos[i];
   apuracaoAtiva = Object.fromEntries(Object.entries(pz.ufs).map(([u, x]) => [u, { ...vazio(), ...x }]));
-  const t = Object.values(pz.ufs).reduce((s, x) => ({ secoes: s.secoes + x.secoes, a: s.a + x.a, b: s.b + x.b }), { secoes: 0, a: 0, b: 0 });
-  const dia = pz.min >= 1440 ? '26/10' : '25/10', m = pz.min % 1440;
-  rotTempo.innerHTML = `<b>${dia} ${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}</b> (horário do recebimento) · ${pct(t.secoes, R.total.secoes, 2)} das seções · ${esc(NOME_A)} <b>${pct(t.a, t.a + t.b, 2)}</b> × <b>${pct(t.b, t.a + t.b, 2)}</b> ${esc(NOME_B)}`;
+  // Brasil (sem o exterior) naquele instante: alimenta o painel ao vivo.
+  const t = Object.entries(apuracaoAtiva).filter(([u]) => u !== 'ZZ').reduce((s, [, x]) => somar(s, x), { ...vazio(), q1705: 0, q19: 0 });
+  const dia = pz.min >= 1440 ? '26/10' : '25/10', m = pz.min % 1440, hora = `${dia} ${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+  rotTempo.innerHTML = `<b>${hora}</b> (horário do recebimento) · <b>${pct(t.secoes, R.totalBrasil.secoes, 2)}</b> das urnas apuradas · ${esc(NOME_A)} <b>${pct(t.a, t.a + t.b, 2)}</b> × <b>${pct(t.b, t.a + t.b, 2)}</b> ${esc(NOME_B)}`;
+  const vivo = document.getElementById('cab-brasil');
+  if (vivo && selAtual?.tipo === 'brasil') vivo.innerHTML = cabecalho(`Apuração em andamento · ${hora} · ${pct(t.secoes, R.totalBrasil.secoes, 2)} das urnas`, 'Brasil', t, `<p class="small">Números somados só com os boletins recebidos até este momento. Arraste a barra para ir e voltar.</p>`);
   camadaUf.setStyle(f => { const g = apuracaoAtiva[f.properties.uf]; return { ...estilo(g, f.properties.uf, corCss('--borda-mapa')), fillOpacity: g.secoes ? 0.25 + 0.65 * g.secoes / R.porUf[f.properties.uf].secoes : 0.06 }; });
+  camadaUf.eachLayer(l => { if (l.isTooltipOpen()) l.setTooltipContent(l.getTooltip()._content); });
 }
 async function iniciarApuracao() {
-  if (selAtual?.tipo !== 'brasil' || metrica !== 'resultado' || nivelBrasil !== 'uf') { metrica = 'resultado'; selMetrica.value = 'resultado'; nivelBrasil = 'uf'; document.getElementById('nivel').value = 'uf'; await selecionar({ tipo: 'brasil' }); }
+  if (METRICAS[metrica].hist) { metrica = 'resultado'; selMetrica.value = 'resultado'; } // variação 2022→2026 não existe hora a hora
+  if (selAtual?.tipo !== 'brasil' || nivelBrasil !== 'uf') { nivelBrasil = 'uf'; document.getElementById('nivel').value = 'uf'; await selecionar({ tipo: 'brasil' }); }
   if (+deslizador.value >= passos.length - 1) deslizador.value = 0;
   btnPlay.innerHTML = `${icone('pausa')}Pausar`; btnPlay.setAttribute('aria-pressed', 'true');
   const reduzido = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -790,9 +803,52 @@ async function iniciarApuracao() {
 function pararApuracao(limpar = true) {
   if (timer) { clearInterval(timer); timer = null; }
   btnPlay.innerHTML = `${icone('play')}Reproduzir apuração`; btnPlay.setAttribute('aria-pressed', 'false');
-  if (limpar && apuracaoAtiva) { apuracaoAtiva = null; rotTempo.textContent = 'Arraste para ver o mapa em qualquer momento da apuração.'; deslizador.value = passos.length - 1; camadaUf.setStyle(camadaUf.options.style); }
+  if (limpar && apuracaoAtiva) { apuracaoAtiva = null; rotTempo.textContent = 'Arraste para ver o mapa em qualquer momento da apuração. Troque a cor do mapa para acompanhar biometria, comparecimento ou brancos e nulos.'; deslizador.value = passos.length - 1; camadaUf.setStyle(camadaUf.options.style); }
 }
 btnPlay.onclick = () => timer ? pararApuracao(false) : iniciarApuracao();
+
+// ---------- Simulação do dia: quanto do comparecimento final já tinha votado em cada horário ----------
+// Vem dos logs das urnas (amostra calibrada pelo comparecimento do boletim). Só comparecimento: o log não diz o voto.
+let DIA = null, diaAtivo = null, timerDia = null;
+const btnDia = document.getElementById('play-dia'), sliderDia = document.getElementById('tempo-dia'), rotDia = document.getElementById('dia-rotulo');
+const LIM_DIA = [0.2, 0.4, 0.6, 0.8, 0.95];
+async function carregarDia() {
+  if (DIA) return;
+  const L = await carregar('logs-resumo.json');
+  const c = L.curvaDia, acum = {};
+  DIA = { blocos: c.blocos, passos: [] };
+  let nac = 0;
+  c.blocos.forEach((b, i) => {
+    nac += c.nacional[i];
+    const ufs = {};
+    for (const [uf, serie] of Object.entries(c.porUf)) { acum[uf] = (acum[uf] || 0) + serie[i]; ufs[uf] = acum[uf]; }
+    DIA.passos.push({ min: b, nac, ufs });
+  });
+  DIA.totalUf = { ...acum }; DIA.totalNac = nac;
+  sliderDia.max = DIA.passos.length - 1;
+}
+function passoDia(i) {
+  const p = DIA.passos[i];
+  diaAtivo = Object.fromEntries(Object.entries(p.ufs).map(([uf, v]) => [uf, DIA.totalUf[uf] ? v / DIA.totalUf[uf] : 0]));
+  rotDia.innerHTML = `<b>${hhmm(Math.min(p.min + 15, 1200))}</b> (Brasília) · já votaram ≈ <b>${nf(p.nac * R.totalBrasil.comp / DIA.totalNac)}</b> pessoas · <b>${pct(p.nac, DIA.totalNac)}</b> de todo o comparecimento`;
+  camadaUf.setStyle(f => { const fr = diaAtivo[f.properties.uf] ?? 0; return { ...estilo(R.porUf[f.properties.uf], f.properties.uf, corCss('--borda-mapa')), fillColor: corSequencial(fr, LIM_DIA), fillOpacity: 0.9 }; });
+  ctlLegenda.getContainer().innerHTML = `<div class="lc-titulo">Quanto já votou (% do comparecimento do estado)</div><div class="lc-barra">${[0.1, 0.3, 0.5, 0.7, 0.9, 1].map(v => `<i style="background:${corSequencial(v, LIM_DIA)}"></i>`).join('')}</div><div class="lc-rot"><span>0%</span><span>100%</span></div>`;
+}
+function pararDia(limpar = true) {
+  if (timerDia) { clearInterval(timerDia); timerDia = null; }
+  btnDia.innerHTML = `${icone('relogio')}Simular o dia`; btnDia.setAttribute('aria-pressed', 'false');
+  if (limpar && diaAtivo) { diaAtivo = null; rotDia.textContent = 'Das 8h às 17h: quanto do eleitorado de cada estado já tinha votado, hora a hora.'; camadaUf.setStyle(camadaUf.options.style); legendaCalor(); }
+}
+btnDia.onclick = async () => {
+  if (timerDia) { pararDia(false); return; }
+  await carregarDia();
+  if (selAtual?.tipo !== 'brasil' || nivelBrasil !== 'uf') { nivelBrasil = 'uf'; document.getElementById('nivel').value = 'uf'; await selecionar({ tipo: 'brasil' }); }
+  pararApuracao();
+  if (+sliderDia.value >= DIA.passos.length - 1) sliderDia.value = 0;
+  btnDia.innerHTML = `${icone('pausa')}Pausar`; btnDia.setAttribute('aria-pressed', 'true');
+  timerDia = setInterval(() => { const i = +sliderDia.value + 1; if (i >= DIA.passos.length) { pararDia(false); return; } sliderDia.value = i; passoDia(i); }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 500 : 160);
+};
+sliderDia.oninput = async () => { await carregarDia(); if (timerDia) { clearInterval(timerDia); timerDia = null; btnDia.innerHTML = `${icone('relogio')}Simular o dia`; } if (selAtual?.tipo !== 'brasil') await selecionar({ tipo: 'brasil' }); passoDia(+sliderDia.value); };
 deslizador.oninput = async () => { if (selAtual?.tipo !== 'brasil') await selecionar({ tipo: 'brasil' }); if (timer) { clearInterval(timer); timer = null; btnPlay.innerHTML = `${icone('play')}Reproduzir apuração`; } mostrarPasso(+deslizador.value); };
 
 // ---------- Abas e tema ----------
