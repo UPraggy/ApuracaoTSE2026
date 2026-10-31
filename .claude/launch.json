@@ -1,0 +1,6 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "apuracao", "runtimeExecutable": "node", "runtimeArgs": ["scripts/servir.mjs"], "port": 5174 }
+  ]
+}

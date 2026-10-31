@@ -1,0 +1,7 @@
+# Dados brutos do TSE (2 GB): baixar de novo pelo catálogo em dados/catalogo/downloads.json
+dados/brutos/
+dados/extraidos/
+dados/*.zip
+dados/investigacao.json
+.cache/
+node_modules/

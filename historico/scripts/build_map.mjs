@@ -1,0 +1,12 @@
+import fs from 'node:fs/promises';
+const template=await fs.readFile('work/analise_template.html','utf8');
+const map=await fs.readFile('work/mapa_real.mjs','utf8');
+const geo=JSON.parse(await fs.readFile('work/brasil_uf.geojson','utf8'));
+if(geo.features.length!==27)throw Error('Malha incompleta');
+const uri='data:text/javascript;base64,'+(await fs.readFile('work/three.module.js')).toString('base64');
+let html=template.slice(0,template.indexOf('<script type="module">'))+'<script type="module">'+map.replace('__GEO__',JSON.stringify(geo)).replace('__THREE_URI__',uri)+'</script></main></body></html>';
+html=html.replace(/<script type="importmap">.*?<\/script>/,'').replace('__DATA__',await fs.readFile('outputs/analise_dados.json','utf8'));
+html=html.replace('</style>',`#maptip{display:none;position:absolute;bottom:20px;left:16px;right:16px;pointer-events:none;padding:12px;background:#071a2fee;border:1px solid #76c9df;border-radius:10px;color:#fff}.maptools{display:flex;gap:12px;align-items:center;flex-wrap:wrap}select{background:#152d46;color:#e8f3ff;padding:10px;border:1px solid #416581;border-radius:8px}#globe{touch-action:none}.maplist{max-height:none}@media(max-width:780px){.mapwrap{grid-template-columns:1fr}#globe{height:440px}.mapstage{min-height:440px}} </style>`);
+await fs.writeFile('outputs/analise.html',html);
+await fs.copyFile('work/brasil_uf.geojson','outputs/brasil_uf.geojson');
+console.log('Construído: 27 UFs IBGE; Three.js e geografia embutidos; sem CDN em execução.');

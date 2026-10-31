@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apuração TSE 2026</title>
+<meta name="description" content="Mapa e análise dos boletins de urna do 2º turno de 2026 (Presidente): resultado por estado, município, zona, bairro e local de votação, biometria, horários e alertas automáticos. Dados abertos do TSE e malhas do IBGE.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M8 17l5 5 11-12' stroke='white' stroke-width='3.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="estilo.css">
+<script>try { const t = localStorage.getItem('tema'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+</head>
+<body>
+<header class="topo">
+  <div class="topo-linha">
+    <div>
+      <div class="sobretitulo">Boletins de urna · TSE · 2º turno · 25/10/2026 · Presidente</div>
+      <h1>Apuração 2026</h1>
+    </div>
+    <div class="topo-acoes">
+      <div class="busca-box" role="combobox" aria-expanded="false" aria-owns="sugestoes" aria-haspopup="listbox">
+        <input id="busca" type="search" autocomplete="off" placeholder="Estado, cidade, região, bairro, zona ou escola…" aria-label="Buscar estado, cidade, região, bairro, zona eleitoral ou local de votação" aria-autocomplete="list" aria-controls="sugestoes">
+        <ul id="sugestoes" role="listbox" hidden></ul>
+      </div>
+      <button id="tema" class="botao icone" title="Trocar tema claro/escuro" aria-label="Trocar tema claro/escuro">◐</button>
+    </div>
+  </div>
+  <nav class="abas" role="tablist" aria-label="Seções do painel">
+    <button role="tab" data-aba="mapa" aria-selected="true">Mapa</button>
+    <button role="tab" data-aba="geral" aria-selected="false">Visão geral</button>
+    <button role="tab" data-aba="biometria" aria-selected="false">Biometria</button>
+    <button role="tab" data-aba="horarios" aria-selected="false">Horários</button>
+    <button role="tab" data-aba="estados" aria-selected="false">Estados</button>
+    <button role="tab" data-aba="alertas" aria-selected="false">Alertas</button>
+    <button role="tab" data-aba="sobre" aria-selected="false">Método e fontes</button>
+  </nav>
+</header>
+
+<main>
+  <section id="aba-mapa" role="tabpanel" class="aba-mapa">
+    <div class="mapa-col">
+      <div class="ferramentas">
+        <label>Cor <select id="metrica"></select></label>
+        <label title="Na vista do Brasil, pintar por estado ou por município">Nível <select id="nivel"><option value="uf">Estados</option><option value="mun">Municípios</option></select></label>
+        <label class="check" title="Mostra as ruas (OpenStreetMap/CARTO) quando você aproxima numa cidade, para achar as escolas"><input type="checkbox" id="ruas" checked> Ruas ao aproximar</label>
+        <button id="btn-brasil" class="botao">Brasil</button>
+        <button id="btn-exterior" class="botao" title="ZZ é o código do TSE para seções fora do Brasil">Exterior (ZZ)</button>
+      </div>
+      <div id="mapa" aria-label="Mapa do Brasil colorido pelo indicador escolhido. Clique numa área para abrir."></div>
+      <div id="resumo-mapa" class="resumo-mapa" aria-live="polite"></div>
+      <div id="legenda" class="legenda"></div>
+      <div class="apuracao">
+        <button id="play" class="botao primario" aria-pressed="false">▶ Reproduzir apuração</button>
+        <input id="tempo" type="range" min="0" value="0" aria-label="Momento da apuração">
+        <p id="tempo-rotulo" class="small">Arraste para ver o mapa em qualquer momento da apuração.</p>
+      </div>
+    </div>
+    <aside id="painel" class="painel" aria-live="polite"></aside>
+  </section>
+
+  <section id="aba-geral" role="tabpanel" hidden></section>
+  <section id="aba-biometria" role="tabpanel" hidden></section>
+  <section id="aba-horarios" role="tabpanel" hidden></section>
+  <section id="aba-estados" role="tabpanel" hidden></section>
+  <section id="aba-alertas" role="tabpanel" hidden></section>
+
+  <section id="aba-sobre" role="tabpanel" hidden>
+    <h2>Método e fontes</h2>
+    <div class="grid2">
+      <div>
+        <h3>De onde vêm os dados</h3>
+        <ul>
+          <li><b>Boletins de urna</b>: <a href="https://dadosabertos.tse.jus.br/dataset/resultados-2026-boletim-de-urna" target="_blank" rel="noopener">Portal de Dados Abertos do TSE</a>, 2º turno, 28 arquivos (26 estados, DF e exterior), coletados em 30/10/2026. Cada ZIP foi conferido com o SHA-512 publicado pelo TSE.</li>
+          <li><b>Locais de votação</b> (nome da escola, endereço, bairro, coordenadas): cadastro "Eleitorado — local de votação 2026" do TSE.</li>
+          <li><b>Malhas</b> dos estados e municípios: <a href="https://servicodados.ibge.gov.br/api/docs/malhas?versao=3" target="_blank" rel="noopener">API de malhas do IBGE</a>, qualidade mínima. Regiões intermediárias e imediatas: <a href="https://servicodados.ibge.gov.br/api/docs/localidades" target="_blank" rel="noopener">API de localidades do IBGE</a>.</li>
+          <li><b>Código TSE ↔ código IBGE</b> dos municípios: <a href="https://github.com/betafcc/Municipios-Brasileiros-TSE" target="_blank" rel="noopener">betafcc/Municipios-Brasileiros-TSE</a>, mais Boa Esperança do Norte (MT), incluída à mão.</li>
+          <li><b>População</b>: Censo IBGE 2022. <b>Histórico</b>: totalizações do TSE de 2018 e 2022.</li>
+        </ul>
+        <h3>Como os números são calculados</h3>
+        <ul>
+          <li>Um registro por seção do cargo Presidente (chave UF + município + zona + seção). Aptos, comparecimento, abstenções e o campo de biometria vêm do cabeçalho do boletim. Votos nominais, brancos e nulos são somados por seção.</li>
+          <li>As seções se juntam no local de votação (escola), no bairro (o do endereço do local), na zona, no município, na região e no estado.</li>
+          <li>"Comparado à mesma escola": a % de cada seção é comparada à das <i>outras</i> seções do mesmo local de votação. A inclinação é uma regressão ponderada pelos votos válidos, com efeito fixo de local.</li>
+          <li>Horários: o boletim traz a hora local da urna, convertida aqui para Brasília pelo fuso da UF.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Siglas</h3>
+        <dl class="glossario">
+          <dt>UF</dt><dd>Unidade da Federação (estado ou DF).</dd>
+          <dt>ZZ</dt><dd>Código do TSE para as seções no <b>exterior</b>. Não é um estado e não aparece no mapa: use o botão "Exterior (ZZ)".</dd>
+          <dt>BU</dt><dd>Boletim de urna: o resultado impresso e publicado por cada urna.</dd>
+          <dt>Seção</dt><dd>Uma urna. Um local de votação (escola) tem várias seções.</dd>
+          <dt>Zona</dt><dd>Zona eleitoral: divisão administrativa da Justiça Eleitoral. Pode cobrir vários municípios, e uma capital tem várias.</dd>
+          <dt>Sem hab. biom.</dt><dd>Eleitores com biometria cadastrada que votaram sem habilitação pela digital (identificados por documento).</dd>
+          <dt>p.p.</dt><dd>Pontos percentuais: de 50% para 52% são +2 p.p.</dd>
+          <dt>Válidos</dt><dd>Votos dados a um candidato, sem brancos e nulos.</dd>
+        </dl>
+        <h3>Limites</h3>
+        <ul>
+          <li>O boletim é agregado por seção: não liga a forma de identificação de cada eleitor ao voto dele.</li>
+          <li>Associação estatística ou valor extremo não demonstra fraude. Os alertas servem para escolher o que conferir.</li>
+          <li>Malha simplificada: serve para visualização, não para limite oficial. Cerca de 1,7% dos locais não têm coordenadas no cadastro.</li>
+          <li>Ainda não entram: governadores no 2º turno e o 1º turno, que está catalogado mas ainda não foi baixado.</li>
+        </ul>
+        <p class="small muted">Gerado por <code>scripts/construir.mjs</code> a partir dos arquivos oficiais. Nada é atualizado sozinho.</p>
+      </div>
+    </div>
+  </section>
+</main>
+<footer class="rodape small">Dados públicos do TSE e do IBGE. Painel independente, sem vínculo com a Justiça Eleitoral.</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

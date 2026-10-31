@@ -1,0 +1,699 @@
+{
+  "meta": {
+    "arquivos": 28,
+    "linhas": 2088107,
+    "escopo": "Segundo turno de 2026; CSV por UF; ZZ = exterior",
+    "fonte": "https://dadosabertos.tse.jus.br/dataset/resultados-2026-boletim-de-urna"
+  },
+  "totals": {
+    "secoes": 499205,
+    "aptos": 158744977,
+    "comparecimento": 128236074,
+    "abstencoes": 30508903,
+    "biomSem": 8632488,
+    "apos17": 467153,
+    "apos19": 6326,
+    "alertas": 27
+  },
+  "claimChecks": {
+    "semBiometria": {
+      "observado": 8632488,
+      "alegado": 8632488,
+      "diferenca": 0
+    },
+    "secoes": {
+      "observado": 499205,
+      "alegado": 499205,
+      "diferenca": 0
+    },
+    "comparecimento": {
+      "observado": 128236074,
+      "alegado": 128236074,
+      "diferenca": 0
+    },
+    "margem": {
+      "observado": 4430191,
+      "alegado": 4430191,
+      "diferenca": 0
+    },
+    "apos17": {
+      "observado": 467153,
+      "alegado": 348398,
+      "diferenca": 118755
+    },
+    "apos19": {
+      "observado": 6326,
+      "alegado": 6333,
+      "diferenca": -7
+    }
+  },
+  "candidatosNacional": {
+    "LULA": 64256232,
+    "FLAVIO BOLSONARO": 59826041
+  },
+  "estados": [
+    {
+      "uf": "AC",
+      "secoes": 2270,
+      "aptos": 613715,
+      "comparecimento": 453654,
+      "abstencoes": 160061,
+      "biomSem": 22654,
+      "apos17": 1,
+      "apos19": 0,
+      "candidatos": {
+        "LULA": 144513,
+        "FLAVIO BOLSONARO": 287715
+      },
+      "alertas": 0
+    },
+    {
+      "uf": "AL",
+      "secoes": 7101,
+      "aptos": 2442081,
+      "comparecimento": 1951632,
+      "abstencoes": 490449,
+      "biomSem": 135874,
+      "apos17": 7101,
+      "apos19": 2,
+      "candidatos": {
+        "LULA": 1152621,
+        "FLAVIO BOLSONARO": 744140
+      },
+      "alertas": 0
+    },
+    {
+      "uf": "AM",
+      "secoes": 8157,
+      "aptos": 2798661,
+      "comparecimento": 2192059,
+      "abstencoes": 606602,
+      "biomSem": 118955,
+      "apos17": 1,
+      "apos19": 0,
+      "candidatos": {
+        "LULA": 1145783,
+        "FLAVIO BOLSONARO": 975245
+      },
+      "alertas": 0
+    },
+    {
+      "uf": "AP",
+      "secoes": 1914,
+      "aptos": 576910,
+      "comparecimento": 429975,
+      "abstencoes": 146935,
+      "biomSem": 19685,
+      "apos17": 1914,
+      "apos19": 0,
+      "candidatos": {
+        "LULA": 222968,
+        "FLAVIO BOLSONARO": 198674
+      },
+      "alertas": 0
+    },
+    {
+      "uf": "BA",
+      "secoes": 35476,
+      "aptos": 11312891,
+      "comparecimento": 9422047,
+      "abstencoes": 1890844,
+      "biomSem": 702255,
+      "apos17": 35476,
+      "apos19": 933,
+      "candidatos": {
+        "LULA": 6485258,
+        "FLAVIO BOLSONARO": 2608761
+      },
+      "alertas": 0
+    },
+    {
+      "uf": "CE",
+      "secoes": 23765,
+      "aptos": 6996521,
+      "comparecimento": 6024843,
+      "abstencoes": 971678,
+      "biomSem": 429294,
+      "apos17": 23765,
+      "apos19": 0,
+      "candidatos": {
+        "LULA": 4036124,
+        "FLAVIO BOLSONARO": 1819478
+      },
+      "alertas": 0
+    },
+    {
+      "uf": "DF",
+      "secoes": 6969,
+      "aptos": 2258995,
+      "comparecimento": 1868280,
+      "abstencoes": 390715,
+      "biomSem": 84114,
+      "apos17": 6969,
+      "apos19": 17,
+      "candidatos": {
+        "FLAVIO BOLSONARO": 979542,
+        "LULA": 825224
+      },
+      "alertas": 0
+    },
+    {
+      "uf": "ES",
+      "secoes": 9844,
+      "aptos": 2991515,
+      "comparecimento": 2409214,
+      "abstencoes": 582301,
+      "biomSem": 151401,
+      "apos17": 9844,
+      "apos19": 2,
+      "candidatos": {
+        "LULA": 1001965,
+        "FLAVIO BOLSONARO": 1294504
+      },
+      "alertas": 0
+    },
+    {
+      "uf": "GO",
+      "secoes": 15686,
+      "aptos": 5080385,
+      "comparecimento": 4047280,
+      "abstencoes": 1033105,
+      "biomSem": 268656,
+      "apos17": 15686,
+      "apos19": 1,
+      "candidatos": {
+        "LULA": 1585555,
+        "FLAVIO BOLSONARO": 2345334
+      },
+      "alertas": 0
+    },
+    {
+      "uf": "MA",
+      "secoes": 18093,
+      "aptos": 5183049,
+      "comparecimento": 4127771,
+      "abstencoes": 1055278,
+      "biomSem": 259852,
+      "apos17": 18093,
+      "apos19": 3,
+      "candidatos": {
+        "LULA": 2808231,
+        "FLAVIO BOLSONARO": 1229971
+      },
+      "alertas": 0
+    },
+    {
+      "uf": "MG",
+      "secoes": 52062,
+      "aptos": 16372144,
+      "comparecimento": 13044203,
+      "abstencoes": 3327941,
+      "biomSem": 887910,
+      "apos17": 52062,
+      "apos19": 1,
+      "candidatos": {
+        "LULA": 6351099,
+        "FLAVIO BOLSONARO": 6241786
+      },
+      "alertas": 0
+    },
+    {
+      "uf": "MS",
+      "secoes": 7106,
+      "aptos": 2024437,
+      "comparecimento": 1594460,
+      "abstencoes": 429977,
+      "biomSem": 115545,
+      "apos17": 0,
+      "apos19": 0,
+      "candidatos": {
+        "LULA": 628973,
+        "FLAVIO BOLSONARO": 927892
+      },
+      "alertas": 0
+    },
+    {
+      "uf": "MT",
+      "secoes": 8287,
+      "aptos": 2637879,
+      "comparecimento": 2085334,
+      "abstencoes": 552545,
+      "biomSem": 137579,
+      "apos17": 9,
+      "apos19": 0,
+      "candidatos": {
+        "LULA": 694167,
+        "FLAVIO BOLSONARO": 1351099
+      },
+      "alertas": 0
+    },
+    {
+      "uf": "PA",
+      "secoes": 20827,
+      "aptos": 6262063,
+      "comparecimento": 4989573,
+      "abstencoes": 1272490,
+      "biomSem": 277373,
+      "apos17": 20827,
+      "apos19": 8,
+      "candidatos": {
+        "LULA": 2690449,
+        "FLAVIO BOLSONARO": 2199940
+      },
+      "alertas": 0
+    },
+    {
+      "uf": "PB",
+      "secoes": 10712,
+      "aptos": 3248434,
+      "comparecimento": 2743560,
+      "abstencoes": 504874,
+      "biomSem": 199353,
+      "apos17": 10712,
+      "apos19": 272,
+      "candidatos": {
+        "LULA": 1794059,
+        "FLAVIO BOLSONARO": 865210
+      },
+      "alertas": 0
+    },
+    {
+      "uf": "PE",
+      "secoes": 21418,
+      "aptos": 7223227,
+      "comparecimento": 6126467,
+      "abstencoes": 1096760,
+      "biomSem": 399764,
+      "apos17": 21418,
+      "apos19": 657,
+      "candidatos": {
+        "LULA": 4117513,
+        "FLAVIO BOLSONARO": 1832554
+      },
+      "alertas": 0
+    },
+    {
+      "uf": "PI",
+      "secoes": 10225,
+      "aptos": 2704695,
+      "comparecimento": 2239830,
+      "abstencoes": 464865,
+      "biomSem": 201641,
+      "apos17": 10225,
+      "apos19": 7,
+      "candidatos": {
+        "LULA": 1653989,
+        "FLAVIO BOLSONARO": 525859
+      },
+      "alertas": 0
+    },
+    {
+      "uf": "PR",
+      "secoes": 27142,
+      "aptos": 8613628,
+      "comparecimento": 7059339,
+      "abstencoes": 1554289,
+      "biomSem": 493321,
+      "apos17": 27142,
+      "apos19": 1,
+      "candidatos": {
+        "LULA": 2566504,
+        "FLAVIO BOLSONARO": 4291444
+      },
+      "alertas": 0
+    },
+    {
+      "uf": "RJ",
+      "secoes": 37675,
+      "aptos": 12857526,
+      "comparecimento": 10077449,
+      "abstencoes": 2780077,
+      "biomSem": 750301,
+      "apos17": 37675,
+      "apos19": 2799,
+      "candidatos": {
+        "LULA": 4565393,
+        "FLAVIO BOLSONARO": 5169033
+      },
+      "alertas": 0
+    },
+    {
+      "uf": "RN",
+      "secoes": 8115,
+      "aptos": 2659867,
+      "comparecimento": 2232823,
+      "abstencoes": 427044,
+      "biomSem": 180838,
+      "apos17": 8115,
+      "apos19": 3,
+      "candidatos": {
+        "LULA": 1413596,
+        "FLAVIO BOLSONARO": 737409
+      },
+      "alertas": 0
+    },
+    {
+      "uf": "RO",
+      "secoes": 4698,
+      "aptos": 1265926,
+      "comparecimento": 988489,
+      "abstencoes": 277437,
+      "biomSem": 61938,
+      "apos17": 1,
+      "apos19": 0,
+      "candidatos": {
+        "LULA": 294446,
+        "FLAVIO BOLSONARO": 674382
+      },
+      "alertas": 0
+    },
+    {
+      "uf": "RR",
+      "secoes": 1519,
+      "aptos": 401540,
+      "comparecimento": 308597,
+      "abstencoes": 92943,
+      "biomSem": 12646,
+      "apos17": 0,
+      "apos19": 0,
+      "candidatos": {
+        "LULA": 83505,
+        "FLAVIO BOLSONARO": 219675
+      },
+      "alertas": 0
+    },
+    {
+      "uf": "RS",
+      "secoes": 27547,
+      "aptos": 8522318,
+      "comparecimento": 6889638,
+      "abstencoes": 1632680,
+      "biomSem": 582380,
+      "apos17": 27547,
+      "apos19": 2,
+      "candidatos": {
+        "LULA": 2824552,
+        "FLAVIO BOLSONARO": 3874378
+      },
+      "alertas": 0
+    },
+    {
+      "uf": "SC",
+      "secoes": 17326,
+      "aptos": 5734687,
+      "comparecimento": 4762303,
+      "abstencoes": 972384,
+      "biomSem": 357632,
+      "apos17": 17326,
+      "apos19": 0,
+      "candidatos": {
+        "LULA": 1418314,
+        "FLAVIO BOLSONARO": 3220071
+      },
+      "alertas": 0
+    },
+    {
+      "uf": "SE",
+      "secoes": 5923,
+      "aptos": 1740093,
+      "comparecimento": 1466659,
+      "abstencoes": 273434,
+      "biomSem": 102204,
+      "apos17": 5923,
+      "apos19": 51,
+      "candidatos": {
+        "LULA": 989041,
+        "FLAVIO BOLSONARO": 433354
+      },
+      "alertas": 0
+    },
+    {
+      "uf": "SP",
+      "secoes": 103656,
+      "aptos": 34123591,
+      "comparecimento": 27364389,
+      "abstencoes": 6759202,
+      "biomSem": 1632098,
+      "apos17": 103656,
+      "apos19": 1567,
+      "candidatos": {
+        "LULA": 12119274,
+        "FLAVIO BOLSONARO": 14139178
+      },
+      "alertas": 0
+    },
+    {
+      "uf": "TO",
+      "secoes": 4384,
+      "aptos": 1182041,
+      "comparecimento": 954763,
+      "abstencoes": 227278,
+      "biomSem": 47225,
+      "apos17": 4384,
+      "apos19": 0,
+      "candidatos": {
+        "LULA": 442962,
+        "FLAVIO BOLSONARO": 467916
+      },
+      "alertas": 0
+    },
+    {
+      "uf": "ZZ",
+      "secoes": 1308,
+      "aptos": 916158,
+      "comparecimento": 381443,
+      "abstencoes": 534715,
+      "biomSem": 0,
+      "apos17": 1281,
+      "apos19": 0,
+      "candidatos": {
+        "LULA": 200154,
+        "FLAVIO BOLSONARO": 171497
+      },
+      "alertas": 27
+    }
+  ],
+  "cargos": [
+    "Governador",
+    "Presidente"
+  ],
+  "alertas": [
+    {
+      "tipo": "encerramento_ausente",
+      "uf": "ZZ",
+      "municipio": "BISSAU",
+      "zona": "1",
+      "secao": "28",
+      "cargo": "Presidente"
+    },
+    {
+      "tipo": "encerramento_ausente",
+      "uf": "ZZ",
+      "municipio": "NASSAU",
+      "zona": "1",
+      "secao": "1228",
+      "cargo": "Presidente"
+    },
+    {
+      "tipo": "encerramento_ausente",
+      "uf": "ZZ",
+      "municipio": "WINDHOEK",
+      "zona": "1",
+      "secao": "1524",
+      "cargo": "Presidente"
+    },
+    {
+      "tipo": "encerramento_ausente",
+      "uf": "ZZ",
+      "municipio": "HAVANA",
+      "zona": "1",
+      "secao": "127",
+      "cargo": "Presidente"
+    },
+    {
+      "tipo": "encerramento_ausente",
+      "uf": "ZZ",
+      "municipio": "MASCATE",
+      "zona": "1",
+      "secao": "712",
+      "cargo": "Presidente"
+    },
+    {
+      "tipo": "encerramento_ausente",
+      "uf": "ZZ",
+      "municipio": "DAR ES SALAAM",
+      "zona": "1",
+      "secao": "558",
+      "cargo": "Presidente"
+    },
+    {
+      "tipo": "encerramento_ausente",
+      "uf": "ZZ",
+      "municipio": "KIEV",
+      "zona": "1",
+      "secao": "1183",
+      "cargo": "Presidente"
+    },
+    {
+      "tipo": "encerramento_ausente",
+      "uf": "ZZ",
+      "municipio": "SÓFIA",
+      "zona": "1",
+      "secao": "1764",
+      "cargo": "Presidente"
+    },
+    {
+      "tipo": "encerramento_ausente",
+      "uf": "ZZ",
+      "municipio": "PASO LOS LIBRES",
+      "zona": "1",
+      "secao": "348",
+      "cargo": "Presidente"
+    },
+    {
+      "tipo": "encerramento_ausente",
+      "uf": "ZZ",
+      "municipio": "DÍLI",
+      "zona": "1",
+      "secao": "380",
+      "cargo": "Presidente"
+    },
+    {
+      "tipo": "encerramento_ausente",
+      "uf": "ZZ",
+      "municipio": "RIO BRANCO",
+      "zona": "1",
+      "secao": "384",
+      "cargo": "Presidente"
+    },
+    {
+      "tipo": "encerramento_ausente",
+      "uf": "ZZ",
+      "municipio": "ABIDJÃ",
+      "zona": "1",
+      "secao": "1",
+      "cargo": "Presidente"
+    },
+    {
+      "tipo": "encerramento_ausente",
+      "uf": "ZZ",
+      "municipio": "MOSCOU",
+      "zona": "1",
+      "secao": "647",
+      "cargo": "Presidente"
+    },
+    {
+      "tipo": "encerramento_ausente",
+      "uf": "ZZ",
+      "municipio": "HANÓI",
+      "zona": "1",
+      "secao": "1703",
+      "cargo": "Presidente"
+    },
+    {
+      "tipo": "encerramento_ausente",
+      "uf": "ZZ",
+      "municipio": "PORT OF SPAIN",
+      "zona": "1",
+      "secao": "352",
+      "cargo": "Presidente"
+    },
+    {
+      "tipo": "encerramento_ausente",
+      "uf": "ZZ",
+      "municipio": "PORTO PRÍNCIPE",
+      "zona": "1",
+      "secao": "353",
+      "cargo": "Presidente"
+    },
+    {
+      "tipo": "encerramento_ausente",
+      "uf": "ZZ",
+      "municipio": "TEERÃ",
+      "zona": "1",
+      "secao": "1182",
+      "cargo": "Presidente"
+    },
+    {
+      "tipo": "encerramento_ausente",
+      "uf": "ZZ",
+      "municipio": "KATMANDU",
+      "zona": "1",
+      "secao": "494",
+      "cargo": "Presidente"
+    },
+    {
+      "tipo": "encerramento_ausente",
+      "uf": "ZZ",
+      "municipio": "BAREIN",
+      "zona": "1",
+      "secao": "1327",
+      "cargo": "Presidente"
+    },
+    {
+      "tipo": "encerramento_ausente",
+      "uf": "ZZ",
+      "municipio": "ANCARA",
+      "zona": "1",
+      "secao": "495",
+      "cargo": "Presidente"
+    },
+    {
+      "tipo": "encerramento_ausente",
+      "uf": "ZZ",
+      "municipio": "ACCRA",
+      "zona": "1",
+      "secao": "3",
+      "cargo": "Presidente"
+    },
+    {
+      "tipo": "encerramento_ausente",
+      "uf": "ZZ",
+      "municipio": "ARGEL",
+      "zona": "1",
+      "secao": "6",
+      "cargo": "Presidente"
+    },
+    {
+      "tipo": "encerramento_ausente",
+      "uf": "ZZ",
+      "municipio": "MUMBAI",
+      "zona": "1",
+      "secao": "1340",
+      "cargo": "Presidente"
+    },
+    {
+      "tipo": "encerramento_ausente",
+      "uf": "ZZ",
+      "municipio": "CONCEPCIÓN",
+      "zona": "1",
+      "secao": "96",
+      "cargo": "Presidente"
+    },
+    {
+      "tipo": "encerramento_ausente",
+      "uf": "ZZ",
+      "municipio": "TUNIS",
+      "zona": "1",
+      "secao": "444",
+      "cargo": "Presidente"
+    },
+    {
+      "tipo": "encerramento_ausente",
+      "uf": "ZZ",
+      "municipio": "LAGOS",
+      "zona": "1",
+      "secao": "150",
+      "cargo": "Presidente"
+    },
+    {
+      "tipo": "encerramento_ausente",
+      "uf": "ZZ",
+      "municipio": "PUERTO IGUAZÚ",
+      "zona": "1",
+      "secao": "1504",
+      "cargo": "Presidente"
+    }
+  ],
+  "alertasTotal": 27
+}

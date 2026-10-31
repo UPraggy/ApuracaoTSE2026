@@ -1,0 +1,170 @@
+[
+  {
+    "uf": "AC",
+    "csv": "bweb_2t_AC_261020260742.csv",
+    "bytes": 7787974,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6258;\"Eleição Geral Federal 2026\";\"AC\";1538;\"SENADOR GUIOMARD\";8;68;1074;1;\"Presidente\";13;\"PT\";\"PARTIDO DOS TRABALHADORES\";\"2026-10-25 19:42:19\";220;169;51;1;\"Apurada\";1"
+  },
+  {
+    "uf": "AL",
+    "csv": "bweb_2t_AL_261020260742.csv",
+    "bytes": 12121461,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6258;\"Eleição Geral Federal 2026\";\"AL\";28878;\"VIÇOSA\";5;27;1058;1;\"Presidente\";13;\"PT\";\"PARTIDO DOS TRABALHADORES\";\"2026-10-25 20:10:45\";357;249;108;1;\"Apurada\";1;\"Nomina"
+  },
+  {
+    "uf": "AM",
+    "csv": "bweb_2t_AM_261020260742.csv",
+    "bytes": 27702556,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6260;\"Eleições Gerais Estaduais 2026\";\"AM\";2135;\"BENJAMIN CONSTANT\";20;14;1066;3;\"Governador\";-1;\"#NULO#\";\"#NULO#\";\"2026-10-25 20:30:43\";436;342;94;1;\"Apurada\";3;\"Nulo\";9"
+  },
+  {
+    "uf": "AP",
+    "csv": "bweb_2t_AP_261020260742.csv",
+    "bytes": 3056017,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6258;\"Eleição Geral Federal 2026\";\"AP\";6122;\"VITÓRIA DO JARI\";7;138;1015;1;\"Presidente\";13;\"PT\";\"PARTIDO DOS TRABALHADORES\";\"2026-10-25 19:37:06\";361;251;110;1;\"Apurada\";"
+  },
+  {
+    "uf": "BA",
+    "csv": "bweb_2t_BA_261020260742.csv",
+    "bytes": 60634146,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6258;\"Eleição Geral Federal 2026\";\"BA\";33090;\"ÉRICO CARDOSO\";111;5;1023;1;\"Presidente\";13;\"PT\";\"PARTIDO DOS TRABALHADORES\";\"2026-10-25 20:37:33\";260;213;47;1;\"Apurada\";1;"
+  },
+  {
+    "uf": "CE",
+    "csv": "bweb_2t_CE_261020260742.csv",
+    "bytes": 40143027,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6258;\"Eleição Geral Federal 2026\";\"CE\";14478;\"JUAZEIRO DO NORTE\";28;161;1597;1;\"Presidente\";13;\"PT\";\"PARTIDO DOS TRABALHADORES\";\"2026-10-25 20:53:33\";293;264;29;1;\"Apurad"
+  },
+  {
+    "uf": "DF",
+    "csv": "bweb_2t_DF_261020260742.csv",
+    "bytes": 24424285,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6260;\"Eleições Gerais Estaduais 2026\";\"DF\";97012;\"BRASÍLIA\";17;43;1040;3;\"Governador\";13;\"PT\";\"PARTIDO DOS TRABALHADORES\";\"2026-10-25 19:35:07\";344;275;69;1;\"Apurada\";1;\""
+  },
+  {
+    "uf": "ES",
+    "csv": "bweb_2t_ES_261020260742.csv",
+    "bytes": 34889872,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6260;\"Eleições Gerais Estaduais 2026\";\"ES\";56235;\"CACHOEIRO DE ITAPEMIRIM\";2;31;2267;3;\"Governador\";15;\"MDB\";\"MOVIMENTO DEMOCRÁTICO BRASILEIRO\";\"2026-10-25 20:00:13\";379;"
+  },
+  {
+    "uf": "GO",
+    "csv": "bweb_2t_GO_261020260742.csv",
+    "bytes": 26992772,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6258;\"Eleição Geral Federal 2026\";\"GO\";93750;\"GOIANIRA\";101;2;1066;1;\"Presidente\";13;\"PT\";\"PARTIDO DOS TRABALHADORES\";\"2026-10-25 20:11:16\";332;265;67;1;\"Apurada\";1;\"Nomi"
+  },
+  {
+    "uf": "MA",
+    "csv": "bweb_2t_MA_261020260742.csv",
+    "bytes": 29265535,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6258;\"Eleição Geral Federal 2026\";\"MA\";7331;\"BARREIRINHAS\";56;107;1554;1;\"Presidente\";13;\"PT\";\"PARTIDO DOS TRABALHADORES\";\"2026-10-25 20:38:35\";197;147;50;1;\"Apurada\";1;\""
+  },
+  {
+    "uf": "MG",
+    "csv": "bweb_2t_MG_261020260742.csv",
+    "bytes": 90084704,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6258;\"Eleição Geral Federal 2026\";\"MG\";41238;\"BELO HORIZONTE\";26;2;1074;1;\"Presidente\";13;\"PT\";\"PARTIDO DOS TRABALHADORES\";\"2026-10-25 19:52:09\";362;294;68;1;\"Apurada\";1;"
+  },
+  {
+    "uf": "MS",
+    "csv": "bweb_2t_MS_261020260742.csv",
+    "bytes": 11819925,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6258;\"Eleição Geral Federal 2026\";\"MS\";91430;\"RIO BRILHANTE\";11;1;1015;1;\"Presidente\";13;\"PT\";\"PARTIDO DOS TRABALHADORES\";\"2026-10-25 19:36:38\";336;246;90;1;\"Apurada\";1;\""
+  },
+  {
+    "uf": "MT",
+    "csv": "bweb_2t_MT_261020260742.csv",
+    "bytes": 13675646,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6258;\"Eleição Geral Federal 2026\";\"MT\";91090;\"VILA BELA DA SANTÍSSIMA TRINDADE\";25;80;1015;1;\"Presidente\";13;\"PT\";\"PARTIDO DOS TRABALHADORES\";\"2026-10-25 20:48:15\";210;14"
+  },
+  {
+    "uf": "PA",
+    "csv": "bweb_2t_PA_261020260742.csv",
+    "bytes": 33481174,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6258;\"Eleição Geral Federal 2026\";\"PA\";4251;\"BARCARENA\";65;4;1031;1;\"Presidente\";13;\"PT\";\"PARTIDO DOS TRABALHADORES\";\"2026-10-25 20:05:12\";337;279;58;1;\"Apurada\";1;\"Nomin"
+  },
+  {
+    "uf": "PB",
+    "csv": "bweb_2t_PB_261020260742.csv",
+    "bytes": 18289946,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6258;\"Eleição Geral Federal 2026\";\"PB\";19585;\"AMPARO\";43;87;1040;1;\"Presidente\";13;\"PT\";\"PARTIDO DOS TRABALHADORES\";\"2026-10-25 19:03:52\";302;248;54;1;\"Apurada\";1;\"Nomina"
+  },
+  {
+    "uf": "PE",
+    "csv": "bweb_2t_PE_261020260742.csv",
+    "bytes": 36788510,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6258;\"Eleição Geral Federal 2026\";\"PE\";23817;\"CARUARU\";105;316;1503;1;\"Presidente\";13;\"PT\";\"PARTIDO DOS TRABALHADORES\";\"2026-10-25 19:51:02\";389;335;54;1;\"Apurada\";1;\"Nom"
+  },
+  {
+    "uf": "PI",
+    "csv": "bweb_2t_PI_261020260742.csv",
+    "bytes": 16738697,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6258;\"Eleição Geral Federal 2026\";\"PI\";11096;\"JOSÉ DE FREITAS\";24;9;1066;1;\"Presidente\";13;\"PT\";\"PARTIDO DOS TRABALHADORES\";\"2026-10-25 20:49:38\";278;236;42;1;\"Apurada\";1"
+  },
+  {
+    "uf": "PR",
+    "csv": "bweb_2t_PR_261020260742.csv",
+    "bytes": 46790542,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6258;\"Eleição Geral Federal 2026\";\"PR\";78875;\"SÃO MATEUS DO SUL\";12;2;1015;1;\"Presidente\";13;\"PT\";\"PARTIDO DOS TRABALHADORES\";\"2026-10-25 19:43:06\";358;285;73;1;\"Apurada\""
+  },
+  {
+    "uf": "RJ",
+    "csv": "bweb_2t_RJ_261020260742.csv",
+    "bytes": 65654095,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6258;\"Eleição Geral Federal 2026\";\"RJ\";59030;\"SÃO PEDRO DA ALDEIA\";59;19;1040;1;\"Presidente\";13;\"PT\";\"PARTIDO DOS TRABALHADORES\";\"2026-10-25 20:42:30\";330;260;70;1;\"Apura"
+  },
+  {
+    "uf": "RN",
+    "csv": "bweb_2t_RN_261020260742.csv",
+    "bytes": 28189615,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6260;\"Eleições Gerais Estaduais 2026\";\"RN\";18554;\"SÃO TOMÉ\";19;30;1023;3;\"Governador\";-1;\"#NULO#\";\"#NULO#\";\"2026-10-25 20:15:41\";381;315;66;1;\"Apurada\";3;\"Nulo\";96;\"Nulo\""
+  },
+  {
+    "uf": "RO",
+    "csv": "bweb_2t_RO_261020260742.csv",
+    "bytes": 7610801,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6258;\"Eleição Geral Federal 2026\";\"RO\";175;\"OURO PRETO DO OESTE\";13;38;1066;1;\"Presidente\";13;\"PT\";\"PARTIDO DOS TRABALHADORES\";\"2026-10-25 20:08:34\";178;143;35;1;\"Apurada"
+  },
+  {
+    "uf": "RR",
+    "csv": "bweb_2t_RR_261020260742.csv",
+    "bytes": 2339778,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6258;\"Eleição Geral Federal 2026\";\"RR\";3018;\"BOA VISTA\";1;74;1775;1;\"Presidente\";13;\"PT\";\"PARTIDO DOS TRABALHADORES\";\"2026-10-25 20:14:20\";297;240;57;1;\"Apurada\";1;\"Nomin"
+  },
+  {
+    "uf": "RS",
+    "csv": "bweb_2t_RS_261020260742.csv",
+    "bytes": 47289327,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6258;\"Eleição Geral Federal 2026\";\"RS\";89532;\"VACARIA\";58;16;1228;1;\"Presidente\";13;\"PT\";\"PARTIDO DOS TRABALHADORES\";\"2026-10-25 21:01:43\";305;237;68;1;\"Apurada\";1;\"Nomin"
+  },
+  {
+    "uf": "SC",
+    "csv": "bweb_2t_SC_261020260742.csv",
+    "bytes": 29698108,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6258;\"Eleição Geral Federal 2026\";\"SC\";83399;\"SÃO MIGUEL DO OESTE\";45;104;1015;1;\"Presidente\";13;\"PT\";\"PARTIDO DOS TRABALHADORES\";\"2026-10-25 20:03:10\";336;261;75;1;\"Apur"
+  },
+  {
+    "uf": "SE",
+    "csv": "bweb_2t_SE_261020260742.csv",
+    "bytes": 10064205,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6258;\"Eleição Geral Federal 2026\";\"SE\";31194;\"CAMPO DO BRITO\";24;1;1040;1;\"Presidente\";13;\"PT\";\"PARTIDO DOS TRABALHADORES\";\"2026-10-25 20:11:23\";355;298;57;1;\"Apurada\";1;"
+  },
+  {
+    "uf": "SP",
+    "csv": "bweb_2t_SP_261020260742.csv",
+    "bytes": 181487605,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6258;\"Eleição Geral Federal 2026\";\"SP\";64270;\"FRANCISCO MORATO\";367;6;1015;1;\"Presidente\";13;\"PT\";\"PARTIDO DOS TRABALHADORES\";\"2026-10-25 20:55:31\";312;229;83;1;\"Apurada\""
+  },
+  {
+    "uf": "TO",
+    "csv": "bweb_2t_TO_261020260742.csv",
+    "bytes": 15196303,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6260;\"Eleições Gerais Estaduais 2026\";\"TO\";92371;\"ARAGUACEMA\";28;98;1058;3;\"Governador\";44;\"UNIÃO\";\"UNIÃO BRASIL\";\"2026-10-25 19:03:54\";186;142;44;1;\"Apurada\";1;\"Nominal\""
+  },
+  {
+    "uf": "ZZ",
+    "csv": "bweb_2t_ZZ_261020260742.csv",
+    "bytes": 2179102,
+    "amostra": "\"26/10/2026\";\"07:42:38\";2026;0;\"Eleição Ordinária\";3221;\"2026-10-25 00:00:00\";2;6258;\"Eleição Geral Federal 2026\";\"ZZ\";29513;\"CHICAGO\";1;81;1015;1;\"Presidente\";13;\"PT\";\"PARTIDO DOS TRABALHADORES\";\"2026-10-25 21:04:40\";780;160;620;1;\"Apurada\";1;\"Nomin"
+  }
+]

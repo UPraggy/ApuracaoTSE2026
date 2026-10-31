@@ -1,0 +1,12 @@
+{
+  "name": "apuracao-tse-2026",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Mapa e análise dos boletins de urna do 2º turno de 2026 (TSE) com malhas do IBGE.",
+  "scripts": {
+    "construir": "node --max-old-space-size=6000 scripts/construir.mjs",
+    "servir": "node scripts/servir.mjs",
+    "deploy": "node scripts/deploy.mjs"
+  }
+}
