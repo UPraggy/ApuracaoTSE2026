@@ -28,6 +28,7 @@
   <nav class="abas" role="tablist" aria-label="Seções do painel">
     <button role="tab" data-aba="mapa" aria-selected="true">Mapa</button>
     <button role="tab" data-aba="geral" aria-selected="false">Análise</button>
+    <button role="tab" data-aba="comparar" aria-selected="false">2022 × 2026</button>
     <button role="tab" data-aba="biometria" aria-selected="false">Biometria</button>
     <button role="tab" data-aba="horarios" aria-selected="false">Horários</button>
     <button role="tab" data-aba="estados" aria-selected="false">Estados</button>
@@ -43,6 +44,7 @@
         <label>Cor <select id="metrica"></select></label>
         <label title="Na vista do Brasil, pintar por estado ou por município">Nível <select id="nivel"><option value="uf">Estados</option><option value="mun">Municípios</option></select></label>
         <label class="check" title="Mostra as ruas (OpenStreetMap/CARTO) quando você aproxima numa cidade, para achar as escolas"><input type="checkbox" id="ruas" checked> Ruas ao aproximar</label>
+        <button id="btn-perto" class="botao" title="Usa a localização do aparelho para mostrar as escolas de votação mais próximas e a zona eleitoral">📍 Perto de mim</button>
         <button id="btn-brasil" class="botao">Brasil</button>
         <button id="btn-exterior" class="botao" title="ZZ é o código do TSE para seções fora do Brasil">Exterior (ZZ)</button>
       </div>
@@ -59,6 +61,7 @@
   </section>
 
   <section id="aba-geral" role="tabpanel" hidden></section>
+  <section id="aba-comparar" role="tabpanel" hidden></section>
   <section id="aba-biometria" role="tabpanel" hidden></section>
   <section id="aba-horarios" role="tabpanel" hidden></section>
   <section id="aba-estados" role="tabpanel" hidden></section>
@@ -71,6 +74,7 @@
         <h3>De onde vêm os dados</h3>
         <ul>
           <li><b>Boletins de urna</b>: <a href="https://dadosabertos.tse.jus.br/dataset/resultados-2026-boletim-de-urna" target="_blank" rel="noopener">Portal de Dados Abertos do TSE</a>, 2º turno, 28 arquivos (26 estados, DF e exterior), coletados em 30/10/2026. Cada ZIP foi conferido com o SHA-512 publicado pelo TSE.</li>
+          <li><b>Eleições anteriores</b> (2014, 2018 e 2022, 2º turno): boletins de urna e totalização do TSE, conferidos pelo hash publicado.</li>
           <li><b>Habitantes, idade, renda e PIB</b>: IBGE (Censo 2022, Estimativas 2026, PIB dos Municípios 2023) via <a href="https://sidra.ibge.gov.br/" target="_blank" rel="noopener">SIDRA</a>. <b>Perfil do eleitorado</b>: TSE 2026.</li>
           <li><b>Locais de votação</b> (nome da escola, endereço, bairro, coordenadas): cadastro "Eleitorado — local de votação 2026" do TSE.</li>
           <li><b>Malhas</b> dos estados e municípios: <a href="https://servicodados.ibge.gov.br/api/docs/malhas?versao=3" target="_blank" rel="noopener">API de malhas do IBGE</a>, qualidade mínima. Regiões intermediárias e imediatas: <a href="https://servicodados.ibge.gov.br/api/docs/localidades" target="_blank" rel="noopener">API de localidades do IBGE</a>.</li>

@@ -134,6 +134,7 @@ for (const s of todas) {
   s.a = s.votos[A] || 0; s.b = s.votos[B] || 0; s.val = s.a + s.b;
   s.fechaBsb = brasilia(s);
   s.q17 = s.fechaBsb != null && s.fechaBsb > 17 * 60 ? 1 : 0;
+  s.q1705 = s.fechaBsb != null && s.fechaBsb > 17 * 60 + 5 ? 1 : 0;
   s.q1730 = s.fechaBsb != null && s.fechaBsb > 17 * 60 + 30 ? 1 : 0;
   s.q19 = s.fechaBsb != null && s.fechaBsb > 19 * 60 ? 1 : 0;
   s.ibge = tseIbge.get(s.uf + '|' + s.mun) ?? IBGE_POR_NOME[s.uf + '|' + s.munNome] ?? null;
@@ -144,15 +145,15 @@ for (const s of todas) {
 const porLocal = new Map();
 for (const s of todas) {
   let L = porLocal.get(s.chaveLocal);
-  if (!L) porLocal.set(s.chaveLocal, L = { secoes: [], aptos: 0, comp: 0, biom: 0, a: 0, b: 0, br: 0, nu: 0, q17: 0, q1730: 0, q19: 0 });
-  L.secoes.push(s); L.aptos += s.aptos || 0; L.comp += s.comp || 0; L.biom += s.biom || 0; L.a += s.a; L.b += s.b; L.br += s.branco; L.nu += s.nulo; L.q17 += s.q17; L.q1730 += s.q1730; L.q19 += s.q19;
+  if (!L) porLocal.set(s.chaveLocal, L = { secoes: [], aptos: 0, comp: 0, biom: 0, a: 0, b: 0, br: 0, nu: 0, q17: 0, q1730: 0, q19: 0, q1705: 0 });
+  L.secoes.push(s); L.aptos += s.aptos || 0; L.comp += s.comp || 0; L.biom += s.biom || 0; L.a += s.a; L.b += s.b; L.br += s.branco; L.nu += s.nulo; L.q17 += s.q17; L.q1730 += s.q1730; L.q19 += s.q19; L.q1705 += s.q1705;
 }
 const porMun = new Map();
 for (const s of todas) {
   const k = s.uf + '|' + s.mun;
   let M = porMun.get(k);
-  if (!M) porMun.set(k, M = { uf: s.uf, mun: s.mun, nome: s.munNome, ibge: s.ibge, zonas: new Set(), secoes: 0, aptos: 0, comp: 0, biom: 0, a: 0, b: 0, br: 0, nu: 0, alertas: 0, q17: 0, q1730: 0, q19: 0 });
-  M.zonas.add(s.zona); M.secoes++; M.aptos += s.aptos || 0; M.comp += s.comp || 0; M.biom += s.biom || 0; M.a += s.a; M.b += s.b; M.br += s.branco; M.nu += s.nulo; M.q17 += s.q17; M.q1730 += s.q1730; M.q19 += s.q19;
+  if (!M) porMun.set(k, M = { uf: s.uf, mun: s.mun, nome: s.munNome, ibge: s.ibge, zonas: new Set(), secoes: 0, aptos: 0, comp: 0, biom: 0, a: 0, b: 0, br: 0, nu: 0, alertas: 0, q17: 0, q1730: 0, q19: 0, q1705: 0 });
+  M.zonas.add(s.zona); M.secoes++; M.aptos += s.aptos || 0; M.comp += s.comp || 0; M.biom += s.biom || 0; M.a += s.a; M.b += s.b; M.br += s.branco; M.nu += s.nulo; M.q17 += s.q17; M.q1730 += s.q1730; M.q19 += s.q19; M.q1705 += s.q1705;
 }
 
 // ---------- Alertas por seção (sinais para olhar de perto; nenhum prova irregularidade) ----------
@@ -200,7 +201,7 @@ for (const s of todas) {
 }
 
 // ---------- Totais e agregações ----------
-const soma = lista => lista.reduce((t, s) => { t.secoes++; t.aptos += s.aptos || 0; t.comp += s.comp || 0; t.abst += s.abst || 0; t.biom += s.biom || 0; t.a += s.a; t.b += s.b; t.br += s.branco; t.nu += s.nulo; t.alertas += s.alertas.length ? 1 : 0; t.q17 += s.q17; t.q1730 += s.q1730; t.q19 += s.q19; return t; }, { secoes: 0, aptos: 0, comp: 0, abst: 0, biom: 0, a: 0, b: 0, br: 0, nu: 0, alertas: 0, q17: 0, q1730: 0, q19: 0 });
+const soma = lista => lista.reduce((t, s) => { t.secoes++; t.aptos += s.aptos || 0; t.comp += s.comp || 0; t.abst += s.abst || 0; t.biom += s.biom || 0; t.a += s.a; t.b += s.b; t.br += s.branco; t.nu += s.nulo; t.alertas += s.alertas.length ? 1 : 0; t.q17 += s.q17; t.q1730 += s.q1730; t.q19 += s.q19; t.q1705 += s.q1705; return t; }, { secoes: 0, aptos: 0, comp: 0, abst: 0, biom: 0, a: 0, b: 0, br: 0, nu: 0, alertas: 0, q17: 0, q1730: 0, q19: 0, q1705: 0 });
 const ufs = [...new Set(todas.map(s => s.uf))].sort();
 const porUf = Object.fromEntries(ufs.map(uf => [uf, soma(todas.filter(s => s.uf === uf))]));
 const total = soma(todas);
@@ -296,14 +297,14 @@ await fsp.mkdir(path.join(SAIDA, 'geo'), { recursive: true });
 
 const municipios = [...porMun.values()].map(M => {
   const info = ibgeInfo.get(M.ibge) || {};
-  return [M.ibge, M.uf, info.nome || M.nome, M.mun, [...M.zonas].sort((a, b) => a - b).join(' '), M.secoes, M.aptos, M.comp, M.biom, M.a, M.b, M.br, M.nu, M.alertas, info.interm || '', info.imed || '', M.q17, M.q1730, M.q19];
+  return [M.ibge, M.uf, info.nome || M.nome, M.mun, [...M.zonas].sort((a, b) => a - b).join(' '), M.secoes, M.aptos, M.comp, M.biom, M.a, M.b, M.br, M.nu, M.alertas, info.interm || '', info.imed || '', M.q17, M.q1730, M.q19, M.q1705];
 }).sort((x, y) => x[1].localeCompare(y[1]) || x[2].localeCompare(y[2]));
 
 const zonas = new Map();
 for (const s of todas) {
   const k = s.uf + '|' + s.zona;
-  let Z = zonas.get(k); if (!Z) zonas.set(k, Z = { uf: s.uf, zona: s.zona, muns: new Set(), secoes: 0, aptos: 0, comp: 0, biom: 0, a: 0, b: 0, br: 0, nu: 0, alertas: 0, q17: 0, q1730: 0, q19: 0 });
-  Z.muns.add(s.ibge ?? s.munNome); Z.secoes++; Z.aptos += s.aptos || 0; Z.comp += s.comp || 0; Z.biom += s.biom || 0; Z.a += s.a; Z.b += s.b; Z.br += s.branco; Z.nu += s.nulo; Z.alertas += s.alertas.length ? 1 : 0; Z.q17 += s.q17; Z.q1730 += s.q1730; Z.q19 += s.q19;
+  let Z = zonas.get(k); if (!Z) zonas.set(k, Z = { uf: s.uf, zona: s.zona, muns: new Set(), secoes: 0, aptos: 0, comp: 0, biom: 0, a: 0, b: 0, br: 0, nu: 0, alertas: 0, q17: 0, q1730: 0, q19: 0, q1705: 0 });
+  Z.muns.add(s.ibge ?? s.munNome); Z.secoes++; Z.aptos += s.aptos || 0; Z.comp += s.comp || 0; Z.biom += s.biom || 0; Z.a += s.a; Z.b += s.b; Z.br += s.branco; Z.nu += s.nulo; Z.alertas += s.alertas.length ? 1 : 0; Z.q17 += s.q17; Z.q1730 += s.q1730; Z.q19 += s.q19; Z.q1705 += s.q1705;
 }
 
 const resumo = {
@@ -311,9 +312,9 @@ const resumo = {
     gerado: new Date().toISOString(), eleicao: 'Eleição Geral Federal 2026 · 2º turno (25/10/2026) · Presidente',
     fonte: 'https://dadosabertos.tse.jus.br/dataset/resultados-2026-boletim-de-urna', arquivosBweb: arquivosBweb.length, linhasLidas,
     colunas: {
-      municipio: ['ibge', 'uf', 'nome', 'tse', 'zonas', 'secoes', 'aptos', 'comp', 'biom', 'a', 'b', 'branco', 'nulo', 'secoesComAlerta', 'regiaoIntermediaria', 'regiaoImediata', 'fechouApos17', 'fechouApos1730', 'fechouApos19'],
-      zona: ['uf', 'zona', 'municipios', 'secoes', 'aptos', 'comp', 'biom', 'a', 'b', 'branco', 'nulo', 'secoesComAlerta', 'fechouApos17', 'fechouApos1730', 'fechouApos19'],
-      local: ['id', 'ibge', 'zona', 'local', 'nome', 'bairro', 'endereco', 'tipo', 'lat', 'lon', 'secoes', 'aptos', 'comp', 'biom', 'a', 'b', 'branco', 'nulo', 'secoesComAlerta', 'tse', 'fechouApos17', 'fechouApos1730', 'fechouApos19'],
+      municipio: ['ibge', 'uf', 'nome', 'tse', 'zonas', 'secoes', 'aptos', 'comp', 'biom', 'a', 'b', 'branco', 'nulo', 'secoesComAlerta', 'regiaoIntermediaria', 'regiaoImediata', 'fechouApos17', 'fechouApos1730', 'fechouApos19', 'fechouApos1705'],
+      zona: ['uf', 'zona', 'municipios', 'secoes', 'aptos', 'comp', 'biom', 'a', 'b', 'branco', 'nulo', 'secoesComAlerta', 'fechouApos17', 'fechouApos1730', 'fechouApos19', 'fechouApos1705'],
+      local: ['id', 'ibge', 'zona', 'local', 'nome', 'bairro', 'endereco', 'tipo', 'lat', 'lon', 'secoes', 'aptos', 'comp', 'biom', 'a', 'b', 'branco', 'nulo', 'secoesComAlerta', 'tse', 'fechouApos17', 'fechouApos1730', 'fechouApos19', 'fechouApos1705'],
       alerta: ['uf', 'ibge', 'municipio', 'zona', 'secao', 'local', 'aptos', 'comp', 'biom', 'a', 'b', 'branco', 'nulo', 'encerramentoBsbMin', 'tipos']
     }
   },
@@ -323,7 +324,7 @@ const resumo = {
 };
 await fsp.writeFile(path.join(SAIDA, 'resumo.json'), JSON.stringify(resumo));
 await fsp.writeFile(path.join(SAIDA, 'municipios.json'), JSON.stringify(municipios));
-await fsp.writeFile(path.join(SAIDA, 'zonas.json'), JSON.stringify([...zonas.values()].map(Z => [Z.uf, Z.zona, [...Z.muns], Z.secoes, Z.aptos, Z.comp, Z.biom, Z.a, Z.b, Z.br, Z.nu, Z.alertas, Z.q17, Z.q1730, Z.q19])));
+await fsp.writeFile(path.join(SAIDA, 'zonas.json'), JSON.stringify([...zonas.values()].map(Z => [Z.uf, Z.zona, [...Z.muns], Z.secoes, Z.aptos, Z.comp, Z.biom, Z.a, Z.b, Z.br, Z.nu, Z.alertas, Z.q17, Z.q1730, Z.q19, Z.q1705])));
 
 // Locais por UF + índice de busca nacional: { UF: [bairros[], [nome, índiceDoBairro][]] } (posição = id do local).
 const busca = {};
@@ -334,7 +335,7 @@ for (const uf of ufs) {
     const s0 = L.secoes[0], info = locais.get(k) || {};
     const bairro = info.bairro || '';
     if (!idxBairro.has(bairro)) { idxBairro.set(bairro, bairros.length); bairros.push(bairro); }
-    lista.push([lista.length, s0.ibge, s0.zona, s0.local, info.nome || 'Local ' + s0.local, bairro, info.end || '', info.tipo || '', info.lat ?? null, info.lon ?? null, L.secoes.length, L.aptos, L.comp, L.biom, L.a, L.b, L.br, L.nu, L.secoes.filter(s => s.alertas.length).length, s0.mun, L.q17, L.q1730, L.q19]);
+    lista.push([lista.length, s0.ibge, s0.zona, s0.local, info.nome || 'Local ' + s0.local, bairro, info.end || '', info.tipo || '', info.lat ?? null, info.lon ?? null, L.secoes.length, L.aptos, L.comp, L.biom, L.a, L.b, L.br, L.nu, L.secoes.filter(s => s.alertas.length).length, s0.mun, L.q17, L.q1730, L.q19, L.q1705]);
     nomes.push([info.nome || '', idxBairro.get(bairro), s0.ibge, L.comp]);
   }
   busca[uf] = [bairros, nomes];

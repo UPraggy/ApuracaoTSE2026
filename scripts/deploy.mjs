@@ -46,6 +46,12 @@ cpSync(SITE, DIR, { recursive: true });
 // Carimbo de versão (?v=hash) no CSS e nos módulos JS: o Pages guarda arquivos em cache por 10 min,
 // e um index.html novo com um app.js velho quebraria a página.
 const hash = arq => createHash('sha1').update(readFileSync(join(DIR, arq))).digest('hex').slice(0, 10);
+// Hash de todos os JSON de dados: entra na URL de cada fetch (util.js, VERSAO_DADOS).
+const hDados = createHash('sha1');
+const varrer = d => { for (const n of readdirSync(d, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) n.isDirectory() ? varrer(join(d, n.name)) : hDados.update(n.name).update(readFileSync(join(d, n.name))); };
+varrer(join(DIR, 'dados'));
+const util = join(DIR, 'js', 'util.js');
+writeFileSync(util, readFileSync(util, 'utf8').replace("const VERSAO_DADOS = '';", `const VERSAO_DADOS = '?v=${hDados.digest('hex').slice(0, 10)}';`));
 const js = readdirSync(join(DIR, 'js')).filter(n => n.endsWith('.js'));
 for (const n of js) {
   const p = join(DIR, 'js', n);

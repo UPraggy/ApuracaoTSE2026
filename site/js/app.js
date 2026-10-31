@@ -1,21 +1,23 @@
 // Painel da apuração: mapa de cor (UF → município → local de votação), busca e painel de detalhes.
-import { UF_NOME, REGIAO_NOME, carregar, nf, pct, esc, norm, titulo, sigla, vazio, somar, corVantagem, CLASSES_VANTAGEM, classesQuantis, corSequencial, corCss } from './util.js';
+import { UF_NOME, REGIAO_NOME, carregar, nf, pct, pp, esc, norm, titulo, sigla, vazio, somar, corVantagem, CLASSES_VANTAGEM, classesQuantis, corSequencial, corCss } from './util.js';
 import { iniciarAnalises } from './analises.js';
 import { animarNumeros } from './anim.js';
 import { iniciarFaq } from './faq.js';
+import { iniciarComparar } from './comparar.js';
 
 const R = await carregar('resumo.json');
 const MUN = await carregar('municipios.json');
 const ZON = await carregar('zonas.json');
 const [CA, CB] = R.candidatos;
+for (const [uf, g] of Object.entries(R.porUf)) g.uf = uf; // a variação 2022→2026 é procurada pela UF
 const NOME_A = titulo(CA.nome), NOME_B = titulo(CB.nome);
 document.querySelectorAll('[data-cand="a"]').forEach(e => e.textContent = NOME_A);
 document.querySelectorAll('[data-cand="b"]').forEach(e => e.textContent = NOME_B);
 
 // ---------- Acesso aos dados ----------
-const aggMun = r => ({ secoes: r[5], aptos: r[6], comp: r[7], biom: r[8], a: r[9], b: r[10], br: r[11], nu: r[12], alertas: r[13], q17: r[16], q1730: r[17], q19: r[18] });
-const aggZona = z => ({ secoes: z[3], aptos: z[4], comp: z[5], biom: z[6], a: z[7], b: z[8], br: z[9], nu: z[10], alertas: z[11], q17: z[12], q1730: z[13], q19: z[14] });
-const aggLocal = l => ({ secoes: l[10], aptos: l[11], comp: l[12], biom: l[13], a: l[14], b: l[15], br: l[16], nu: l[17], alertas: l[18], q17: l[20], q1730: l[21], q19: l[22] });
+const aggMun = r => ({ ibge: r[0], secoes: r[5], aptos: r[6], comp: r[7], biom: r[8], a: r[9], b: r[10], br: r[11], nu: r[12], alertas: r[13], q17: r[16], q1730: r[17], q19: r[18], q1705: r[19] });
+const aggZona = z => ({ secoes: z[3], aptos: z[4], comp: z[5], biom: z[6], a: z[7], b: z[8], br: z[9], nu: z[10], alertas: z[11], q17: z[12], q1730: z[13], q19: z[14], q1705: z[15] });
+const aggLocal = l => ({ secoes: l[10], aptos: l[11], comp: l[12], biom: l[13], a: l[14], b: l[15], br: l[16], nu: l[17], alertas: l[18], q17: l[20], q1730: l[21], q19: l[22], q1705: l[23] });
 const munPorIbge = new Map(MUN.filter(m => m[0]).map(m => [m[0], m]));
 const nomeMun = ibge => munPorIbge.get(ibge)?.[2] ?? '';
 const ufsDaRegiao = id => R.regioes[id];
@@ -31,16 +33,38 @@ const METRICAS = {
   abstencao: { nome: 'Abstenção (%)', curto: 'Abstenção', valor: g => g.aptos ? 1 - g.comp / g.aptos : NaN, dd: 'comp', explica: 'Aptos que não foram votar, em % dos aptos.' },
   comparecimento: { nome: 'Comparecimento (%)', curto: 'Comparec. %', valor: g => g.aptos ? g.comp / g.aptos : NaN, dd: 'comp', explica: 'Quem votou, em % dos eleitores aptos.' },
   brancosnulos: { nome: 'Brancos + nulos (%)', curto: 'Br.+nulos', valor: g => g.comp ? (g.br + g.nu) / g.comp : NaN, dd: 'brnu', explica: 'Votos em branco e nulos, em % de quem votou.' },
-  apos17: { nome: 'Urnas encerradas após 17h (%)', curto: 'Após 17h', valor: g => g.secoes ? g.q17 / g.secoes : NaN, dd: 'apos17', explica: 'Urnas que fecharam depois de 17:00:00 de Brasília, em % das urnas. Quase todas fecham alguns segundos ou minutos depois das 17h por causa da fila: quem chegou até as 17h ainda vota.' },
+  apos17: { nome: 'Urnas encerradas após 17h05 (%)', curto: 'Após 17h05', valor: g => g.secoes ? g.q1705 / g.secoes : NaN, dd: 'apos17', explica: 'Urnas que fecharam depois de 17:05 de Brasília, em % das urnas: é onde houve fila de verdade. Contando qualquer segundo após 17:00:00, praticamente 100% das urnas entram (o fechamento leva alguns instantes), por isso o corte é 17:05.' },
   apos1730: { nome: 'Urnas encerradas após 17h30 (%)', curto: 'Após 17h30', valor: g => g.secoes ? g.q1730 / g.secoes : NaN, dd: 'apos17', explica: 'Urnas que fecharam depois de 17:30 de Brasília, em % das urnas. Fora do normal: no país, só 1,5% das urnas.' },
   apos19: { nome: 'Urnas encerradas após 19h (%)', curto: 'Após 19h', valor: g => g.secoes ? g.q19 / g.secoes : NaN, dd: 'apos17', explica: 'Urnas que fecharam depois de 19:00 de Brasília, em % das urnas. É o caso que pede explicação oficial (veja Análise › Horários).' },
+  var13: { nome: 'Variação do 13 (2022→2026, p.p.)', curto: 'Δ 13 (p.p.)', valor: g => variacao(g, 1), dd: 'placar', div: true, pp: true, hist: true, explica: 'Quanto a % do candidato de número 13 nos votos válidos subiu (vermelho) ou caiu (azul) em relação a 2022, em pontos percentuais. Só para estados e municípios.' },
+  varcomp: { nome: 'Variação do comparecimento (2022→2026, p.p.)', curto: 'Δ comparec. (p.p.)', valor: g => variacao(g, 0), dd: 'comp', pp: true, hist: true, explica: 'Quanto o comparecimento subiu ou caiu em relação a 2022, em pontos percentuais. Só para estados e municípios.' },
   alertas: { nome: 'Seções com alerta (%)', curto: 'Seç. c/ alerta', valor: g => g.secoes ? g.alertas / g.secoes : NaN, dd: 'alertas', explica: 'Seções com pelo menos um alerta automático, em % das seções.' }
 };
 let metrica = 'resultado';
 let limites = [];
-const cor = g => metrica === 'resultado' ? corVantagem(g.a, g.b) : corSequencial(METRICAS[metrica].valor(g), limites);
+const cor = g => metrica === 'resultado' ? corVantagem(g.a, g.b) : METRICAS[metrica].div ? corVariacao(METRICAS[metrica].valor(g)) : corSequencial(METRICAS[metrica].valor(g), limites);
+// Variação 2022→2026 (scripts/historico.mjs): colunas dComparecimentoPP, dPctAValidosPP, …
+let HIST_MUN = null, HIST_UF = null;
+const COL_UF = ['dComparecimentoPP', 'dPctAValidosPP'];
+function variacao(g, i) {
+  if (g.ibge && HIST_MUN) { const v = HIST_MUN[String(g.ibge)]; return v ? v[i] : NaN; }
+  if (g.uf && HIST_UF) { const v = HIST_UF[g.uf]; return v ? v[COL_UF[i]] : NaN; }
+  return NaN;
+}
+async function carregarHistorico() {
+  if (HIST_MUN) return;
+  const [m, r] = await Promise.all([carregar('historico-municipios.json'), carregar('historico-resumo.json')]);
+  HIST_MUN = m.variacao2022a2026.municipios; HIST_UF = r.comparacao['2022-2026'].porUf;
+}
+// Divergente: vermelho = o 13 subiu, azul = caiu; mais forte = mais pontos.
+const CLASSES_VAR = [0, 1, 3, 6];
+function corVariacao(v) {
+  if (!Number.isFinite(v)) return corCss('--sem-dado');
+  const m = Math.abs(v), i = CLASSES_VAR.filter(x => m >= x).length;
+  return corCss(`--${v >= 0 ? 'a' : 'b'}-${Math.max(1, i)}`);
+}
 // Valor formatado do indicador: número inteiro para os absolutos, % para as taxas.
-const fmtValor = (v, M = METRICAS[metrica], casas = 2) => !Number.isFinite(v) ? '—' : M.abs ? nf(v) : pct(v, 1, casas);
+const fmtValor = (v, M = METRICAS[metrica], casas = 2) => !Number.isFinite(v) ? '—' : M.abs ? nf(v) : M.pp ? pp(v, Math.min(casas, 2)) + ' p.p.' : pct(v, 1, casas);
 const fmtMetrica = g => metrica === 'resultado' ? `${NOME_A} ${pct(g.a, g.a + g.b)} · ${NOME_B} ${pct(g.b, g.a + g.b)}` : `${METRICAS[metrica].curto}: ${fmtValor(METRICAS[metrica].valor(g))}`;
 
 // ---------- Mapa ----------
@@ -155,7 +179,7 @@ function atualizarResumo(sel) {
 
 // Limites das classes calculados sobre o que está visível no momento.
 function recalcularLimites(grupos) {
-  limites = metrica === 'resultado' ? [] : classesQuantis(grupos.map(g => METRICAS[metrica].valor(g)));
+  limites = metrica === 'resultado' || METRICAS[metrica].div ? [] : classesQuantis(grupos.map(g => METRICAS[metrica].valor(g)));
 }
 async function desenharPoligonos() {
   const ufs = ufMunicipios === '*' ? Object.keys(R.porUf).filter(u => u !== 'ZZ') : ufMunicipios ? [ufMunicipios] : [];
@@ -174,6 +198,8 @@ async function desenharPoligonos() {
 const ControleLegenda = L.Control.extend({ options: { position: 'bottomleft' }, onAdd() { const d = L.DomUtil.create('div', 'legenda-calor'); L.DomEvent.disableClickPropagation(d); return d; } });
 const ctlLegenda = new ControleLegenda().addTo(mapa);
 const curto = n => n.split(' ').slice(-1)[0];
+// Cor da classe k (0 = abaixo do primeiro limite, n = acima do último). Infinity viraria "sem dado" (cinza).
+const corDaClasse = k => !limites.length ? corSequencial(0, []) : corSequencial(k === 0 ? limites[0] - 1 : k === limites.length ? limites[limites.length - 1] + 1 : (limites[k - 1] + limites[k]) / 2, limites);
 function legendaCalor() {
   const el = ctlLegenda.getContainer();
   if (metrica === 'resultado') {
@@ -182,7 +208,11 @@ function legendaCalor() {
     return;
   }
   const M = METRICAS[metrica], n = limites.length;
-  const cores = Array.from({ length: n + 1 }, (_, k) => corSequencial(k === 0 ? -Infinity : k === n ? Infinity : (limites[k - 1] + limites[k]) / 2, limites));
+  if (M.div) {
+    el.innerHTML = `<div class="lc-titulo">${esc(M.nome)}</div><div class="lc-barra">${[4, 3, 2, 1].map(i => `<i style="background:var(--b-${i})"></i>`).join('')}${[1, 2, 3, 4].map(i => `<i style="background:var(--a-${i})"></i>`).join('')}</div><div class="lc-rot"><span>caiu 6+</span><span>0</span><span>subiu 6+</span></div>`;
+    return;
+  }
+  const cores = Array.from({ length: n + 1 }, (_, k) => corDaClasse(k));
   el.innerHTML = `<div class="lc-titulo">${esc(M.nome)}</div><div class="lc-barra">${cores.map(c => `<i style="background:${c}"></i>`).join('')}</div><div class="lc-rot"><span>menos${n ? ' · ' + fmtValor(limites[0], M, 1) : ''}</span><span>${n ? fmtValor(limites[n - 1], M, 1) + ' · ' : ''}mais</span></div>`;
 }
 function desenharLegenda() {
@@ -194,11 +224,12 @@ function desenharLegenda() {
     el.innerHTML = `<span class="leg-nome">${esc(NOME_A)}</span>${faixa('a', NOME_A).reverse().join('')}<span class="leg-meio">50%</span>${faixa('b', NOME_B).join('')}<span class="leg-nome">${esc(NOME_B)}</span><span class="leg-nota">cor de quem lidera; mais forte = mais folga (50–55, 55–60, 60–70, 70%+ dos válidos)</span>`;
     return;
   }
+  if (METRICAS[metrica].div) { el.innerHTML = `<span class="leg-nome">${esc(METRICAS[metrica].nome)}</span><span class="leg-nota">vermelho = o 13 subiu em relação a 2022; azul = caiu; faixas de 0–1, 1–3, 3–6 e 6+ pontos; cinza = sem dado (zonas, bairros e escolas não têm comparação)</span>`; legendaCalor(); return; }
   const n = limites.length, faixas = [], f1 = v => fmtValor(v, METRICAS[metrica], 1);
   for (let i = 0; i <= n; i++) {
     const de = i === 0 ? null : limites[i - 1], ate = i === n ? null : limites[i];
     const txt = de == null ? '< ' + f1(ate) : ate == null ? '≥ ' + f1(de) : f1(de) + '–' + f1(ate);
-    faixas.push(`<span class="sw" style="background:${corSequencial(de == null ? -Infinity : ate == null ? Infinity : (de + ate) / 2, limites)}"></span><span class="leg-txt">${txt}</span>`);
+    faixas.push(`<span class="sw" style="background:${corDaClasse(i)}"></span><span class="leg-txt">${txt}</span>`);
   }
   el.innerHTML = `<span class="leg-nome">${esc(METRICAS[metrica].nome)}</span>${faixas.join('')}<span class="leg-nota">faixas com o mesmo número de áreas na tela; cinza = sem dado</span>`;
   legendaCalor();
@@ -226,7 +257,7 @@ function reestilizar() {
   camadaUf.setStyle(camadaUf.options.style);
   for (const c of camadasMun.values()) if (mapa.hasLayer(c)) c.setStyle(c.options.style);
 }
-function recalcularLimitesPontos(lista) { if (metrica !== 'resultado') limites = classesQuantis(lista.map(l => METRICAS[metrica].valor(aggLocal(l)))); desenharLegenda(); }
+function recalcularLimitesPontos(lista) { if (metrica !== 'resultado' && !METRICAS[metrica].div) limites = classesQuantis(lista.map(l => METRICAS[metrica].valor(aggLocal(l)))); desenharLegenda(); }
 
 function enquadrar(camadas) {
   const b = L.latLngBounds([]);
@@ -279,7 +310,7 @@ function cabecalho(tipo, nome, g, extra = '') {
     <div${foco('brnu')}><dt>Brancos</dt><dd>${nf(g.br)} <small>${pct(g.br, g.comp)}</small></dd></div>
     <div${foco('brnu')}><dt>Nulos</dt><dd>${nf(g.nu)} <small>${pct(g.nu, g.comp)}</small></dd></div>
     <div${foco('biom')} title="Eleitores com biometria cadastrada que foram liberados para votar sem a digital (campo QT_ELEI_BIOM_SEM_HABILITACAO)"><dt>Sem habilitação biométrica</dt><dd>${nf(g.biom)} <small>${pct(g.biom, g.comp, 2)}</small></dd></div>
-    <div${foco('apos17')} title="Urnas que fecharam depois de 17:00, 17:30 e 19:00 (horário de Brasília)"><dt>Urnas fechadas após 17h · 17h30 · 19h</dt><dd>${nf(g.q17)} <small>${pct(g.q17, g.secoes)}</small> · ${nf(g.q1730)} · ${nf(g.q19)}</dd></div>
+    <div${foco('apos17')} title="Urnas que fecharam depois de 17:05, 17:30 e 19:00 (horário de Brasília). Depois de 17:00:00 em ponto: quase todas."><dt>Urnas fechadas após 17h05 · 17h30 · 19h</dt><dd>${nf(g.q1705)} <small>${pct(g.q1705, g.secoes)}</small> · ${nf(g.q1730)} · ${nf(g.q19)}</dd></div>
     <div${foco('alertas')} title="Seções com pelo menos um alerta automático (veja a aba Alertas)"><dt>Seções com alerta</dt><dd>${nf(g.alertas)}</dd></div>
   </dl>`;
 }
@@ -442,27 +473,35 @@ let marcaEndereco = null;
 ROTAS.endereco = async (sel, p) => {
   p.innerHTML = '<p class="muted">Procurando o endereço no OpenStreetMap…</p>';
   // Nominatim (OpenStreetMap): uma busca por escolha, só no Brasil. Política de uso: baixo volume, com atribuição.
-  const url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=1&countrycodes=br&accept-language=pt-BR&q=' + encodeURIComponent(sel.q);
-  const r = await fetch(url, { headers: { Accept: 'application/json' } }).then(x => x.json());
-  if (!r.length) { p.innerHTML = migalhas([['Brasil', { tipo: 'brasil' }], ['Endereço']]) + `<p>Não achei "<b>${esc(sel.q)}</b>". Tente com cidade e estado, por exemplo: <i>Rua da Bahia, Belo Horizonte, MG</i>.</p>`; return; }
+  // Com coordenadas (botão "Perto de mim"), a busca é reversa: só serve para saber o estado e o nome do lugar.
+  const base = 'https://nominatim.openstreetmap.org/';
+  const url = sel.lat != null
+    ? `${base}reverse?format=jsonv2&addressdetails=1&zoom=16&accept-language=pt-BR&lat=${sel.lat}&lon=${sel.lon}`
+    : `${base}search?format=jsonv2&addressdetails=1&limit=1&countrycodes=br&accept-language=pt-BR&q=${encodeURIComponent(sel.q)}`;
+  const resp = await fetch(url, { headers: { Accept: 'application/json' } }).then(x => x.json());
+  const r = sel.lat != null ? (resp && !resp.error ? [{ ...resp, lat: sel.lat, lon: sel.lon, name: 'Você está aqui' }] : []) : resp;
+  if (!r.length) { p.innerHTML = migalhas([['Brasil', { tipo: 'brasil' }], ['Endereço']]) + `<p>Não achei "<b>${esc(sel.q || 'sua localização')}</b>". Tente com cidade e estado, por exemplo: <i>Rua da Bahia, Belo Horizonte, MG</i>.</p>`; return; }
   const lugar = r[0], lat = +lugar.lat, lon = +lugar.lon;
   const uf = UF_ISO[lugar.address?.['ISO3166-2-lvl4']] || null;
-  if (!uf) throw Error('não consegui identificar o estado deste endereço');
+  if (!uf) throw Error('não consegui identificar o estado deste lugar (o painel cobre só o Brasil)');
   const todos = await locaisDaUf(uf);
   const dist = l => { const dy = (l[8] - lat) * 111.32, dx = (l[9] - lon) * 111.32 * Math.cos(lat * Math.PI / 180); return Math.hypot(dx, dy); };
   const perto = todos.filter(l => l[8] != null).map(l => [dist(l), l]).sort((a, b) => a[0] - b[0]).slice(0, 12);
   ufMunicipios = uf; foco = new Set(perto.map(([, l]) => l[1]));
   await desenharPoligonos(); await desenharPontos(perto.map(([, l]) => l), uf);
   if (marcaEndereco) marcaEndereco.remove();
-  marcaEndereco = L.marker([lat, lon], { title: lugar.display_name }).addTo(mapa).bindTooltip('Endereço procurado');
+  marcaEndereco = L.marker([lat, lon], { title: lugar.display_name }).addTo(mapa).bindTooltip(sel.lat != null ? 'Você está aqui' : 'Endereço procurado');
   mapa.flyToBounds(L.latLngBounds([[lat, lon], ...perto.slice(0, 5).map(([, l]) => [l[8], l[9]])]).pad(0.25), { maxZoom: 16, duration: 0.6 });
   const g = perto.reduce((s, [, l]) => somar(s, aggLocal(l)), vazio());
   p.innerHTML = migalhas([['Brasil', { tipo: 'brasil' }], [uf, { tipo: 'uf', uf }], ['Perto do endereço']]) +
-    cabecalho('Perto de um endereço (12 locais de votação mais próximos)', esc(lugar.name || sel.q), g, `<p class="small">${esc(lugar.display_name)}</p><p class="fonte">ⓘ Endereço localizado pelo <a href="https://nominatim.openstreetmap.org/" target="_blank" rel="noopener">OpenStreetMap (Nominatim)</a>. Resultados: TSE.</p>`);
+    cabecalho('Perto de um endereço (12 locais de votação mais próximos)', esc(lugar.name || sel.q), g, `<p class="small">${esc(lugar.display_name)}</p>
+    <div class="zona-perto">Zona eleitoral do local mais próximo: <button class="link" data-ir="${ir({ tipo: 'zona', uf, zona: perto[0][1][2] })}"><b>Zona ${perto[0][1][2]} · ${uf}</b></button> (${esc(titulo(perto[0][1][4]))}). <span class="muted">Sua zona de verdade é a do seu título de eleitor; confira no app e-Título.</span></div><p class="fonte">ⓘ Endereço localizado pelo <a href="https://nominatim.openstreetmap.org/" target="_blank" rel="noopener">OpenStreetMap (Nominatim)</a>. Resultados: TSE.</p>`);
+  p.querySelector('.zona-perto [data-ir]').onclick = e => selecionar(JSON.parse(e.currentTarget.dataset.ir));
   tabela(p, 'Locais de votação mais próximos', [
     { t: 'Distância', num: true, v: l => dist(l), f: l => dist(l) < 1 ? Math.round(dist(l) * 1000) + ' m' : dist(l).toFixed(1).replace('.', ',') + ' km' },
     { t: 'Local', v: l => l[4], f: l => esc(titulo(l[4])), busca: l => l[4] + ' ' + l[5] },
     { t: 'Bairro', v: l => l[5], f: l => esc(titulo(l[5])) },
+    { t: 'Zona', num: true, v: l => l[2] },
     colVantagem(aggLocal), colComp(aggLocal), colBio(aggLocal)
   ], perto.map(([, l]) => l), l => selecionar({ tipo: 'local', uf, id: l[0] }), { ordem: [0, 1] });
 };
@@ -516,7 +555,7 @@ function tabelaLocais(p, locais, uf, rotulo = 'Locais de votação (escolas e ou
 
 // ---------- Endereço na URL (#uf=SP, #mun=3550308, #zona=SP-1, #local=SP-12, #regiao=NE) ----------
 function hashDe(s) {
-  return { brasil: 'brasil', regiao: 'regiao=' + s.id, uf: 'uf=' + s.uf, municipio: s.ibge ? 'mun=' + s.ibge : 'ext=' + s.tse, zona: `zona=${s.uf}-${s.zona}`, local: `local=${s.uf}-${s.id}`, bairro: `bairro=${s.uf}-${s.ibge}-${encodeURIComponent(s.bairro)}`, regiaoIbge: `rib=${s.uf}-${s.nivel}-${encodeURIComponent(s.nome)}`, endereco: 'end=' + encodeURIComponent(s.q) }[s.tipo] || 'brasil';
+  return { brasil: 'brasil', regiao: 'regiao=' + s.id, uf: 'uf=' + s.uf, municipio: s.ibge ? 'mun=' + s.ibge : 'ext=' + s.tse, zona: `zona=${s.uf}-${s.zona}`, local: `local=${s.uf}-${s.id}`, bairro: `bairro=${s.uf}-${s.ibge}-${encodeURIComponent(s.bairro)}`, regiaoIbge: `rib=${s.uf}-${s.nivel}-${encodeURIComponent(s.nome)}`, endereco: s.lat != null ? `perto=${s.lat.toFixed(4)},${s.lon.toFixed(4)}` : 'end=' + encodeURIComponent(s.q) }[s.tipo] || 'brasil';
 }
 function selDoHash() {
   const [k, v = ''] = decodeURIComponent(location.hash.slice(1)).split('=');
@@ -524,7 +563,7 @@ function selDoHash() {
   return {
     regiao: { tipo: 'regiao', id: v }, uf: { tipo: 'uf', uf: v }, mun: { tipo: 'municipio', ibge: +v }, ext: { tipo: 'municipio', uf: 'ZZ', tse: +v },
     zona: { tipo: 'zona', uf: p[0], zona: +p[1] }, local: { tipo: 'local', uf: p[0], id: +p[1] }, bairro: { tipo: 'bairro', uf: p[0], ibge: +p[1], bairro: p.slice(2).join('-') },
-    rib: { tipo: 'regiaoIbge', uf: p[0], nivel: p[1], nome: p.slice(2).join('-') }, end: { tipo: 'endereco', q: v }
+    rib: { tipo: 'regiaoIbge', uf: p[0], nivel: p[1], nome: p.slice(2).join('-') }, end: { tipo: 'endereco', q: v }, perto: { tipo: 'endereco', lat: +v.split(',')[0], lon: +v.split(',')[1] }
   }[k] || { tipo: 'brasil' };
 }
 
@@ -608,7 +647,7 @@ function escolher(it) { escolhendo = true; sugestoes.hidden = true; entrada.valu
 // ---------- Controles do mapa ----------
 const selMetrica = document.getElementById('metrica');
 selMetrica.innerHTML = Object.entries(METRICAS).map(([k, m]) => `<option value="${k}">${m.nome}</option>`).join('');
-selMetrica.onchange = () => { metrica = selMetrica.value; selecionar(selAtual || { tipo: 'brasil' }, { semHash: true }); };
+selMetrica.onchange = async () => { if (METRICAS[selMetrica.value].hist) await carregarHistorico(); metrica = selMetrica.value; selecionar(selAtual || { tipo: 'brasil' }, { semHash: true }); };
 document.getElementById('nivel').onchange = e => { nivelBrasil = e.target.value; selecionar({ tipo: 'brasil' }); };
 // Ruas: ligadas, aparecem sozinhas a partir do zoom 9 (cidade). Desligadas, o mapa fica só com as cores.
 const chkRuas = document.getElementById('ruas');
@@ -623,6 +662,15 @@ function atualizarRuas() {
 chkRuas.onchange = atualizarRuas;
 mapa.on('zoomend', atualizarRuas);
 document.getElementById('btn-brasil').onclick = () => selecionar({ tipo: 'brasil' });
+// "Perto de mim": a localização fica só no navegador; vai ao OpenStreetMap apenas para saber o estado.
+document.getElementById('btn-perto').onclick = () => {
+  if (!navigator.geolocation) { alert('Este navegador não informa a localização. Busque pelo seu bairro ou endereço.'); return; }
+  const b = document.getElementById('btn-perto'); b.disabled = true; b.textContent = '📍 Localizando…';
+  navigator.geolocation.getCurrentPosition(
+    pos => { b.disabled = false; b.textContent = '📍 Perto de mim'; mostrarAba('mapa'); selecionar({ tipo: 'endereco', lat: pos.coords.latitude, lon: pos.coords.longitude }); },
+    () => { b.disabled = false; b.textContent = '📍 Perto de mim'; alert('Não deu para pegar sua localização. Busque pelo seu bairro, escola ou endereço.'); },
+    { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 });
+};
 document.getElementById('btn-exterior').onclick = () => selecionar({ tipo: 'uf', uf: 'ZZ' });
 
 // ---------- Reprodução da apuração (ordem de chegada dos boletins ao TSE) ----------
@@ -684,6 +732,7 @@ aplicarTema();
 
 iniciarAnalises(R, { NOME_A, NOME_B, irPara: sel => { mostrarAba('mapa'); selecionar(sel); }, mostrarAba: nome => { mostrarAba(nome); window.scrollTo({ top: 0, behavior: 'smooth' }); } });
 iniciarFaq(R, { NOME_A, NOME_B });
+iniciarComparar(R, { NOME_A, NOME_B, irPara: sel => { mostrarAba('mapa'); selecionar(sel); } });
 await selecionar(selDoHash(), { semHash: true });
 window.addEventListener('popstate', () => selecionar(selDoHash(), { semHash: true }));
 document.body.classList.add('pronto');
