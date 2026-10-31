@@ -1,0 +1,95 @@
+/* Brasil × Mundo (site/js/mundo.js). Usa os tokens de estilo.css; cores neutras (sem as cores dos candidatos). */
+.mu-aba { max-width: 1200px; margin: 0 auto; }
+.mu-intro h2 { display: flex; align-items: center; gap: 8px; }
+.mu-intro h2 .ic { width: 24px; height: 24px; color: var(--acento); }
+.mu-intro p { max-width: 80ch; }
+
+.mu-filtros { position: sticky; top: var(--mu-topo, 112px); z-index: 50; display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px 12px; background: color-mix(in srgb, var(--fundo) 94%, transparent); backdrop-filter: blur(6px); border: 1px solid var(--linha); border-radius: 12px; padding: 10px 12px; margin: 12px 0; }
+.mu-filtros label { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; min-width: 0; }
+.mu-filtros select { width: 100%; text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 15px; }
+
+/* Resumo */
+.mu-resumo-box { margin: 8px 0 18px; }
+.mu-resumo { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.mu-res { display: grid; grid-template-columns: 1fr auto; grid-template-areas: "nome pos" "barra barra" "ano ano"; gap: 4px 8px; text-align: left; background: var(--superficie); border: 1px solid var(--linha); border-radius: 10px; padding: 9px 11px; cursor: pointer; transition: background .15s ease, transform .12s ease; }
+.mu-res:hover { background: var(--superficie-2); }
+.mu-res:active { transform: scale(.98); }
+.mu-res:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+.mu-res-nome { grid-area: nome; font-size: 14px; font-weight: 600; line-height: 1.25; }
+.mu-res-pos { grid-area: pos; font-weight: 800; font-variant-numeric: tabular-nums; }
+.mu-res-pos small { font-weight: 400; color: var(--muted); }
+.mu-res-barra { grid-area: barra; height: 6px; border-radius: 3px; background: var(--superficie-2); overflow: hidden; }
+.mu-res-barra i { display: block; height: 100%; background: var(--serie-1); border-radius: 3px; }
+.mu-res-ano { grid-area: ano; }
+
+/* Cartões */
+.mu-tema h3 { margin: 22px 0 8px; }
+.mu-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 520px), 1fr)); gap: 12px; }
+.mu-card { background: var(--superficie); border: 1px solid var(--linha); border-radius: 14px; padding: 14px 16px; min-width: 0; animation: sobe .45s ease both; animation-delay: calc(min(var(--i, 0), 10) * 40ms); }
+.mu-cab { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
+.mu-cab h4 { font-size: 16px; line-height: 1.3; flex: 1 1 240px; }
+.mu-sentido { font-size: 12px; border: 1px solid var(--borda); border-radius: 99px; padding: 2px 9px; color: var(--tinta-2); white-space: nowrap; }
+.mu-destaque { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 12px 0 6px; }
+.mu-destaque > div { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.mu-rot { font-size: 12px; color: var(--muted); }
+.mu-num { font-size: 22px; font-weight: 750; letter-spacing: -.01em; font-variant-numeric: tabular-nums; line-height: 1.15; overflow-wrap: anywhere; }
+.mu-de { font-size: 14px; font-weight: 400; color: var(--tinta-2); }
+.mu-destaque small { font-size: 12px; color: var(--tinta-2); }
+
+/* Régua 1º … Nº */
+.mu-regua { margin: 14px 0 4px; }
+.mu-trilho { position: relative; height: 8px; border-radius: 4px; background: linear-gradient(90deg, color-mix(in srgb, var(--serie-2) 55%, var(--superficie-2)), var(--superficie-2) 50%, color-mix(in srgb, var(--muted) 35%, var(--superficie-2))); }
+.mu-meio { position: absolute; left: 50%; top: -3px; width: 1px; height: 14px; background: var(--muted); }
+.mu-br { position: absolute; top: 50%; width: 16px; height: 16px; margin-left: -8px; transform: translateY(-50%); border-radius: 50%; background: var(--serie-1); border: 2px solid var(--superficie); box-shadow: 0 0 0 1px var(--serie-1); }
+.mu-br em { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); font-size: 11px; font-style: normal; font-weight: 700; color: var(--serie-1); white-space: nowrap; }
+.mu-regua-rot { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 4px; }
+.mu-texto { font-size: 14px; color: var(--tinta-2); margin: 10px 0; }
+.mu-texto b { color: var(--tinta); }
+
+/* Lista com barras */
+.mu-lista-tit { margin: 8px 0 4px; }
+.mu-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.mu-lista.longa { max-height: 420px; overflow: auto; border: 1px solid var(--linha); border-radius: 10px; padding: 4px; -webkit-overflow-scrolling: touch; }
+.mu-l, .mu-gap { display: grid; grid-template-columns: 40px minmax(0, 1.3fr) minmax(50px, 1fr) auto; gap: 8px; align-items: center; padding: 3px 6px; border-radius: 6px; font-size: 13px; }
+.mu-l-pos { color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
+.mu-l-nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mu-l-nome small { color: var(--muted); }
+.mu-l-barra { height: 8px; background: var(--superficie-2); border-radius: 4px; overflow: hidden; }
+.mu-l-barra i { display: block; height: 100%; background: color-mix(in srgb, var(--muted) 70%, transparent); border-radius: 4px; animation: cresceX .6s ease both; transform-origin: left; }
+.mu-l-v { font-variant-numeric: tabular-nums; text-align: right; min-width: 52px; }
+.mu-l.br { background: color-mix(in srgb, var(--serie-1) 14%, transparent); font-weight: 700; }
+.mu-l.br .mu-l-pos { color: var(--serie-1); }
+.mu-l.br .mu-l-barra i { background: var(--serie-1); }
+.mu-gap { color: var(--muted); padding: 0 6px; line-height: 1; }
+
+/* Detalhes: gráficos e mandatos */
+.mu-mais { margin-top: 12px; border-top: 1px solid var(--linha); padding-top: 8px; }
+.mu-mais summary { cursor: pointer; color: var(--acento); font-weight: 600; font-size: 14px; padding: 4px 0; }
+.mu-mais h5 { margin: 12px 0 0; font-size: 13px; color: var(--tinta-2); font-weight: 600; }
+.mu-faixa.f0 { fill: color-mix(in srgb, var(--tinta) 4%, transparent); }
+.mu-faixa.f1 { fill: color-mix(in srgb, var(--tinta) 9%, transparent); }
+.mu-faixa-rot { fill: var(--muted); font-size: 10px; }
+.mu-tab { width: 100%; border-collapse: collapse; font-size: 13px; }
+.mu-tab caption { text-align: left; padding: 6px 4px; }
+.mu-tab th, .mu-tab td { padding: 5px 8px; border-bottom: 1px solid var(--linha); text-align: left; white-space: nowrap; }
+.mu-tab .num { text-align: right; font-variant-numeric: tabular-nums; }
+.mu-tab td small { color: var(--muted); }
+.mu-tab .sobe { color: var(--ok); }
+.mu-tab .desce { color: var(--erro); }
+
+/* Versão compacta (abas Candidatos / Governos) */
+.mu-card.compacto { padding: 12px 14px; }
+.mu-card.compacto .mu-num { font-size: 19px; }
+.mu-card.compacto .mu-texto { font-size: 13px; }
+
+@media (max-width: 640px) {
+  .mu-filtros { position: static; grid-template-columns: 1fr 1fr; }
+  .mu-destaque { grid-template-columns: 1fr 1fr; }
+  .mu-destaque > div:last-child { grid-column: 1 / -1; }
+  .mu-num { font-size: 20px; }
+  .mu-l, .mu-gap { grid-template-columns: 34px minmax(0, 1.4fr) minmax(36px, .8fr) auto; gap: 6px; font-size: 12.5px; }
+  .mu-resumo { grid-template-columns: 1fr 1fr; }
+  .mu-res { padding: 8px 9px; }
+}
+@media (max-width: 380px) { .mu-filtros, .mu-resumo { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .mu-card, .mu-l-barra i { animation: none; } .mu-res { transition: none; } }

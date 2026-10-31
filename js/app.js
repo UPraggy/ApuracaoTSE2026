@@ -1,6 +1,6 @@
 // Painel da apuração: mapa de cor (UF → município → local de votação), busca e painel de detalhes.
-import { UF_NOME, REGIAO_NOME, carregar, nf, pct, pp, hhmm, esc, norm, titulo, sigla, vazio, somar, corVantagem, CLASSES_VANTAGEM, classesQuantis, corSequencial, corCss } from './util.js?v=29dda3fef3';
-import { iniciarAnalises } from './analises.js?v=b2df9fa094';
+import { UF_NOME, REGIAO_NOME, carregar, nf, pct, pp, hhmm, esc, norm, titulo, sigla, vazio, somar, corVantagem, CLASSES_VANTAGEM, classesQuantis, corSequencial, corCss } from './util.js?v=ea3d1a9ee8';
+import { iniciarAnalises } from './analises.js?v=03998d0c5f';
 import { animarNumeros } from './anim.js?v=19eef1076c';
 import { iniciarFaq } from './faq.js?v=76d3a0a37d';
 import { iniciarComparar } from './comparar.js?v=09b7c011af';
@@ -903,9 +903,9 @@ function carregarCss(nome) {
 }
 for (const [arq, fn, args, aba] of [
   ['./inicio.js?v=9c02df0453', 'iniciarInicio', { NOME_A, NOME_B, irAba, irPara: irParaMapa, focarBusca: () => entrada.focus() }],
-  ['./explorar.js?v=838e7623b5', 'iniciarExplorar', { NOME_A, NOME_B, irPara: irParaMapa }],
-  ['./candidatos.js?v=4e63b20511', 'iniciarCandidatos', { NOME_A, NOME_B }],
-  // ['./mundo.js?v=9b872a95e8', 'iniciarMundo', { NOME_A, NOME_B, irAba }, 'mundo'],      ← liga quando o módulo existir
+  ['./explorar.js?v=8835371190', 'iniciarExplorar', { NOME_A, NOME_B, irPara: irParaMapa }],
+  ['./candidatos.js?v=a8e7a90a61', 'iniciarCandidatos', { NOME_A, NOME_B }],
+  ['./mundo.js?v=9b872a95e8', 'iniciarMundo', { NOME_A, NOME_B, irAba }, 'mundo'],
   // ['./governo.js?v=pendente', 'iniciarGoverno', { NOME_A, NOME_B, irAba }, 'governos'],
 ]) import(arq).then(m => {
   if (!m[fn]) return;

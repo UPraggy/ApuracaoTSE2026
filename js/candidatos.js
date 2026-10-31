@@ -2,7 +2,7 @@
 // Unidade = município (o boletim é por seção, os indicadores sociais são por município). Exterior fora.
 // Média do eleitor do 13 = Σ(votos do 13 no município × indicador) ÷ Σ(votos do 13). Idem para o 22,
 // para todos os votantes (peso = comparecimento) e para a população (peso = habitantes do Censo 2022).
-import { REGIAO_NOME, carregar, nf, pct, esc, titulo } from './util.js?v=29dda3fef3';
+import { REGIAO_NOME, carregar, nf, pct, esc, titulo } from './util.js?v=ea3d1a9ee8';
 
 // Indicadores, na ordem em que aparecem. un: forma de mostrar. bu: calculado do próprio boletim de urna.
 export const INDICADORES = [
@@ -20,6 +20,7 @@ export const INDICADORES = [
   { grupo: 'Saúde', k: 'preNatal7mais', nome: 'Bebês com 7+ consultas de pré-natal', un: '%' },
   { grupo: 'Saúde', k: 'mortInfantil', nome: 'Mortalidade infantil', un: 'mil' },
   { grupo: 'Saúde', k: 'leitosSusPorMil', nome: 'Leitos do SUS', un: 'leitos' },
+  { grupo: 'Segurança', k: 'homicidiosPor100k', nome: 'Homicídios (por 100 mil hab., 2022–2024)', un: 'hom' },
   { grupo: 'População', k: 'pct60mais', nome: 'Moradores com 60 anos ou mais', un: '%' },
   { grupo: 'População', k: 'pct16a29', nome: 'Moradores de 16 a 29 anos', un: '%' },
   { grupo: 'População', k: 'alfabetizacao15', nome: 'Alfabetização (15 anos ou mais)', un: '%' },
@@ -42,6 +43,7 @@ export function fmt(ind, x) {
     case 'bf': return num(x, 1) + ' por 100 dom.';
     case 'mil': return num(x, 1) + ' por mil';
     case 'leitos': return num(x, 2) + ' por mil hab.';
+    case 'hom': return num(x, 1) + ' por 100 mil';
     case 'hab': return num(x, 0) + ' hab/km²';
     default: return num(x, ind.d ?? 1) + '%';
   }
@@ -55,6 +57,7 @@ function fmtDif(ind, d) {
     case 'idx': return s + num(a, 3);
     case 'bf': case 'mil': return s + num(a, 1);
     case 'leitos': return s + num(a, 2);
+    case 'hom': return s + num(a, 1);
     case 'hab': return s + num(a);
     default: return s + num(a, ind.d ?? 1) + ' p.p.';
   }
@@ -124,7 +127,7 @@ export function calcularPerfil(R, MUN, C) {
     distribuicao('Moradores com 60+ no município (quintos da população)', rotQ(q60, x => num(x, 1) + '%'), q60.de, 'Do 1º quinto (municípios mais jovens) ao 5º (mais envelhecidos).')
   ];
   // Quintos extras só para o texto "onde tem mais X, a maior parte votou em Y".
-  const EXTRA = [['pibPerCapita', 'PIB por habitante'], ['pctEsgotoRede', 'esgoto ligado à rede'], ['pctDomInternet', 'internet em casa'], ['eleitPctSuperior', 'eleitores com superior completo'], ['alfabetizacao15', 'alfabetização'], ['apsCobertura', 'cobertura da atenção básica']];
+  const EXTRA = [['pibPerCapita', 'PIB por habitante'], ['pctEsgotoRede', 'esgoto ligado à rede'], ['pctDomInternet', 'internet em casa'], ['eleitPctSuperior', 'eleitores com superior completo'], ['alfabetizacao15', 'alfabetização'], ['apsCobertura', 'cobertura da atenção básica'], ['homicidiosPor100k', 'homicídios por habitante']];
   const quintosTexto = [
     { tema: 'renda por pessoa', d: distribuicoes[2] }, { tema: 'famílias no Bolsa Família', d: distribuicoes[3] }, { tema: 'moradores com 60 anos ou mais', d: distribuicoes[4] },
     ...EXTRA.map(([k, tema]) => { const q = quintis(k); return { tema, d: distribuicao(tema, q.faixas.map((_, i) => ({ nome: `${i + 1}º quinto` })), q.de) }; })

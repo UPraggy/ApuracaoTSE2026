@@ -1,7 +1,7 @@
 // Aba "Explorar": escolhe um indicador (eleição, programas sociais, saneamento, saúde, renda, eleitorado),
 // mostra o ranking por estado ou município e um "bot"
 // escreve a análise a partir dos números (regras fixas, sem IA).
-import { UF_NOME, REGIAO_NOME, carregar, nf, pp, esc, norm, titulo, fonte } from './util.js?v=29dda3fef3';
+import { UF_NOME, REGIAO_NOME, carregar, nf, pp, esc, norm, titulo, fonte } from './util.js?v=ea3d1a9ee8';
 
 // ---------- Indicadores ----------
 // u = unidade: % · pp · rs (R$) · mil (por mil) · mil2 · idx · dens · bf (a cada 100 domicílios)
@@ -31,6 +31,11 @@ const IND = [
     ['preNatal7mais', 'Bebês com 7+ consultas de pré-natal', '%', { ctx: 'preNatal7mais' }],
     ['mortInfantil', 'Mortalidade infantil', 'mil', { ctx: 'mortInfantil' }],
     ['leitosSusPorMil', 'Leitos do SUS', 'mil2', { ctx: 'leitosSusPorMil' }]]],
+  ['Segurança', [
+    ['homicidiosPor100k', 'Homicídios por 100 mil hab. (2022–2024)', 'hom', { ctx: 'homicidiosPor100k' }],
+    ['mviPor100k', 'Mortes violentas intencionais por 100 mil (só estados, 2025)', 'hom', { ctx: 'mviPor100k' }],
+    ['roubosVeiculosPor100k', 'Roubos de veículos por 100 mil (só estados, 2025)', 'hom', { ctx: 'roubosVeiculosPor100k' }],
+    ['estuprosPor100k', 'Estupros por 100 mil (só estados, 2025)', 'hom', { ctx: 'estuprosPor100k' }]]],
   ['Renda e população', [
     ['rendaPcMedia', 'Renda por pessoa (média)', 'rs', { ctx: 'rendaPcMedia' }],
     ['rendaPcMediana', 'Renda por pessoa (mediana)', 'rs', { ctx: 'rendaPcMediana' }],
@@ -55,11 +60,11 @@ const ehPct = u => u === '%' || u === 'pp' || u === 'bf';
 function fmt(v, u) {
   if (v == null || !Number.isFinite(v)) return '—';
   const n = (x, d) => x.toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
-  return { '%': n(v, 1) + '%', pp: pp(v, 2) + ' p.p.', rs: 'R$ ' + nf(v), mil: n(v, 1) + ' por mil', mil2: n(v, 2) + ' por mil', idx: n(v, 3), dens: n(v, 1) + ' hab/km²', bf: n(v, 1) }[u] ?? n(v, 2);
+  return { '%': n(v, 1) + '%', pp: pp(v, 2) + ' p.p.', rs: 'R$ ' + nf(v), mil: n(v, 1) + ' por mil', mil2: n(v, 2) + ' por mil', hom: n(v, 1) + ' por 100 mil', idx: n(v, 3), dens: n(v, 1) + ' hab/km²', bf: n(v, 1) }[u] ?? n(v, 2);
 }
 // Diferença entre dois valores: em pontos para porcentagens, na própria unidade para o resto.
 const dif = (v, u) => ehPct(u) ? Math.abs(v).toLocaleString('pt-BR', { maximumFractionDigits: 2 }) + ' pontos' : fmt(Math.abs(v), u);
-const unidadeDif = u => ({ '%': 'pontos', pp: 'pontos', bf: 'famílias a cada 100 domicílios', rs: 'reais', mil: 'por mil', mil2: 'por mil', idx: 'no índice', dens: 'hab/km²' })[u] || '';
+const unidadeDif = u => ({ '%': 'pontos', pp: 'pontos', bf: 'famílias a cada 100 domicílios', rs: 'reais', mil: 'por mil', mil2: 'por mil', hom: 'por 100 mil', idx: 'no índice', dens: 'hab/km²' })[u] || '';
 const REG_DA_UF = {};
 const COR_REG = { N: 'var(--reg-n)', NE: 'var(--reg-ne)', CO: 'var(--reg-co)', SE: 'var(--reg-se)', S: 'var(--reg-s)' };
 

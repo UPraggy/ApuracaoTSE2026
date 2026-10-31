@@ -1,5 +1,5 @@
 // Página inicial: placar, números-chave com proporção, busca, atalhos para as abas e o que já foi verificado.
-import { nf, pct, esc, titulo } from './util.js?v=29dda3fef3';
+import { nf, pct, esc, titulo } from './util.js?v=ea3d1a9ee8';
 import { animarNumeros } from './anim.js?v=19eef1076c';
 
 const ic = nome => `<svg class="ic" aria-hidden="true"><use href="#i-${nome}"/></svg>`;

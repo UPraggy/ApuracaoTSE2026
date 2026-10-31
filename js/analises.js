@@ -1,5 +1,5 @@
 // Abas de análise: análise guiada (com contexto IBGE e histórico), biometria, horários, estados e alertas.
-import { UF_NOME, carregar, nf, pct, pp, hhmm, esc, sigla, corVantagem, corCss, fonte } from './util.js?v=29dda3fef3';
+import { UF_NOME, carregar, nf, pct, pp, hhmm, esc, sigla, corVantagem, corCss, fonte } from './util.js?v=ea3d1a9ee8';
 
 // População: Censo IBGE 2022 (mesmos números do painel anterior).
 const POP_IBGE = { RO: 1581016, AC: 830026, AM: 3941175, RR: 636303, PA: 8116132, AP: 733508, TO: 1511459, MA: 6775152, PI: 3269200, CE: 8791688, RN: 3302406, PB: 3974495, PE: 9058155, AL: 3127511, SE: 2209558, BA: 14136417, MG: 20538718, ES: 3833486, RJ: 16054524, SP: 44420459, PR: 11443208, SC: 7609601, RS: 10880506, MS: 2756700, MT: 3658813, GO: 7055228, DF: 2817068 };

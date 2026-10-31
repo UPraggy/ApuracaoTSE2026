@@ -2,8 +2,8 @@
 // export blocoMundo(alvo, opcoes) desenha cartões em qualquer elemento (abas Governos e Candidatos);
 // export iniciarMundo(R) desenha a aba completa em #aba-mundo (filtros, resumo, cartões).
 // Dados: site/dados/mundo.json (scripts/mundo.mjs). Regras de posição/percentil/mandatos: mundo-calc.js.
-import { carregar, esc, corCss } from './util.js?v=29dda3fef3';
-import { linhaInterativa } from './grafico.js?v=3a1d878e2d';
+import { carregar, esc, corCss } from './util.js?v=ea3d1a9ee8';
+import { linhaInterativa } from './grafico.js?v=da69cf904d';
 import * as C from './mundo-calc.js?v=93eef4e284';
 
 let promessa = null;
