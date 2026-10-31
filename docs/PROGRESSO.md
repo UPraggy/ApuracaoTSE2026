@@ -41,3 +41,25 @@
   - Reprodução da apuração com o painel do Brasil ao vivo e qualquer cor do mapa. O BU traz, por bloco, os 11 campos.
   - Corrida da apuração de 2022 e 2026, com linha guia, dica, legenda clicável, botão Tocar e setas do teclado (`grafico.js`).
   - Proporção ao lado de todo número, indicadores sociais em %, tema escuro por padrão.
+
+## 31/10/2026 (noite) — Início, Explorar, Candidatos, probabilidades
+
+- Abas novas, feitas em paralelo:
+  - **Início** (`inicio.js`): página limpa, aberta por padrão.
+  - **Explorar** (`explorar.js`): 33 indicadores, ranking, dispersão ponderada e "bot" de análise com r, r² e outliers.
+  - **Candidatos** (`candidatos.js`): perfil dos lugares de onde veio o voto, com média ponderada pelos votos de cada candidato e distribuição por região, porte e quintos de renda, Bolsa Família e 60+ pela população.
+- `scripts/simular-apuracao.mjs` → `simulacao.json`.
+  - **Sorteando urna por urna:** 0 viradas em 200.
+  - **Sorteando municípios inteiros:** virada em 39% (2026) e 61% (2022).
+  - A curva real se explica pela ordem regional de chegada.
+- **Teste de "robô" e repetição:** 0 blocos repetidos. Urnas da mesma escola com votos idênticos: 1.835 pares, contra 1.994 a 2.122 pelo acaso. Os 302 pares consecutivos são urnas vizinhas da mesma escola, e nenhum é cópia completa.
+- **Análise:** 6 verificações e 8 pontos de atenção, cada um com "chance por acaso". Os pontos de atenção:
+  - boletim impresso tarde (368);
+  - encerramento cancelado (743);
+  - contagem TSE 6.766 × 6.352;
+  - ≥50% sem digital (96);
+  - urnas destoando das vizinhas (420);
+  - aberturas tardias (84);
+  - número de urna repetido no exterior;
+  - unanimidades.
+- **Revisão:** biometria sempre sem o exterior; abas com degradê e setas do teclado; topo compacto no celular; FAQ só na Início e no Método; marcas de hora cheia nos gráficos; "Flávio" com acento; rodapé completo. O deploy agora carimba todos os CSS e os `import()` dinâmicos.
