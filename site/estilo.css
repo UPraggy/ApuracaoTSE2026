@@ -330,3 +330,9 @@ tbody tr { transition: background .12s ease; }
   .bolha { max-width: 92%; }
   .lead { font-size: 15px; }
 }
+.grupo-ctx { border: 1px solid var(--linha); border-radius: 10px; margin: 6px 0; background: var(--superficie); }
+.grupo-ctx summary { cursor: pointer; padding: 8px 10px; font-weight: 600; display: flex; gap: 8px; align-items: center; list-style: none; }
+.grupo-ctx summary::-webkit-details-marker { display: none; }
+.grupo-ctx summary::after { content: '+'; margin-left: auto; color: var(--muted); transition: transform .2s ease; }
+.grupo-ctx[open] summary::after { transform: rotate(45deg); }
+.grupo-ctx .numeros { margin: 0 8px 8px; }

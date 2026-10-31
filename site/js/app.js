@@ -574,21 +574,37 @@ async function blocoContexto(p, chave, nivel) {
   const v = Object.fromEntries(C.colunas.map((c, i) => [c, linha[i]]));
   const f = (x, d = 0) => x == null ? '—' : x.toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
   const reais = x => x == null ? '—' : 'R$ ' + f(x);
-  const itens = [
-    ['Habitantes (Censo 2022)', f(v.pop2022), 'pop2022'], ['Estimativa 2026', f(v.popEstimada), 'popEstimada'],
-    ['Área', f(v.areaKm2, v.areaKm2 < 100 ? 1 : 0) + ' km²', 'areaKm2'], ['Densidade', f(v.densidade, 1) + ' hab/km²', 'densidade'],
-    ['60 anos ou mais', f(v.pct60mais, 1) + '%', 'pct60mais'], ['16 a 29 anos', f(v.pct16a29, 1) + '%', 'pct16a29'],
-    ['Alfabetização (15+)', f(v.alfabetizacao15, 1) + '%', 'alfabetizacao15'], ['PIB per capita (2023)', reais(v.pibPerCapita), 'pibPerCapita'],
-    ['Renda domiciliar per capita (média)', reais(v.rendaPcMedia), 'rendaPcMedia'], ['Renda per capita (mediana)', reais(v.rendaPcMediana), 'rendaPcMediana'],
-    ...(v.giniRendaPc != null ? [['Índice de Gini da renda', f(v.giniRendaPc, 3), 'giniRendaPc']] : []),
-    ['Eleitores (perfil TSE 2026)', f(v.eleitores), 'eleitores'], ['Eleitoras (mulheres)', f(v.eleitPctFeminino, 1) + '%', 'eleitPctFeminino'],
-    ['Eleitores com 60+', f(v.eleitPct60mais, 1) + '%', 'eleitPct60mais'], ['Eleitores de 16–17', f(v.eleitPct16a17, 1) + '%', 'eleitPct16a17'],
-    ['Superior completo (declarado)', f(v.eleitPctSuperior, 1) + '%', 'eleitPctSuperior'], ['Com biometria cadastrada', f(v.eleitPctBiometria, 1) + '%', 'eleitPctBiometria']
+  const p100 = (x, d = 1) => x == null ? '—' : f(x, d) + '%';
+  // Em grupos e, sempre que faz sentido, em porcentagem; valores em reais e taxas por mil ficam no próprio número.
+  const grupos = [
+    ['Gente', 'cidade', [
+      ['Habitantes (Censo 2022)', f(v.pop2022), 'pop2022'], ['Estimativa 2026', f(v.popEstimada), 'popEstimada'],
+      ['Densidade', f(v.densidade, 1) + ' hab/km²', 'densidade'], ['60 anos ou mais', p100(v.pct60mais), 'pct60mais'],
+      ['16 a 29 anos', p100(v.pct16a29), 'pct16a29'], ['Alfabetização (15+)', p100(v.alfabetizacao15), 'alfabetizacao15']]],
+    ['Renda e economia', 'comparar', [
+      ['Renda domiciliar por pessoa (média)', reais(v.rendaPcMedia), 'rendaPcMedia'], ['Renda por pessoa (mediana)', reais(v.rendaPcMediana), 'rendaPcMediana'],
+      ['PIB por habitante (2023)', reais(v.pibPerCapita), 'pibPerCapita'],
+      ...(v.giniRendaPc != null ? [['Desigualdade (Gini, 0 a 1)', f(v.giniRendaPc, 3), 'giniRendaPc']] : []),
+      ...(v.idhm2010 != null ? [['IDHM (2010)', f(v.idhm2010, 3), 'idhm2010']] : [])]],
+    ['Saneamento e moradia', 'casa', [
+      ['Água da rede geral', p100(v.pctAguaRede), 'pctAguaRede'], ['Esgoto ligado à rede', p100(v.pctEsgotoRede), 'pctEsgotoRede'],
+      ['Lixo coletado', p100(v.pctLixoColetado), 'pctLixoColetado'], ['Sem banheiro só da casa', p100(v.pctSemBanheiroExclusivo), 'pctSemBanheiroExclusivo'],
+      ['Domicílios com internet', p100(v.pctDomInternet), 'pctDomInternet']]],
+    ['Saúde', 'analise', [
+      ['Cobertura da atenção básica', p100(v.apsCobertura), 'apsCobertura'], ['Bebês com 7+ consultas de pré-natal', p100(v.preNatal7mais), 'preNatal7mais'],
+      ['Mortalidade infantil', v.mortInfantil == null ? '—' : f(v.mortInfantil, 1) + ' por mil', 'mortInfantil'], ['Leitos do SUS', v.leitosSusPorMil == null ? '—' : f(v.leitosSusPorMil, 2) + ' por mil hab.', 'leitosSusPorMil']]],
+    ['Programas sociais', 'casa', [
+      ['Famílias no Bolsa Família', v.bfPctDomicilios == null ? '—' : f(v.bfPctDomicilios, 1) + ' a cada 100 domicílios', 'bfPctDomicilios'],
+      ['Valor médio do Bolsa Família', reais(v.bfValorMedio), 'bfValorMedio'], ['Recebem BPC', p100(v.bpcPctPop, 2) + ' da população', 'bpcPctPop']]],
+    ['Quem vota (perfil do eleitorado 2026)', 'urna', [
+      ['Eleitores', f(v.eleitores), 'eleitores'], ['Mulheres', p100(v.eleitPctFeminino), 'eleitPctFeminino'],
+      ['Com 60 anos ou mais', p100(v.eleitPct60mais), 'eleitPct60mais'], ['Com 16 ou 17 anos', p100(v.eleitPct16a17), 'eleitPct16a17'],
+      ['Superior completo (declarado)', p100(v.eleitPctSuperior), 'eleitPctSuperior'], ['Biometria cadastrada', p100(v.eleitPctBiometria), 'eleitPctBiometria']]]
   ];
   const box = document.createElement('section');
   box.className = 'lista contexto';
-  box.innerHTML = `<h3>Quem mora e quem vota aqui</h3><dl class="numeros contexto-num">${itens.map(([r, val, k]) => `<div title="${esc(C.fontes[k]?.nome || '')}"><dt>${r}</dt><dd>${val}</dd></div>`).join('')}</dl>
-    <p class="fonte">ⓘ Fonte: <a href="https://sidra.ibge.gov.br/" target="_blank" rel="noopener">IBGE · Censo 2022, Estimativas 2026 e PIB dos Municípios 2023 (SIDRA)</a> · <a href="https://dadosabertos.tse.jus.br/" target="_blank" rel="noopener">TSE · Perfil do eleitorado 2026</a>. Passe o mouse em cada número para ver a tabela exata. Os anos são diferentes; servem para dar contexto, não para explicar o voto.</p>`;
+  box.innerHTML = `<h3>Quem mora e quem vota aqui</h3>${grupos.map(([g, ic, itens]) => `<details class="grupo-ctx"${g === 'Gente' ? ' open' : ''}><summary><svg class="ic" aria-hidden="true"><use href="#i-${ic}"/></svg>${g}</summary><dl class="numeros contexto-num">${itens.map(([r, val, k]) => `<div title="${esc((C.fontes[k]?.nome || '') + (C.fontes[k]?.ano ? ' · ' + C.fontes[k].ano : ''))}"><dt>${r}</dt><dd>${val}</dd></div>`).join('')}</dl></details>`).join('')}
+    <p class="fonte">ⓘ Fontes: <a href="https://sidra.ibge.gov.br/" target="_blank" rel="noopener">IBGE (Censo 2022, Estimativas 2026, PIB 2023)</a> · <a href="https://portaldatransparencia.gov.br/download-de-dados" target="_blank" rel="noopener">Portal da Transparência (Bolsa Família e BPC, set/2026)</a> · <a href="https://datasus.saude.gov.br/" target="_blank" rel="noopener">Ministério da Saúde (DATASUS, APS)</a> · <a href="https://dadosabertos.tse.jus.br/" target="_blank" rel="noopener">TSE (perfil do eleitorado)</a> · IDHM: PNUD/IBGE. Passe o mouse em cada número para ver a tabela e o ano. Os anos são diferentes: os números servem de contexto, não explicam o voto. "Famílias no Bolsa Família a cada 100 domicílios" pode passar de 100, porque um domicílio pode ter mais de uma família.</p>`;
   const primeiraLista = p.querySelector('.lista');
   primeiraLista ? p.insertBefore(box, primeiraLista) : p.append(box);
 }

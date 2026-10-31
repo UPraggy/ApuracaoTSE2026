@@ -1,17 +1,19 @@
 # Dados de contexto por município e por UF
 
-Gerados por `node scripts/contexto.mjs` (Node, sem dependências). O script baixa só o que ainda não está em `dados/contexto/brutos/` e é idempotente; `--forcar` baixa tudo de novo. Rodada completa sem cache: cerca de 70 s (o perfil do TSE tem 2,2 GB de CSV dentro do ZIP e é lido em stream, sem extrair). Com cache: poucos segundos.
+Gerados por `node scripts/contexto.mjs` (Node, sem dependências). O script baixa só o que ainda não está em `dados/contexto/brutos/` e é idempotente; `--forcar` baixa tudo de novo. Rodada completa sem cache: cerca de 3 min (perfil do TSE, Bolsa Família e BPC somam ~5,5 GB de CSV dentro dos ZIPs, lidos em stream sem extrair). Com cache: poucos segundos, mais uma tentativa rápida de achar mês novo no Portal da Transparência.
 
 ## Saída
 
 | Arquivo | Tamanho | Conteúdo |
 |---|---|---|
-| `site/dados/contexto-municipios.json` | ~578 KB | 5.571 municípios (chave = código IBGE de 7 dígitos, os mesmos de `municipios.json`) |
-| `site/dados/contexto-uf.json` | ~8 KB | 27 UFs + `BR` (Brasil) + `ZZ` (exterior, só campos do TSE) |
+| `site/dados/contexto-municipios.json` | ~944 KB | 5.571 municípios (chave = código IBGE de 7 dígitos, os mesmos de `municipios.json`) |
+| `site/dados/contexto-uf.json` | ~14 KB | 27 UFs + `BR` (Brasil) + `ZZ` (exterior, só campos do TSE) |
 
 Formato: `{ gerado, notas, colunas: [...], fontes: { campo: { nome, ano, url, unidade } }, dados: { "<chave>": [valores na ordem de colunas] } }`. `null` = sem dado na fonte. Percentuais com 1 casa decimal.
 
-Os brutos (`dados/contexto/brutos/`, ~415 MB, dos quais 408 MB são o ZIP do TSE) estão no `.gitignore`.
+Os brutos (`dados/contexto/brutos/`, ~930 MB: ZIP do TSE 408 MB, Bolsa Família 329 MB, BPC 193 MB) estão no `.gitignore`. Os CSV do Portal da Transparência trazem nome e CPF mascarado dos beneficiários; o script só guarda contagens e somas por município (`*_agregado.json`), e nada pessoal vai para o site.
+
+**Ordem das colunas.** Município: as 19 colunas-base e depois as 15 sociais (34 no total). UF: as 19 de base, `giniRendaPc` (posição 20, como antes) e depois as mesmas 15 sociais (35 no total). Colunas novas entram sempre no fim.
 
 ## Campos e fontes exatas
 
@@ -58,7 +60,65 @@ UFs: 27/27 em todos os campos; BR completo; ZZ só TSE.
 
 Conferência: a soma de `eleitores` (157.826.587 no Brasil) bate com a soma dos aptos do 2º turno em `municipios.json` (157.828.819; diferença de 0,001%) e nenhum município difere mais de 3%. Exterior: 918.876 no perfil × 916.158 aptos.
 
-## Limitações
+## Indicadores sociais (acrescentados em 30/10/2026)
+
+| Campo | Unidade | Fonte exata | Ano/mês |
+|---|---|---|---|
+| `pctAguaRede` | % dos moradores | IBGE, Censo 2022, SIDRA [6894](https://sidra.ibge.gov.br/tabela/6894), v382 moradores em domicílios particulares permanentes ocupados; c1821 = 72144 "possui ligação à rede geral e a utiliza como forma principal" ÷ 72129 Total; idade (c58=95253) e cor (c86=95251) Total | 2022 |
+| `pctEsgotoRede` | % dos moradores | SIDRA [7555](https://sidra.ibge.gov.br/tabela/7555), v382; c11558 = 46290 "rede geral, rede pluvial ou fossa ligada à rede" ÷ 46292 Total | 2022 |
+| `pctLixoColetado` | % dos moradores | SIDRA [9541](https://sidra.ibge.gov.br/tabela/9541), v382; c67 = 2520 "Coletado" (no domicílio ou em caçamba) ÷ 10972 Total | 2022 |
+| `pctSemBanheiroExclusivo` | % dos moradores | SIDRA [9397](https://sidra.ibge.gov.br/tabela/9397), v382; 100 − (c458 = 12032 "tinham banheiro de uso exclusivo" ÷ 72117 Total). Inclui quem só tinha banheiro de uso comum, só sanitário/buraco ou nada | 2022 |
+| `pctDomInternet` | % dos domicílios | SIDRA [9936](https://sidra.ibge.gov.br/tabela/9936), v381 domicílios particulares permanentes ocupados; c2072 = 77585 "Sim" ÷ 77584 Total; condição de ocupação e tipo = Total | 2022 |
+| `bfFamilias` | famílias | CGU, Portal da Transparência, [Novo Bolsa Família](https://portaldatransparencia.gov.br/download-de-dados/novo-bolsa-familia/202609), `202609_NovoBolsaFamilia.csv`: linhas com MÊS REFERÊNCIA = MÊS COMPETÊNCIA (1 linha por família paga no mês). As 42.724 parcelas retroativas do arquivo ficam fora | set/2026 |
+| `bfPctDomicilios` | famílias por 100 domicílios | `bfFamilias` ÷ domicílios particulares permanentes ocupados do Censo 2022 (SIDRA 9936, Total) × 100 | set/2026 ÷ 2022 |
+| `bfValorMedio` | R$ por família | soma de VALOR PARCELA das mesmas linhas ÷ `bfFamilias` | set/2026 |
+| `bpcBeneficiarios` | benefícios | CGU, Portal da Transparência, [BPC](https://portaldatransparencia.gov.br/download-de-dados/bpc/202609), `202609_BPC.csv`, linhas do mês (idoso e pessoa com deficiência juntos; o arquivo não separa) | set/2026 |
+| `bpcPctPop` | % da população | `bpcBeneficiarios` ÷ população estimada 2026 (SIDRA 6579) × 100 | set/2026 ÷ 2026 |
+| `apsCobertura` | % (máx. 100) | Ministério da Saúde/SAPS, [Relatórios Públicos da APS, Histórico de Cobertura da APS](https://relatorioaps.saude.gov.br/cobertura/aps) (API `relatorioaps-prd.saude.gov.br/cobertura/aps?unidadeGeografica=MUNICIPIO&nuCompInicio=AAAAMM&nuCompFim=AAAAMM`): qtCapacidadeEquipe ÷ qtPopulacao (população de referência 2025, DOU), limitada a 100. UF/BR = Σ min(capacidade, pop) ÷ Σ pop | ago/2026 (a mais recente publicada) |
+| `preNatal7mais` | % dos nascidos vivos | Ministério da Saúde, SINASC via [TabNet](http://tabnet.datasus.gov.br/cgi/deftohtm.exe?sinasc/cnv/nvbr.def): nascidos vivos por residência da mãe, coluna "7 ou mais consultas" ÷ Total (os ignorados ficam no denominador) | 2024 (2025 é preliminar e fica de fora) |
+| `mortInfantil` | óbitos < 1 ano por mil nascidos vivos | Ministério da Saúde (SIM e SINASC) publicados pelo IBGE Cidades, pesquisa 39: Σ óbitos < 1 ano (indicador 78160) ÷ Σ nascidos vivos (78159) de 2022 a 2024 × 1000. `null` quando o triênio tem menos de 100 nascidos vivos | 2022–2024 |
+| `leitosSusPorMil` | leitos por mil hab. | Ministério da Saúde, CNES via [TabNet](http://tabnet.datasus.gov.br/cgi/deftohtm.exe?cnes/cnv/leiintbr.def), leitos de internação "Quantidade SUS" por município do estabelecimento ÷ população estimada 2026 × 1000 | set/2026 |
+| `idhm2010` | índice 0–1 | PNUD/Atlas Brasil, IDHM 2010, publicado no IBGE Cidades (pesquisa 10111, indicador 329756). Só município; nas UFs fica `null` | 2010 |
+
+O script escolhe sozinho o período mais recente: o mês do Portal da Transparência (tenta do mês corrente para trás), a competência da APS com dados, o último ano do SINASC não marcado como preliminar no TabNet e o primeiro arquivo do formulário de leitos do CNES.
+
+**UF e BR.** Saneamento e internet vêm direto do nível UF/Brasil do SIDRA. Bolsa Família, BPC, APS, pré-natal, mortalidade e leitos são somas dos municípios: numerador e denominador são somados separadamente, sem média de percentuais.
+
+**Valores ausentes no IBGE Cidades.** Nessa API, `-` quer dizer "sem dado" e o zero vem escrito como `0`. No SIDRA, `-` é zero absoluto. O script trata as duas convenções separadamente.
+
+### Cobertura (de 5.571 municípios)
+
+| Campo | Com valor | Sem valor |
+|---|---|---|
+| `pctAguaRede`, `pctEsgotoRede`, `pctLixoColetado`, `pctSemBanheiroExclusivo`, `pctDomInternet`, `bfPctDomicilios`, `preNatal7mais` | 5.570 | 5101837 Boa Esperança do Norte (MT): sem Censo 2022 e sem linha no SINASC 2024 |
+| `bfFamilias`, `bfValorMedio`, `leitosSusPorMil` | 5.571 | — |
+| `bpcBeneficiarios`, `bpcPctPop` | 5.570 | 3541109 Presidente Alves (SP): nenhuma linha no arquivo de set/2026 |
+| `apsCobertura` | 5.570 | 4310652 (RS): ausente do relatório da APS |
+| `mortInfantil` | 4.997 | 574 municípios com menos de 100 nascidos vivos em 2022–2024 |
+| `idhm2010` | 5.565 | 6 municípios criados depois de 2010 (1504752, 4212650, 4220000, 4314548, 5006275, 5101837) |
+
+Brasil: 18.652.854 famílias no Bolsa Família (set/2026), 6.620.994 BPC, cobertura APS de 83,1%, 79,1% dos nascidos vivos de 2024 com 7+ consultas, mortalidade infantil de 12,6 por mil (2022–2024) e 1,49 leito SUS por mil habitantes.
+
+**Nomes do Portal da Transparência.** O arquivo traz o código SIAFI, não o do IBGE. A ligação é por UF + nome (sem acento e pontuação). Os 31 municípios com grafia diferente no SIAFI (Itapagé/Itapajé, Parati/Paraty, Açu/Assú, Seridó/São Vicente do Seridó, Fernando de Noronha etc.) estão na tabela `SIAFI_EXCECOES` do script. Hoje 100% das famílias e dos benefícios ficam ligados a um código IBGE.
+
+### Limitações dos indicadores sociais
+
+- **`bfPctDomicilios` passa de 100 em municípios do Amazonas e de outros lugares** (máximo 145,9). O denominador é o domicílio do Censo 2022 e o numerador é a "família" do CadÚnico: um domicílio pode ter mais de uma família cadastrada, e o número de domicílios cresceu desde 2022. Leia como "famílias beneficiárias por 100 domicílios", não como percentual de domicílios.
+- **Bolsa Família não tem contagem de pessoas** no arquivo público, por isso não há "% da população beneficiária". `bfValorMedio` inclui todos os complementos pagos à família no mês.
+- **BPC** está contado no município de pagamento informado pelo INSS. A fração da população (`bpcPctPop`) usa a estimativa de 2026.
+- **Cobertura da APS** é cobertura *potencial* (capacidade de cadastro das equipes de Saúde da Família e de Atenção Primária ÷ população), não pessoas efetivamente cadastradas. O valor 100 significa "100 ou mais".
+- **Mortalidade infantil pelo método direto** (óbitos registrados ÷ nascidos registrados) subestima a taxa onde há sub-registro de óbitos, principalmente no Norte e no Nordeste. Mesmo somando três anos, municípios com poucos nascimentos variam muito.
+- **Leitos SUS** ficam no município do hospital: 1.999 municípios têm 0 porque a população é atendida em outro.
+- **O IDHM é de 2010**, o último calculado por município pelo PNUD, e está bem mais velho que os demais campos.
+- **Pré-natal 2024 e mortalidade 2022–2024** são dados finais; 2025 está marcado como preliminar no DATASUS.
+
+### O que ficou de fora e por quê
+
+- **CadÚnico (% de famílias cadastradas) e demais dados do MDS (VIS DATA, MI Social).** Em 30/10/2026, todos os endereços `aplicacoes.mds.gov.br/sagi/...` redirecionam para um aviso do MDS de "serviço temporariamente indisponível", por manutenção preventiva de segurança após um alerta de 21/10/2026. O Bolsa Família veio do Portal da Transparência (CGU), cujos downloads não exigem chave. O CadÚnico não tem fonte alternativa aberta e ficou de fora; dá para acrescentar quando o MDS voltar.
+- **API do Portal da Transparência** (`api-de-dados`): exige chave e não foi usada. Os arquivos de download são públicos.
+- **IDHM por UF**: o IBGE Cidades só publica o municipal; não há fonte oficial aberta via API sem baixar a planilha do Atlas.
+
+## Limitações (colunas-base)
 
 - **Boa Esperança do Norte (MT)** foi instalado em 2025 a partir de partes de Sorriso e Nova Ubiratã. Não existe no Censo 2022 nem no PIB 2023; só tem estimativa de população (5.983 em 2026) e dados do TSE. A população dele em 2022 está dentro dos municípios de origem.
 - **Anos diferentes**: Censo 2022 (população, idade, alfabetização, renda), estimativa 2026, PIB 2023, eleitorado de julho de 2026. Não misturar como se fossem do mesmo momento; `popEstimada` 2026 é a referência mais próxima da eleição.
