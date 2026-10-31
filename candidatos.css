@@ -94,3 +94,11 @@
 .cand-concl p { margin: 6px 0 0; }
 @media (max-width: 760px) { .cand-concls { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) { .cand-concl { animation: none; } }
+
+/* Barras simples (substituem a régua com círculos) */
+.cand-barras { display: grid; gap: 3px; padding: 2px 0; }
+.cand-barras .cb { display: block; height: 9px; width: var(--w); min-width: 2px; border-radius: 0 5px 5px 0; transform-origin: left; animation: cresceX .7s cubic-bezier(.2,.8,.2,1) both; }
+.cand-barras .cb.a { background: var(--cor-a); }
+.cand-barras .cb.b { background: var(--cor-b); animation-delay: .06s; }
+.cand-leg-regua i.d { display: inline-block; width: 12px; height: 9px; border-radius: 0 4px 4px 0; margin-right: 6px; }
+@media (prefers-reduced-motion: reduce) { .cand-barras .cb { animation: none; } }

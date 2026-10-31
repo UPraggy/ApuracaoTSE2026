@@ -190,17 +190,15 @@ function escalaComum(indicadores) {
   const m = Math.max(5, ...indicadores.flatMap(i => [desvio(i, i.A), desvio(i, i.B), desvio(i, i.V)]).filter(Number.isFinite).map(Math.abs));
   return Math.ceil(m / 5) * 5; // múltiplo de 5%
 }
-function regua(i, nA, nB, D) {
-  if (desvio(i, i.A) == null && desvio(i, i.B) == null) return '';
-  const pos = x => { const d = desvio(i, x); return d == null ? null : (50 + 50 * Math.max(-1, Math.min(1, d / D))).toFixed(1); };
-  const pa = pos(i.A), pb = pos(i.B);
-  return `<div class="cand-regua" tabindex="0" aria-label="${esc(i.nome)}: 13 ${esc(fmt(i, i.A))}, 22 ${esc(fmt(i, i.B))}">
-    <span class="cand-trilho"></span><span class="cand-centro"></span>
-    <span class="cand-liga" style="--de:${Math.min(pa, pb)}%;--ate:${Math.max(pa, pb)}%"></span>
-    ${i.P != null ? `<span class="cand-pop" style="--x:${pos(i.P)}%" title="População: ${esc(fmt(i, i.P))}"></span>` : ''}
-    ${i.V != null ? `<span class="cand-vot" style="--x:${pos(i.V)}%" title="Todos os votantes: ${esc(fmt(i, i.V))}"></span>` : ''}
-    <span class="cand-ponto a" style="--x:${pa}%"></span><span class="cand-ponto b" style="--x:${pb}%"></span>
-    <span class="cand-dica"><b>${esc(i.nome)}</b><br><i class="d a"></i>${esc(nA)} (13): <b>${esc(fmt(i, i.A))}</b><br><i class="d b"></i>${esc(nB)} (22): <b>${esc(fmt(i, i.B))}</b><br><i class="d v"></i>Todos os votantes: ${esc(fmt(i, i.V))}<br><i class="d p"></i>População: ${esc(fmt(i, i.P))}<br><span class="muted">13 fica ${fmtDesvio(desvio(i, i.A))} e 22 fica ${fmtDesvio(desvio(i, i.B))} em relação à média da população · dado disponível para ${pct(i.cobertura, 1, 1)} dos votantes</span></span>
+// Duas barras simples por indicador, começando no zero: vermelha = 13, azul = 22. Comprimento proporcional ao valor.
+function regua(i, nA, nB) {
+  const vals = [i.A, i.B].filter(x => x != null && Number.isFinite(x));
+  if (!vals.length) return '';
+  const max = Math.max(...vals.map(Math.abs)) || 1;
+  const w = x => x == null ? 0 : (100 * Math.abs(x) / max).toFixed(1);
+  return `<div class="cand-barras" title="${esc(i.nome)} · ${esc(nA)} (13): ${esc(fmt(i, i.A))} · ${esc(nB)} (22): ${esc(fmt(i, i.B))} · todos os votantes: ${esc(fmt(i, i.V))}">
+    <span class="cb a" style="--w:${w(i.A)}%"></span>
+    <span class="cb b" style="--w:${w(i.B)}%"></span>
   </div>`;
 }
 
@@ -261,7 +259,6 @@ export async function iniciarCandidatos(R, { NOME_A, NOME_B }) {
   const destaque = ['rendaPcMedia', 'bfPctDomicilios', 'pct60mais', 'eleitPctSuperior'].map(k => I[k]).filter(Boolean);
   const grupos = [...new Set(P.indicadores.map(i => i.grupo))];
 
-  const D = escalaComum(P.indicadores);
   el.innerHTML = `
     <h2>Candidatos: onde está o voto de cada um</h2>
     <p class="lead">Como são, em média, os <b>municípios</b> onde cada candidato recebeu seus votos: renda, programas sociais, saneamento, saúde, idade e escolaridade. Os dois recebem exatamente o mesmo cálculo, na ordem do número na urna.</p>
@@ -276,10 +273,10 @@ export async function iniciarCandidatos(R, { NOME_A, NOME_B }) {
       <p class="fonte">Texto gerado automaticamente por regras fixas a partir dos números desta página: os mesmos cálculos e as mesmas frases para os dois candidatos.</p>
     </section>
     <section class="bloco"><h3>${ICONE('analise')}Perfil médio, indicador por indicador</h3>
-      <div class="cand-leg-regua"><span><i class="d a"></i>Município típico do voto do 13</span><span><i class="d b"></i>do voto do 22</span><span><i class="d v"></i>de todos os votantes</span><span><i class="d p"></i>da população</span></div>
-      <p class="muted small">Todas as réguas usam a <b>mesma escala</b>: o traço do meio é a média da população, e a posição mostra quanto cada valor fica acima (direita) ou abaixo (esquerda) dela, de −${D}% a +${D}%. Diferenças pequenas aparecem pequenas. Passe o mouse ou toque numa régua para ver os valores.</p>
+      <div class="cand-leg-regua"><span><i class="d a"></i>Municípios do voto do 13</span><span><i class="d b"></i>Municípios do voto do 22</span></div>
+      <p class="muted small">Em cada linha, a barra maior é o valor mais alto. As colunas à direita trazem os números, incluindo a média de todos os votantes e da população.</p>
       ${grupos.map(g => `<h4 class="sub">${esc(g)}</h4><div class="tabela-rolagem cand-tab"><table><thead><tr><th>Indicador</th><th class="cand-col-regua">Comparação</th><th class="num">13</th><th class="num">22</th><th class="num">Votantes</th><th class="num">População</th><th class="num">Diferença (13 − 22)</th></tr></thead><tbody>
-        ${P.indicadores.filter(i => i.grupo === g).map(i => `<tr><td>${esc(i.nome)}${i.cobertura < 0.99 ? ` <small class="muted" title="Parte dos votantes cujo município tem este dado">(${pct(i.cobertura, 1, 0)} com dado)</small>` : ''}</td><td class="cand-col-regua">${regua(i, nA, nB, D)}</td><td class="num">${esc(fmt(i, i.A))}</td><td class="num">${esc(fmt(i, i.B))}</td><td class="num">${esc(fmt(i, i.V))}</td><td class="num">${esc(fmt(i, i.P))}</td><td class="num">${esc(fmtDif(i, i.dif))}</td></tr>`).join('')}
+        ${P.indicadores.filter(i => i.grupo === g).map(i => `<tr><td>${esc(i.nome)}${i.cobertura < 0.99 ? ` <small class="muted" title="Parte dos votantes cujo município tem este dado">(${pct(i.cobertura, 1, 0)} com dado)</small>` : ''}</td><td class="cand-col-regua">${regua(i, nA, nB)}</td><td class="num">${esc(fmt(i, i.A))}</td><td class="num">${esc(fmt(i, i.B))}</td><td class="num">${esc(fmt(i, i.V))}</td><td class="num">${esc(fmt(i, i.P))}</td><td class="num">${esc(fmtDif(i, i.dif))}</td></tr>`).join('')}
       </tbody></table></div>`).join('')}
     </section>
     <h3 class="cand-sec">Em que tipo de lugar estão os votos</h3>
